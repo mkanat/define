@@ -10,8 +10,6 @@ Tell us what the problem is that you are trying to solve. We accept only problem
 
 An actual program written using the proposal. It does not have to execute. Our first and foremost goal is to create a great programming language, so show that your proposal creates a great programming language by showing an actual program written with it. Even better if you can show what that program looked like before your proposal and what it will look like after.
 
-Note: Even if you just want to report a _problem_ about the language's design, . If you're not proposing a solution, though, that's more of just an Issue than a Language Proposal, though.
-
 ## Why This is the Right Solution
 
 Tell us why this is the right solution to the problem you've proposed. Remember the key points in our [philosophy](philosophy.md), as that will heavily determine if we agree with your reasoning or not.
