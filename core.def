@@ -1,3 +1,7 @@
+# Core Concepts
+#
+# These are the core philosophical constructs required to create any universe or have any action.
+
 Consideration is. # a persistent creation
 
 ViewPoint is a Consideration.
@@ -16,6 +20,7 @@ DimensionPoint can Withdraw:
 
 ViewPoint can create DimensionPoint.
 DimensionPoint has a parent ViewPoint.
+DimensionPoint must have a parent ViewPoint.
 ViewPoint has many child DimensionPoint.
 
 Form is many DimensionPoint.
@@ -38,8 +43,17 @@ ViewPoint has Reality.
 
 Know is a Attitude.
 
-ViewPoint can Communicate using a Form or DimensionPoint named particle, a DimensionPoint named destination, and a ViewPoint named recipient:
+ViewPoint can Communicate using a Form or DimensionPoint named particle, a DimensionPoint named destination, a ViewPoint named recipient:
     Requirement: recipient must own destination
     Make particle Withdraw to destination
     recipient creates a duplicate of particle named myCopy
     recipient creates Affinity with Attitude: Know, AffinityTarget: myCopy, Proximity: DimensionPoint: destination
+
+# Compiler Concepts
+#
+# These are concepts that translate into something the compiler does or
+# knows about. At some point we may get around to defining these
+# conceptually (because they can be) but that doesn't seem like a good
+# use of our time at the moment.
+
+Number is. # can be any form of a number (integer, decimal, float, whatever)
