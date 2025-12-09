@@ -7,3 +7,5 @@ The language is currently in early prototyping stages. Here are key docs:
 * [The Phillsophy of Define](philosophy.md)
 * [How to Write a Language Proposal](language-proposals.md)
 * [Requirements for Define](requirements.md)
+* [Principles for Define](principles.md)
+* [Style Guide](style.md)
