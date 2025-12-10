@@ -1,14 +1,18 @@
 ComputerUniverse:
-    FieldSource is a ViewPoint
-    FieldSource creates Rectangle named playingField using Create2D with:
+    Source is a ViewPoint
+    Source creates Rectangle named playingField using Create2D with:
         origin: (x: 0, y: 0)
         width: 100
         height: 100
-    FieldSource creates Rectangle named leftBumper using Create2D with:
+    Source creates Rectangle named leftBumper using Create2D with:
         origin: (x: 10, y: 35)
         width: 5
         height: 30
-    FieldSource creates Rectangle named rightBumper using Create2D with:
+    Source creates Rectangle named rightBumper using Create2D with:
         origin: (x: 85, y: 35)
         width: 5
         height: 30
+
+    Source creates Circle named ball with:
+        center: (x: 50, y: 50)
+        radius: 2.5

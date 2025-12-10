@@ -9,6 +9,9 @@ SpacePoint is a DimensionPoint where:
 SpaceForm is a Form where:
     All DimensionPoint are SpacePoint
 
+Circle is a SpaceForm.
+Circle has a Number: radius, 1 Coordinates: center
+
 # TODO: Write tests for Rectangle's invariant, or redesign the language to auto-generate the tests.
 
 Rectangle is a SpaceForm.

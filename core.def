@@ -13,21 +13,17 @@ DimensionPoint has Location.
 ViewPoint can Perceive a DimensionPoint:
     ViewPoint knows DimensionPoint's Location
 
-DimensionPoint can Reach:
-    DimensionPoint can move closer to a ViewPoint.
-DimensionPoint can Withdraw:
-    DimensionPoint can move further from a ViewPoint.
+DimensionPoint can MoveBy amount:
+    modify Location by amount
+DimensionPoint can MoveTo newLocation:
+    modify Location by newLocation - Location
 
 ViewPoint can create DimensionPoint.
-DimensionPoint has a parent ViewPoint.
-DimensionPoint must have a parent ViewPoint.
-ViewPoint has many child DimensionPoint.
+DimensionPoint has a ViewPoint owner.
+DimensionPoint must have owner.
+ViewPoint has many DimensionPoint: particles.
 
 Form is many DimensionPoint.
-Form can Reach:
-    All DimensionPoint Reach
-Form can Withdraw:
-    All DimensionPoint Withdraw
 
 Affinity is a Consideration.
 ViewPoint has Affinity.
@@ -45,8 +41,9 @@ Know is a Attitude.
 
 ViewPoint can Communicate using a Form or DimensionPoint named particle, a DimensionPoint named destination, a ViewPoint named recipient:
     Requirement: recipient must own destination
-    Make particle Withdraw to destination
-    recipient creates a duplicate of particle named myCopy
+    Make particle MoveTo destination
+    myCopy is a duplicate of particle with:
+        owner: recipient
     recipient creates Affinity with Attitude: Know, AffinityTarget: myCopy, Proximity: DimensionPoint: destination
 
 # Compiler Concepts
