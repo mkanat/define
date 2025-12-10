@@ -13,3 +13,9 @@ To be clear, define is a programming language and it does require expertise to r
 As much as possible, we should strive for there to be only one correct way to write the language, even down to the style.
 
 Total standardization enables a lot of very powerful abilities with a programming language, because you can much more easily reason about how the code is structured, have simpler compilers, easier automated refactoring, etc.
+
+## Previous Languages Do Not Justify Decisions
+
+There are a lot of great lessons we can and should take from previous programming languages. We should not throw away decades of lessons we have learned in programming language design. However, one of the goals of define is to create an ideal programming language regardless of how any other programming language has worked in the past. So, although we can be _informed_ by past programming languages, saying "this is how other programming languages have worked" or "this is what programmers will be familiar with from other programming languages" is not a sufficient justification _by itself_ for any language design decision.
+
+We realize that this might make define less popular, because it's different from how other languages work. It's already so different from how other languages work that I don't think that's we're adding significantly more barriers by making different decisions than past languages have made.
