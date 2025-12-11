@@ -22,9 +22,9 @@ AbstractUniverse:
     # TODO: Make them hit only the edge of the bumper.
     # TODO: Implement the collision normal.
     when ball Intersects rightBumper:
-        Make ball MoveTo leftBumper
+        Source makes ball MoveTo leftBumper
     when ball Intersects leftBumps:
-        Make ball MoveTo rightBumper
+        Source makes ball MoveTo rightBumper
 
     when programStarts:
-        Make ball MoveTo leftBumper
+        Source makes ball MoveTo leftBumper
