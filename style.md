@@ -18,8 +18,8 @@
   when it's less wide, and 72 characters is apparently the sweet spot
   for that.
 
-  ## Newlines
+## Newlines
 
-  * Always have a newline at the end of a code file. Otherwise, diffs
-    look like you modified the last line whenever you add more code
-    at the end of the file.
+* Always have a newline at the end of a code file. Otherwise, diffs
+  look like you modified the last line whenever you add more code
+  at the end of the file.
