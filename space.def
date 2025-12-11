@@ -9,6 +9,10 @@ SpacePoint is a DimensionPoint where:
 SpaceForm is a Form where:
     All DimensionPoint are SpacePoint
 
+SpaceForm conditionally Intersects using a SpaceForm named otherForm:
+    # TODO: Implement this check
+
+
 Circle is a SpaceForm.
 Circle has a Number: radius, 1 Coordinates: center
 

@@ -4,6 +4,7 @@ ComputerUniverse:
         origin: (x: 0, y: 0)
         width: 100
         height: 100
+
     Source creates Rectangle named leftBumper using Create2D with:
         origin: (x: 10, y: 35)
         width: 5
@@ -16,3 +17,14 @@ ComputerUniverse:
     Source creates Circle named ball with:
         center: (x: 50, y: 50)
         radius: 2.5
+
+    # TODO: Make them travel through space.
+    # TODO: Make them hit only the edge of the bumper.
+    # TODO: Implement the collision normal.
+    when ball Intersects rightBumper:
+        Make ball MoveTo leftBumper
+    when ball Intersects leftBumps:
+        Make ball MoveTo rightBumper
+
+    when programStarts:
+        Make ball MoveTo leftBumper

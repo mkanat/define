@@ -41,7 +41,7 @@ Know is a Attitude.
 
 ViewPoint can Communicate using a Form or DimensionPoint named particle, a DimensionPoint named destination, a ViewPoint named recipient:
     Requirement: recipient must own destination
-    Make particle MoveTo destination
+    Make particle MoveTo destination's Location
     myCopy is a duplicate of particle with:
         owner: recipient
     recipient creates Affinity with Attitude: Know, AffinityTarget: myCopy, Proximity: DimensionPoint: destination
