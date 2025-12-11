@@ -12,12 +12,12 @@ This means there is no concept of "null" in define, there is only "a variable th
 
 ## Separation of Universes
 
-It must be impossible to do computer-universe activities in the physical universe, and vice versa.
+It must be impossible to do abstract-universe activities in the physical universe, and vice versa.
 
-For example, the physical universe cannot do math---the computer does math. The physical universe cannot instantiate objects that have only an abstract representation. The computer universe cannot render any image, output any text, access any part of the network, etc.
+For example, the physical universe cannot do math---the abstract universe does math. The physical universe cannot instantiate objects that have only an abstract representation. The abstract universe cannot render any image, output any text, access any part of the network, etc.
 
 Code in the physical universe part of a program must be about something concrete that exists in the physical universe.
 
-Code in the computer universe must be abstract and have nothing to do with the physical universe.
+Code in the abstract universe must be abstract and have nothing to do with the physical universe.
 
 Of course, the two universes provide data to each other. The restriction here is about what code can execute in each universe.

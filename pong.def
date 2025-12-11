@@ -1,4 +1,4 @@
-ComputerUniverse:
+AbstractUniverse:
     Source is a ViewPoint
     Source creates Rectangle named playingField using Create2D with:
         origin: (x: 0, y: 0)
