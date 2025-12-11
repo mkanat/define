@@ -54,3 +54,4 @@ ViewPoint can Communicate using a Form or DimensionPoint named particle, a Dimen
 # use of our time at the moment.
 
 Number is. # can be any form of a number (integer, decimal, float, whatever)
+String is. # A unicode string.
