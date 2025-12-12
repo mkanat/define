@@ -3,7 +3,7 @@ AbstractUniverse:
     Source creates a String named helloWorld:
         contents: "Hello, world!"
 
-ComputerUniverse:
+PhysicalUniverse:
     Machine is a Computer.
     Machine knows Source's helloWorld.
     Machine makes terminal Output helloWorld.
