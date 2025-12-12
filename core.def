@@ -25,4 +25,6 @@ DimensionPoint has a ViewPoint named owner.
 # use of our time at the moment.
 
 Number is. # can be any form of a number (integer, decimal, float, whatever)
+Number has a Number named value.
 String is. # A unicode string.
+String has a String named value.

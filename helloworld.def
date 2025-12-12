@@ -1,7 +1,7 @@
 AbstractUniverse:
     Source is a ViewPoint.
     Source creates a String named helloWorld:
-        contents: "Hello, world!"
+        value: "Hello, world!"
 
 PhysicalUniverse:
     Machine is a Computer.

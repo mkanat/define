@@ -53,6 +53,8 @@ All names of anything and all reserved words in define may only consist of ASCII
 
 Example: `content: "Hello, world!"`
 
+When the compiler needs to know the type of a String Literal, it considers it to have the type `String`.
+
 #### Numeric Literals
 
 Numeric literals represent numeric values. A numeric literal may be:
@@ -60,6 +62,8 @@ Numeric literals represent numeric values. A numeric literal may be:
 - A floating-point number: an integer part, optionally followed by a decimal point (`.`) and a fractional part consisting of one or more decimal digits.
 
 Examples: `width: 100`, `radius: 2.5`
+
+When the compiler needs to know the type of a Number Literal, it considers it to have the type `Number`.
 
 ### Comments
 
