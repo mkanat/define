@@ -1,0 +1,17 @@
+# Cursor Rules for Define Project
+
+## Python Execution
+- Always use `uv` to run Python applications and scripts
+- Use `uv run` to execute Python code
+- Use `uv sync` to install dependencies
+
+## Code Formatting
+- Formatting is done with `ruff format`
+- Always format code using `ruff format` before committing
+
+## Linting
+- Linting must be done with both `pyright` and `ruff check`
+- Always run both linters before committing code:
+  - `pyright` for type checking
+  - `ruff check` for code quality checks
+- Fix all linting errors before submitting code
