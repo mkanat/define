@@ -64,3 +64,34 @@ UniverseName:
 The universe name must be exactly one of the two valid universe identifiers: `AbstractUniverse` or `PhysicalUniverse`. No other identifiers are permitted as universe names.
 
 A file may contain at most one `AbstractUniverse` block and at most one `PhysicalUniverse` block. The compiler must reject any file that contains multiple blocks of the same universe type.
+
+## Entities and Type Declarations
+
+Entities are things that exist within a universe. For example, in the physical universe, the monitor you are reading this on is an entity. In an abstract universe, the number `1` is an entity, as is the string `Hello, world!`.
+
+Every entity has a type that classifies what sort of entity it is. For example, your monitor might have the type `Screen`. The number `1` would have the type "Number," and the string "Hello, world!" would have the type "String."
+
+### Types
+
+The syntax for declaring a new type is:
+
+`NewTypeName is a ExistingTypeName`
+
+`NewTypeName` and `ExistingTypeName` are placeholders; they can be any valid identifier.
+
+This statement declares that _`NewTypeName`_ is a subcategory of the type _`ExistingTypeName`_.
+
+For example, `Source is a ViewPoint.` means that `Source` is an entity of type `ViewPoint`.
+
+The most basic type is `Consideration`, representing any creation in the abstract or physical universe, with the idea "this is something we consider to exist."
+
+#### Compiler Types
+
+There are a very few types where the syntax looks like: `TypeName is.` with no ExistingTypeName. These are compiler-defined types. They are reserved for use only in the implementation of define itself and may not be used by programs other than those that implement define itself.
+
+#### Validation Rules
+
+The compiler must enforce the following validation rules for type declarations:
+
+1. **Declaration Before Use**: Types must be declared before they can be referenced in any other statement.
+2. **Uniqueness**: Within the entire program, type names must be unique.
