@@ -82,6 +82,10 @@ The last character of a define file must be a newline.
 
 Trailing spaces (Uniccode decinal 32) at the end of a line before the terminating newline are forbidden.
 
+### Spaces Between Tokens
+
+Except where explicitly stated otherwise, all syntax uses exactly one ASCII space (decimal 32) between tokens. Multiple spaces in a row are not allowed except where explicitly specified.
+
 ## Universes
 
 A define program consists of one or more universe blocks. Each universe block defines a separate conceptual space with distinct capabilities and restrictions.
