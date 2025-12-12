@@ -6,7 +6,7 @@ Consideration is. # a persistent creation
 
 ViewPoint is a Consideration.
 DimensionPoint is a Consideration.
-Location is a Consideration. # keeping Location abstract for now
+# Location is a Consideration. # keeping Location abstract for now
 
 # DimensionPoint has a Location named location.
 
@@ -23,8 +23,8 @@ DimensionPoint has a ViewPoint named owner.
 # knows about. At some point we may get around to defining these
 # conceptually (because they can be) but that doesn't seem like a good
 # use of our time at the moment.
-
-Number is. # can be any form of a number (integer, decimal, float, whatever)
-Number has a Number named value.
-String is. # A unicode string.
-String has a String named value.
+AbstractUniverse:
+    Number is. # can be any form of a number (integer, decimal, float, whatever)
+    Number has a Number named value.
+    String is. # A unicode string.
+    String has a String named value.
