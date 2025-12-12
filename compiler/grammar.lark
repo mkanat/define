@@ -1,0 +1,85 @@
+// Lark grammar for the Define language subset supported by the current compiler
+
+%import common.CNAME            -> IDENTIFIER
+%import common.ESCAPED_STRING   -> STRING
+%import common.SIGNED_NUMBER    -> NUMBER
+
+SPACE: " "
+
+_NEWLINE: "\n"
+
+POSSESSIVE: "'s"
+UNIVERSE_NAME: "AbstractUniverse" | "PhysicalUniverse"
+
+%declare INDENT DEDENT
+
+%ignore COMMENT
+COMMENT: /^[ ]*#[^\n]*/m
+
+// A file is one or more universe blocks.
+start: _blank_line* universe_section (_blank_line* universe_section)* _blank_line*
+
+// A universe block with statements indented by exactly one level.
+universe_section: UNIVERSE_NAME ":" _NEWLINE INDENT universe_line+ DEDENT
+
+// Statements allowed inside a universe.
+universe_line: _blank_line
+             | simple_statement_line
+             | entity_creation
+             | action_declaration
+
+_blank_line: _NEWLINE
+
+// Statements that always end with a newline.
+simple_statement_line: simple_statement _NEWLINE
+
+?simple_statement: type_declaration
+                 | property_declaration
+                 | knowledge_statement
+                 | action_execution
+
+// Type declarations allow both subclassing (`is a`) and compiler-defined roots (`is.`).
+type_declaration: IDENTIFIER SPACE "is" SPACE "a" SPACE IDENTIFIER "."
+                | IDENTIFIER SPACE "is" SPACE "."
+
+// Property declaration for types.
+property_declaration: IDENTIFIER SPACE "has" SPACE "a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER "."
+
+// Entity creation with a nested property block.
+entity_creation: IDENTIFIER SPACE "creates" SPACE "a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER ":" _NEWLINE INDENT property_assignment+ DEDENT
+
+property_assignment: IDENTIFIER ":" SPACE property_value _NEWLINE
+
+?property_value: STRING
+               | NUMBER
+               | value_reference
+
+?value_reference: property_reference
+                | IDENTIFIER
+
+property_reference: IDENTIFIER POSSESSIVE IDENTIFIER
+
+knowledge_statement: IDENTIFIER SPACE "knows" SPACE property_reference "."
+
+// Action declarations: either a block body or a terminating period.
+action_declaration: IDENTIFIER SPACE "can" SPACE IDENTIFIER action_parameters? action_terminator
+
+action_parameters: SPACE "using" SPACE action_param (parameter_sep action_param)*
+parameter_sep: "," (SPACE* _NEWLINE)? SPACE*
+action_param: "a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER
+
+action_terminator: ":" _NEWLINE INDENT action_body DEDENT
+                 | "."
+
+// Action bodies may contain blank lines or action executions.
+action_body: action_body_line*
+action_body_line: _blank_line
+                | action_execution_line
+
+action_execution_line: action_execution _NEWLINE
+
+action_execution: IDENTIFIER SPACE "makes" SPACE value_reference SPACE IDENTIFIER SPACE argument_list "."
+
+argument_list: argument (argument_sep argument)*
+argument_sep: "," (SPACE* _NEWLINE)? SPACE*
+argument: value_reference
