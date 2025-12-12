@@ -32,7 +32,14 @@ Within a universe, identifiers must be unique. `TODO: scopes`
 
 Define source files are written in UTF-8 with no BOM.
 
-All text that affects the execution of the program must be written in ASCII. Only literal strings and comments may contain non-ASCII characters. This simplifies parsing the language and avoids various security issues where special Unicode characters confuse the programmer into believing they are doing something safe when they are not.
+All text that affects the execution of the program must be written in the following Unicode codepoints:
+
+* Decimal 10 (Line Feed)
+* Decimals 31 - 126 (traditional ASCII character set, minus control characters)
+
+Only literal strings and comments may contain other UTF-8 characters.
+
+This simplifies parsing the language and avoids various security issues where special Unicode characters confuse the programmer into believing they are doing something safe when they are not.
 
 ### Identifiers
 
@@ -62,7 +69,13 @@ A comment is a line of text starting with any number of spaces and then the char
 
 Define files only contain `\n` (ASCII LF) as their newline marker. Define files do not accept `\r` (ASCII CR) anywhere in their text other than in literal strings and comments. For comments, the final character sequence at the end of a line must be `\n` and never `\r\n`.
 
+A space (Unicode decimal 32) may not appear before a newline except in literal strings.
+
 The last character of a define file must be a newline.
+
+### Trailing Spaces
+
+Trailing spaces (Uniccode decinal 32) at the end of a line before the terminating newline are forbidden.
 
 ## Universes
 
@@ -223,7 +236,7 @@ Where:
 
 By default, ViewPoints can only access entities that they created.
 
-Knowledge statements allow a ViewPoint to "know" about an entity or property that is owned by another ViewPoint and thus be able to access it.
+Knowledge statements allow a ViewPoint to "know" about an entity that is owned by another ViewPoint and thus be able to access it.
 
 The syntax for a knowledge statement is:
 
