@@ -10,6 +10,22 @@ For broader context on the language's design philosophy, requirements, and princ
 
 define is intended to be a very strict language. Any syntax or behavior not specified in this spec is an error.
 
+## Reserved Words
+
+All specific keywords and names listed in this spec are reserved only for the use they are given in this spec. For exmaple, if the spec says that something is named `Foo`, then that thing must always be named `Foo` and nothing else may use the name `Foo`.
+
+## Character Set
+
+Define source files are written in UTF-8 with no BOM.
+
+All text that affects the execution of the program must be written in ASCII. Only literal strings and comments may contain non-ASCII characters. This simplifies parsing the language and avoids various security issues where special Unicode characters confuse the programmer into believing they are doing something safe when they are not.
+
+## Newlines
+
+Define files only contain `\n` as their newline marker. Define files do not accept `\r` anywhere in their text other than in literal strings and comments.
+
+The last character of a define file must be a newline.
+
 ## Universes
 
 A define program consists of one or more universe blocks. Each universe block defines a separate conceptual space with distinct capabilities and restrictions.
