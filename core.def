@@ -8,43 +8,14 @@ ViewPoint is a Consideration.
 DimensionPoint is a Consideration.
 Location is a Consideration. # keeping Location abstract for now
 
-DimensionPoint has Location.
-
-ViewPoint can Perceive a DimensionPoint:
-    ViewPoint knows DimensionPoint's Location
-
-DimensionPoint can MoveBy amount:
-    modify Location by amount
-DimensionPoint can MoveTo newLocation:
-    modify Location by newLocation - Location
+# DimensionPoint has a Location named location.
 
 ViewPoint can create DimensionPoint.
-DimensionPoint has a ViewPoint owner.
-DimensionPoint must have owner.
-ViewPoint has many DimensionPoint: particles.
+DimensionPoint has a ViewPoint named owner.
+# TODO: DimensionPoint must have owner.
+# TODO: ViewPoint has many DimensionPoint: particles.
 
-Form is many DimensionPoint.
-
-Affinity is a Consideration.
-ViewPoint has Affinity.
-Attitude is a Consideration. # Do we need the Know to Mystery scale in here?
-Affinity has Attitude.
-Proximity is a Consideration.
-Proximity has DimenionPoint.
-Affinity has Proximity.
-AffinityTarget is a DimensionPoint or Form
-Affinity has AffnityTarget.
-Raelity is a Consideration.
-ViewPoint has Reality.
-
-Know is a Attitude.
-
-ViewPoint can Communicate using a Form or DimensionPoint named particle, a DimensionPoint named destination, a ViewPoint named recipient:
-    Requirement: recipient must own destination
-    ViewPoint makes particle MoveTo destination's Location
-    myCopy is a duplicate of particle with:
-        owner: recipient
-    recipient creates Affinity with Attitude: Know, AffinityTarget: myCopy, Proximity: DimensionPoint: destination
+# TODO: Form is many DimensionPoint.
 
 # Compiler Concepts
 #
