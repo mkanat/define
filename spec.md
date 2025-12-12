@@ -58,6 +58,7 @@ When the compiler needs to know the type of a String Literal, it considers it to
 #### Numeric Literals
 
 Numeric literals represent numeric values. A numeric literal may be:
+- A sign: the character `-` at the start to indicate the number is negative.
 - An integer: a sequence of one or more decimal digits (`0` through `9`).
 - A floating-point number: an integer part, optionally followed by a decimal point (`.`) and a fractional part consisting of one or more decimal digits.
 
