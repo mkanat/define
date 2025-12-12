@@ -1,6 +1,8 @@
-Computer is a ViewPoint.
-Terminal is a DimensionPoint.
-Terminal can Output using a String named str:
-    # TODO: Implement
+PhysicalUniverse:
 
-Computer has a Terminal named terminal.
+    Computer is a ViewPoint.
+    Terminal is a DimensionPoint.
+    Terminal can Output using a String named str:
+        # TODO: Implement
+
+    Computer has a Terminal named terminal.
