@@ -111,3 +111,45 @@ The behavior of both of these types are described more later in the specificatio
 ### Compiler Types
 
 There are a very few types where the syntax looks like: `TypeName is.` with no ExistingTypeName. These are compiler-defined types. They are reserved for use only in the implementation of define itself and may not be used by programs other than those that implement define itself.
+
+## Entities
+
+The syntax for creating a new entity is:
+
+```
+Creator creates a TypeName named Name:
+    property1: "value1"
+    property2: "value2"
+    ...
+```
+
+Where:
+- `Creator` is a type that is a `ViewPoint` or a subclass of `ViewPoint`.
+- `TypeName` is the type of entity being created.
+- `Name` is the identifier for the created entity.
+- After the colon (`:`), indented property assignments (by exactly four spaces) define the created entity's properties.
+
+This is called an "entity declaration."
+
+### Example
+
+```
+Source creates a String named helloWorld:
+    content: "Hello, world!"
+```
+
+This statement creates a new `String` entity named `helloWorld` with a `content` property set to `"Hello, world!"`.
+
+### ViewPoint Creation
+
+`ViewPoint` entities are created by declaring them as a type. For example:
+
+`Source is a ViewPoint`
+
+That creates both a type called Source and a hidden entity that the compiler tracks.
+
+Only one instance of any given ViewPoint may exist in a program. In the above example, no other instances of Source may be created.
+
+## Name Conflicts
+
+No name conflicts are allowed between types and entities. That is, there may not be two types with the same name, two entities with the same name, and an entity may not share a name with a type.
