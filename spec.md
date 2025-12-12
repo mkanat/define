@@ -6,6 +6,10 @@ This specification defines the syntax and semantics needed to compile define pro
 
 For broader context on the language's design philosophy, requirements, and principles, see [philosophy.md](philosophy.md), [requirements.md](requirements.md), and [principles.md](principles.md).
 
+## Strictness
+
+define is intended to be a very strict language. Any syntax or behavior not specified in this spec is an error.
+
 ## Universes
 
 A define program consists of one or more universe blocks. Each universe block defines a separate conceptual space with distinct capabilities and restrictions.
