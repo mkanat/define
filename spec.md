@@ -232,6 +232,8 @@ Where:
 - `'s` indicates we are referencing a propety belonging to Owner.
 - `propertyName` is the name of the property.
 
+A property reference may be used anywhere an entity identifier may be used.
+
 ## Knowledge
 
 By default, ViewPoints can only access entities that they created.
@@ -250,3 +252,51 @@ Where:
 Knower and Owner must not be the same ViewPoint. entityName must be owned by Owner.
 
 This knowledge statement does not create a new entity; it only creates a reference.
+Once a ViewPoint knows about an entity, it may access any property or action that entity exposes. `TODO: access controls`
+
+## Actions
+
+Action statements make something happen in a universe.
+
+### Defining Actions
+
+Actions are defined on types so that entities of that type can later execute them.
+
+Syntax:
+
+```
+TypeName can ActionName using a ParamType named paramName[, a AnotherType named otherParam, ...]:
+    # action body
+```
+
+Where:
+- `TypeName` is an existing type that will own the action.
+- `ActionName` is the identifier for the action.
+- `ParamType` and `AnotherType` are the types of the parameters required by the action.
+- `paramName` and `otherParam` are the identifiers for those parameters.
+
+The parameter list is started with the word `using`. Parameters in the list are separated by a comma followed by any number of spaces and up to one newline, followed by the letter `a`.
+
+The parameter list ends immediately before the colon.
+
+The colon is followed by an indented block (exactly four spaces) that contains the action body.
+
+The action body may reference only the owning type's properties and the declared parameters.
+
+This is called an "action declaration."
+
+### Executing Actions
+
+The syntax for executing an action is:
+
+```
+Actor makes Target Action Argument1, [Argument2, ... ArgumentN].
+```
+
+Where:
+- `Actor` is a ViewPoint
+- `Target` is an existing entity that can execute the specified action.
+- `Action` is a reference to an action defined on Target.
+- `Argument1` through `ArgumentN` are the entity identifiers. Arguments are separated by a comma followed by any number of spaces and up to one newline.
+
+No space or comma is allowed between the final argument and the period that ends the statement.\
