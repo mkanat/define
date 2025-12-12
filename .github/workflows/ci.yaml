@@ -20,12 +20,9 @@ jobs:
     - run: uv sync
 
     - uses: astral-sh/ruff-action@v3
-      continue-on-error: true
 
     - run: ruff format --check --diff
-      continue-on-error: true
 
     - run: uv run pyright
-      continue-on-error: true
 
     - run: uv run pytest
