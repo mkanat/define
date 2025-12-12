@@ -16,6 +16,8 @@ define is intended to be a very strict language. Any syntax or behavior not spec
 
 All specific keywords and names listed in this spec are reserved only for the use they are given in this spec. For exmaple, if the spec says that something is named `Foo`, then that thing must always be named `Foo` and nothing else may use the name `Foo` in any program.
 
+Any term listed in a syntax specification but not defined is considered to be a reserved word. Some reserved "words" have spaces in them, such as `has a`, `is a`, `creates a`, etc.
+
 ## Declaration
 
 All named things (types, entities, properties, etc.) must be declared in a program before they can be referenced in any other statement.
@@ -36,13 +38,29 @@ All text that affects the execution of the program must be written in ASCII. Onl
 
 All names of anything and all reserved words in define may only consist of ASCII letters, numbers, and the underscore character.
 
+### Literals
+
+#### String Literals
+
+ A string literal begins with a double quote (`"`), contains zero or more UTF-8 characters, and ends with a double quote. Within a string literal, any character may appear except for a newline or an unescaped double quote. Double quotes may be escaped by prefixing them with the `\` character. A literal `\` may be included in a string by writing `\\`.
+
+Example: `content: "Hello, world!"`
+
+#### Numeric Literals
+
+Numeric literals represent numeric values. A numeric literal may be:
+- An integer: a sequence of one or more decimal digits (`0` through `9`).
+- A floating-point number: an integer part, optionally followed by a decimal point (`.`) and a fractional part consisting of one or more decimal digits.
+
+Examples: `width: 100`, `radius: 2.5`
+
 ### Comments
 
 A comment is a line of text starting with any number of spaces and then the character `#`. Comments must not have any effect on the behavior of a program. Do not use comments to implement any sort of metaprogramming language on top of define--define is already a metaprogramming language and should be flexible enough to support anything you need.
 
 ### Newlines
 
-Define files only contain `\n` as their newline marker. Define files do not accept `\r` anywhere in their text other than in literal strings and comments.
+Define files only contain `\n` (ASCII LF) as their newline marker. Define files do not accept `\r` (ASCII CR) anywhere in their text other than in literal strings and comments. For comments, the final character sequence at the end of a line must be `\n` and never `\r\n`.
 
 The last character of a define file must be a newline.
 
@@ -146,10 +164,46 @@ This statement creates a new `String` entity named `helloWorld` with a `content`
 
 `Source is a ViewPoint`
 
-That creates both a type called Source and a hidden entity that the compiler tracks.
+That creates both a type called Source and a hidden entity that the compiler tracks. The language only allows referencing a ViewPoint as a type.
 
 Only one instance of any given ViewPoint may exist in a program. In the above example, no other instances of Source may be created.
 
-## Name Conflicts
+## Name Conflicts Between Types and Entities
 
-No name conflicts are allowed between types and entities. That is, there may not be two types with the same name, two entities with the same name, and an entity may not share a name with a type.
+Name conflicts are not allowed between types and entities. That is, there may not be two types with the same name, two entities with the same name, and an entity may not share a name with a type.
+
+## Properties
+
+Entities have properties that define their characteristics and state.
+
+### Declaring Properties
+
+Types declare what properties they have using this syntax:
+
+`TypeName has a PropertyTypeName named Name.`
+
+Where:
+- `TypeName` is the name of the type that will have this property.
+- `PropertyTypeName` is the type of property being defined.
+- `Name` is the identifier for the defined property.
+
+Within a type, property names must be unique.
+
+### Setting Properties
+
+Properties are assigned within the indented block that follows an entity creation statement.
+
+Property assignment syntax:
+
+```
+    propertyName: value
+```
+
+Where:
+- `propertyName` is an identifier indicating which property you want to set.
+- The colon (`:`) separates the property name from its value.
+- `value` may be a string literal, a numeric literal, or an entity identifier.
+
+Properties must be indented by exactly four spaces relative to the creation statement that creates their parent entity.
+
+Only properties defined on the type may be set.
