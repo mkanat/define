@@ -6,15 +6,15 @@
 
 SPACE: " "
 
-_NEWLINE: "\n"
+// Newline carries following indentation so that the parser can see it for indentation purposes.
+_NEWLINE: /\n[ ]*/
 
 POSSESSIVE: "'s"
 UNIVERSE_NAME: "AbstractUniverse" | "PhysicalUniverse"
 
 %declare INDENT DEDENT
 
-%ignore COMMENT
-COMMENT: /^[ ]*#[^\n]*/m
+COMMENT: /[ ]*#[^\n]*/
 
 // A file is one or more universe blocks.
 start: _blank_line* universe_section (_blank_line* universe_section)* _blank_line*
@@ -24,9 +24,12 @@ universe_section: UNIVERSE_NAME ":" _NEWLINE INDENT universe_line+ DEDENT
 
 // Statements allowed inside a universe.
 universe_line: _blank_line
+             | comment_line
              | simple_statement_line
              | entity_creation
              | action_declaration
+
+comment_line: COMMENT _NEWLINE
 
 _blank_line: _NEWLINE
 
@@ -40,7 +43,7 @@ simple_statement_line: simple_statement _NEWLINE
 
 // Type declarations allow both subclassing (`is a`) and compiler-defined roots (`is.`).
 type_declaration: IDENTIFIER SPACE "is" SPACE "a" SPACE IDENTIFIER "."
-                | IDENTIFIER SPACE "is" SPACE "."
+                | IDENTIFIER SPACE "is" "."
 
 // Property declaration for types.
 property_declaration: IDENTIFIER SPACE "has" SPACE "a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER "."
@@ -57,7 +60,7 @@ property_assignment: IDENTIFIER ":" SPACE property_value _NEWLINE
 ?value_reference: property_reference
                 | IDENTIFIER
 
-property_reference: IDENTIFIER POSSESSIVE IDENTIFIER
+property_reference: IDENTIFIER POSSESSIVE SPACE IDENTIFIER
 
 knowledge_statement: IDENTIFIER SPACE "knows" SPACE property_reference "."
 
