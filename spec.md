@@ -16,6 +16,14 @@ define is intended to be a very strict language. Any syntax or behavior not spec
 
 All specific keywords and names listed in this spec are reserved only for the use they are given in this spec. For exmaple, if the spec says that something is named `Foo`, then that thing must always be named `Foo` and nothing else may use the name `Foo` in any program.
 
+## Declaration
+
+All named things (types, entities, properties, etc.) must be declared in a program before they can be referenced in any other statement.
+
+## Scopes
+
+Within a universe, identifiers must be unique. `TODO: scopes`
+
 ## Parsing
 
 ### Character Set
@@ -65,13 +73,13 @@ The universe name must be exactly one of the two valid universe identifiers: `Ab
 
 A file may contain at most one `AbstractUniverse` block and at most one `PhysicalUniverse` block. The compiler must reject any file that contains multiple blocks of the same universe type.
 
-## Entities and Type Declarations
+## Entities and Type Declarations: Overview
 
 Entities are things that exist within a universe. For example, in the physical universe, the monitor you are reading this on is an entity. In an abstract universe, the number `1` is an entity, as is the string `Hello, world!`.
 
 Every entity has a type that classifies what sort of entity it is. For example, your monitor might have the type `Screen`. The number `1` would have the type "Number," and the string "Hello, world!" would have the type "String."
 
-### Types
+## Types
 
 The syntax for declaring a new type is:
 
@@ -79,19 +87,27 @@ The syntax for declaring a new type is:
 
 `NewTypeName` and `ExistingTypeName` are placeholders; they can be any valid identifier.
 
-This statement declares that _`NewTypeName`_ is a subcategory of the type _`ExistingTypeName`_.
+This statement declares that _`NewTypeName`_ is a subclass of the type _`ExistingTypeName`_.
 
-For example, `Source is a ViewPoint.` means that `Source` is an entity of type `ViewPoint`.
+For example, `Source is a ViewPoint.` means that `Source` is a subclass of `ViewPoint`.
 
-The most basic type is `Consideration`, representing any creation in the abstract or physical universe, with the idea "this is something we consider to exist."
+This is called a "type declaration."
 
-#### Compiler Types
+### Subclass
+
+A subclass is a type that _is_ another type, but has some changes or additional functionality. Anywhere the spec says that something accepts a particular type, subclasses of that type are also accepted, unless specified otherwise.
+
+### Basic Types
+
+The most basic type is `Consideration`, representing any persistent idea in the abstract or physical universe.
+
+Below that are the two common subclasses that make up most programs:
+
+* `ViewPoint` represents a thing capable of creating other things and knowing about them.
+* `DimensionPoint` represents something that a ViewPoint can create and know about.
+
+The behavior of both of these types are described more later in the specification.
+
+### Compiler Types
 
 There are a very few types where the syntax looks like: `TypeName is.` with no ExistingTypeName. These are compiler-defined types. They are reserved for use only in the implementation of define itself and may not be used by programs other than those that implement define itself.
-
-#### Validation Rules
-
-The compiler must enforce the following validation rules for type declarations:
-
-1. **Declaration Before Use**: Types must be declared before they can be referenced in any other statement.
-2. **Uniqueness**: Within the entire program, type names must be unique.
