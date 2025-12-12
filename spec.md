@@ -218,3 +218,22 @@ Where:
 - `Owner` is the entity that has the property.
 - `'s` indicates we are referencing a propety belonging to Owner.
 - `propertyName` is the name of the property.
+
+## Knowledge
+
+By default, ViewPoints can only access entities that they created.
+
+Knowledge statements allow a ViewPoint to "know" about an entity or property that is owned by another ViewPoint and thus be able to access it.
+
+The syntax for a knowledge statement is:
+
+`Knower knows Owner's entityName.`
+
+Where:
+- `Knower` is a ViewPoint
+- `Owner` is the ViewPoint that owns entityName
+- `entityName` is the identifier of a an entity that Knower wishes to be able to access.
+
+Knower and Owner must not be the same ViewPoint. entityName must be owned by Owner.
+
+This knowledge statement does not create a new entity; it only creates a reference.
