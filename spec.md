@@ -207,3 +207,14 @@ Where:
 Properties must be indented by exactly four spaces relative to the creation statement that creates their parent entity.
 
 Only properties defined on the type may be set.
+
+## Referencing Properties
+
+Properties are referenced in programs using this syntax:
+
+`Owner's propertyName`
+
+Where:
+- `Owner` is the entity that has the property.
+- `'s` indicates we are referencing a propety belonging to Owner.
+- `propertyName` is the name of the property.
