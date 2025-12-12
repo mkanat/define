@@ -4,37 +4,8 @@ from textwrap import dedent
 import pytest
 from lark import Lark
 from lark.exceptions import LarkError
-from lark.indenter import Indenter
 
-
-class DefineIndenter(Indenter):
-    """Configure indentation handling for the Define grammar tests."""
-
-    # We have to do all of this as properties to make pyright happy.
-
-    @property
-    def NL_type(self) -> str:  # noqa: N802 D102
-        return "_NEWLINE"
-
-    @property
-    def OPEN_PAREN_types(self) -> list[str]:  # noqa: N802 D102
-        return []
-
-    @property
-    def CLOSE_PAREN_types(self) -> list[str]:  # noqa: N802 D102
-        return []
-
-    @property
-    def INDENT_type(self) -> str:  # noqa: N802 D102
-        return "INDENT"
-
-    @property
-    def DEDENT_type(self) -> str:  # noqa: N802 D102
-        return "DEDENT"
-
-    @property
-    def tab_len(self) -> int:  # noqa: D102
-        return 4
+from compiler.indenter import DefineIndenter
 
 
 def build_parser():
