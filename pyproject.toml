@@ -3,9 +3,9 @@ name = "define"
 version = "0.0.1"
 description = "A programming language based in epistemology (the study of how knowledge is known)"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
-    "lark>=1.1.7,<2",
+    "lark",
 ]
 
 [tool.ruff.lint]
@@ -47,5 +47,7 @@ convention = "pep257"
 
 [dependency-groups]
 dev = [
-    "pytest>=9.0.2",
+    "pyright[nodejs]",
+    "pytest",
+    "ruff",
 ]

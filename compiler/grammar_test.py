@@ -8,18 +8,39 @@ from lark.indenter import Indenter
 
 
 class DefineIndenter(Indenter):
-    NL_type = "_NEWLINE"
-    OPEN_PAREN_types = []
-    CLOSE_PAREN_types = []
-    INDENT_type = "INDENT"
-    DEDENT_type = "DEDENT"
-    tab_len = 4
+    """Configure indentation handling for the Define grammar tests."""
+
+    # We have to do all of this as properties to make pyright happy.
+
+    @property
+    def NL_type(self) -> str:  # noqa: N802 D102
+        return "_NEWLINE"
+
+    @property
+    def OPEN_PAREN_types(self) -> list[str]:  # noqa: N802 D102
+        return []
+
+    @property
+    def CLOSE_PAREN_types(self) -> list[str]:  # noqa: N802 D102
+        return []
+
+    @property
+    def INDENT_type(self) -> str:  # noqa: N802 D102
+        return "INDENT"
+
+    @property
+    def DEDENT_type(self) -> str:  # noqa: N802 D102
+        return "DEDENT"
+
+    @property
+    def tab_len(self) -> int:  # noqa: D102
+        return 4
 
 
 def build_parser():
     grammar_path = Path(__file__).with_name("grammar.lark")
     return Lark.open(
-        grammar_path,
+        str(grammar_path),
         parser="lalr",
         postlex=DefineIndenter(),
         start="start",
