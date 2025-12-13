@@ -1,24 +1,13 @@
-from textwrap import dedent
+import textwrap
 
 import pytest
-from lark.exceptions import LarkError
+from lark.exceptions import UnexpectedCharacters, UnexpectedToken
 
 from compiler.parser import Parser
 
 
-def parse_ok(text: str):
-    parser = Parser()
-    return parser.parse(text)
-
-
-def parse_fail(text: str):
-    parser = Parser()
-    with pytest.raises(LarkError):
-        parser.parse(text)
-
-
 def _strip(text: str) -> str:
-    return dedent(text).lstrip("\n")
+    return textwrap.dedent(text).lstrip("\n")
 
 
 @pytest.mark.parametrize(
@@ -86,98 +75,173 @@ def _strip(text: str) -> str:
     ],
 )
 def test_valid_sources(source):
-    parse_ok(source)
+    parser = Parser()
+    parser.parse(source)
 
 
 @pytest.mark.parametrize(
-    "source",
+    ("source", "token_type", "token_value"),
     [
         # Double space between tokens
-        _strip(
-            """
-            AbstractUniverse:
-                Foo  is a Bar.
-            """
+        (
+            _strip(
+                """
+                AbstractUniverse:
+                    Foo  is a Bar.
+                """
+            ),
+            "SPACE",
+            " ",
         ),
         # Space before period in `is.` form
-        _strip(
-            """
-            AbstractUniverse:
-                Foo is .
-            """
+        (
+            _strip(
+                """
+                AbstractUniverse:
+                    Foo is .
+                """
+            ),
+            "DOT",
+            ".",
         ),
         # Missing space after colon in property assignment
-        _strip(
-            """
-            AbstractUniverse:
-                Creator creates a Thing named instance:
-                    prop:"value"
-            """
+        (
+            _strip(
+                """
+                AbstractUniverse:
+                    Creator creates a Thing named instance:
+                        prop:"value"
+                """
+            ),
+            "STRING",
+            '"value"',
         ),
         # Space before period
-        _strip(
-            """
-            AbstractUniverse:
-                Foo is a Bar .
-            """
+        (
+            _strip(
+                """
+                AbstractUniverse:
+                    Foo is a Bar .
+                """
+            ),
+            "SPACE",
+            " ",
         ),
-        # Tab indentation
-        "AbstractUniverse:\n\tFoo is a Bar.\n",
-        # Carriage return usage
-        "AbstractUniverse:\r\n    Foo is a Bar.\r\n",
         # Trailing inline comment (not at line start)
-        _strip(
-            """
-            AbstractUniverse:
-                Foo is a Bar. # trailing comment
-            """
+        (
+            _strip(
+                """
+                AbstractUniverse:
+                    Foo is a Bar. # trailing comment
+                """
+            ),
+            "COMMENT",
+            " # trailing comment",
         ),
         # Invalid keyword variants people might type
-        _strip(
-            """
-            AbstractUniverse:
-                Foo has an Bar named baz.
-            """
+        (
+            _strip(
+                """
+                AbstractUniverse:
+                    Foo has an Bar named baz.
+                """
+            ),
+            "IDENTIFIER",
+            "n",
         ),
-        _strip(
-            """
-            AbstractUniverse:
-                Foo creates the Bar named baz:
-                    prop: "value"
-            """
+        (
+            _strip(
+                """
+                AbstractUniverse:
+                    Foo creates the Bar named baz:
+                        prop: "value"
+                """
+            ),
+            "IDENTIFIER",
+            "the",
         ),
         # Missing required keyword 'named'
-        _strip(
-            """
-            AbstractUniverse:
-                Foo creates a Bar baz:
-                    prop: "value"
-            """
+        (
+            _strip(
+                """
+                AbstractUniverse:
+                    Foo creates a Bar baz:
+                        prop: "value"
+                """
+            ),
+            "IDENTIFIER",
+            "baz",
         ),
         # Bad universe header spacing
-        _strip(
-            """
-            AbstractUniverse :
-                Foo is a Bar.
-            """
+        (
+            _strip(
+                """
+                AbstractUniverse :
+                    Foo is a Bar.
+                """
+            ),
+            "SPACE",
+            " ",
         ),
         # Missing final newline
-        "AbstractUniverse:\n    Foo is a Bar.",
+        (
+            "AbstractUniverse:\n    Foo is a Bar.",
+            "DEDENT",
+            "",
+        ),
         # Action declaration with extra spaces
-        _strip(
-            """
-            PhysicalUniverse:
-                T  can act.
-            """
+        (
+            _strip(
+                """
+                PhysicalUniverse:
+                    T  can act.
+                """
+            ),
+            "SPACE",
+            " ",
         ),
         # Action execution missing space between target and action
-        _strip(
-            """
-            PhysicalUniverse:
-                actor makes targetaction arg1.
-            """
+        (
+            _strip(
+                """
+                PhysicalUniverse:
+                    actor makes targetaction arg1.
+                """
+            ),
+            "DOT",
+            ".",
         ),
     ],
 )
-def test_invalid_sources(source):
-    parse_fail(source)
+def test_unexpected_token(source, token_type, token_value):
+    parser = Parser()
+    with pytest.raises(UnexpectedToken) as exc_info:
+        parser.parse(source)
+
+    exception = exc_info.value
+    assert exception.token.type == token_type
+    assert exception.token.value == token_value
+
+
+@pytest.mark.parametrize(
+    ("source", "char"),
+    [
+        # Tab indentation
+        (
+            "AbstractUniverse:\n\tFoo is a Bar.\n",
+            "\t",
+        ),
+        # Carriage return usage
+        (
+            "AbstractUniverse:\r\n    Foo is a Bar.\r\n",
+            "\r",
+        ),
+    ],
+)
+def test_unexpected_characters(source, char):
+    parser = Parser()
+    with pytest.raises(UnexpectedCharacters) as exc_info:
+        parser.parse(source)
+
+    exception = exc_info.value
+    assert exception.char == char
