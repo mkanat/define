@@ -26,19 +26,11 @@ _ignored_line: _blank_line
              | comment_line
 
 // A universe block with statements indented by exactly one level.
-universe_section: UNIVERSE_NAME ":" _NEWLINE INDENT (_blank_line | comment_line | simple_statement_line | entity_creation | action_declaration)+ DEDENT
+universe_section: UNIVERSE_NAME ":" _NEWLINE INDENT (_blank_line | comment_line | type_declaration _NEWLINE | property_declaration _NEWLINE | knowledge_statement _NEWLINE | action_execution _NEWLINE | entity_creation | action_declaration)+ DEDENT
 
 comment_line: COMMENT _NEWLINE
 
 _blank_line: _NEWLINE
-
-// Statements that always end with a newline.
-simple_statement_line: simple_statement _NEWLINE
-
-?simple_statement: type_declaration
-                 | property_declaration
-                 | knowledge_statement
-                 | action_execution
 
 // Type declarations allow both subclassing (`is a`) and compiler-defined roots (`is.`).
 type_declaration: IDENTIFIER SPACE "is a" SPACE IDENTIFIER "."
