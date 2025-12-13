@@ -48,8 +48,7 @@ def _get_first_universe(tree: lark.Tree, expected_name: str) -> lark.Tree:
     assert len(universe_sections) == 1
     universe = universe_sections[0]
 
-    universe_name_tokens = _get_tokens_by_type_from_tree(
-        universe, "UNIVERSE_NAME")
+    universe_name_tokens = _get_tokens_by_type_from_tree(universe, "UNIVERSE_NAME")
     assert [t.value for t in universe_name_tokens] == [expected_name]
 
     return universe
@@ -133,8 +132,7 @@ def test_entity_creation_with_properties():
     assert identifiers == ["Creator", "Thing", "instance", "prop", "count"]
 
     # Verify property assignments
-    property_assignments = list(
-        entity_creation.find_data("property_assignment"))
+    property_assignments = list(entity_creation.find_data("property_assignment"))
     assert len(property_assignments) == 2
 
     # Verify property values
@@ -164,8 +162,7 @@ def test_knowledge_statement():
     assert identifiers == ["Foo", "Bar", "baz"]
 
     # Verify property_or_entity_reference exists
-    property_refs = list(knowledge_stmt.find_data(
-        "property_or_entity_reference"))
+    property_refs = list(knowledge_stmt.find_data("property_or_entity_reference"))
     assert len(property_refs) == 1
 
 
