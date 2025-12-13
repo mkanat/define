@@ -252,7 +252,31 @@ def test_comment_allowed():
 
     # Verify comment is present in tree
     comment_tokens = _get_tokens_by_type_from_tree(tree, "COMMENT")
-    assert len(comment_tokens) >= 1
+    assert len(comment_tokens) == 1
+
+    # Verify type declaration still parses correctly
+    type_decls = list(universe.find_data("type_declaration"))
+    assert len(type_decls) == 1
+    type_decl = type_decls[0]
+    identifiers = _get_identifiers_from_tree(type_decl)
+    assert identifiers == ["Foo", "Bar"]
+
+
+def test_comment_before_first_universe():
+    """Test that comments are allowed before the first universe block."""
+    source = _strip(
+        """
+        # This is a comment before the universe block
+        AbstractUniverse:
+            Foo is a Bar.
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "AbstractUniverse")
+
+    # Verify comment is present in tree
+    comment_tokens = _get_tokens_by_type_from_tree(tree, "COMMENT")
+    assert len(comment_tokens) == 1
 
     # Verify type declaration still parses correctly
     type_decls = list(universe.find_data("type_declaration"))

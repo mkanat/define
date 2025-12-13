@@ -1,5 +1,9 @@
 // Lark grammar for the Define language subset supported by the current compiler
 
+// Define UNIVERSE_NAME with explicit priority before IDENTIFIER import
+// Higher priority ensures it matches before IDENTIFIER
+UNIVERSE_NAME.2: "AbstractUniverse" | "PhysicalUniverse"
+
 %import common.CNAME            -> IDENTIFIER
 %import common.ESCAPED_STRING   -> STRING
 %import common.SIGNED_NUMBER    -> NUMBER
@@ -10,14 +14,16 @@ SPACE: " "
 _NEWLINE: /\n[ ]*/
 
 POSSESSIVE: "'s"
-UNIVERSE_NAME: "AbstractUniverse" | "PhysicalUniverse"
 
 %declare INDENT DEDENT
 
 COMMENT: /[ ]*#[^\n]*/
 
 // A file is one or more universe blocks.
-start: _blank_line* universe_section (_blank_line* universe_section)* _blank_line*
+start: _ignored_line* universe_section (_ignored_line* universe_section)* _ignored_line*
+
+_ignored_line: _blank_line
+             | comment_line
 
 // A universe block with statements indented by exactly one level.
 universe_section: UNIVERSE_NAME ":" _NEWLINE INDENT universe_line+ DEDENT
