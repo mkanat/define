@@ -236,6 +236,20 @@ def test_action_execution():
     # Verify argument_list exists
     argument_lists = list(action_exec.find_data("argument_list"))
     assert len(argument_lists) == 1
+    argument_list = argument_lists[0]
+
+    # Verify arguments are parsed correctly
+    argument_nodes = list(argument_list.find_data("argument"))
+    assert len(argument_nodes) == 2
+
+    # Verify argument identifiers (arguments can be value_references which inline to IDENTIFIER tokens)
+    arg_identifiers = []
+    for i, arg_node in enumerate(argument_nodes):
+        arg_idents = _get_identifiers_from_tree(arg_node)
+        assert len(arg_idents) == 1
+        arg_identifiers.append(arg_idents[0])
+
+    assert arg_identifiers == ["arg1", "arg2"]
 
 
 def test_comment_allowed():
