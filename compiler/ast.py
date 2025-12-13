@@ -53,17 +53,24 @@ class UniverseBlock(ASTNode):
 
 
 @dataclass
-class TypeDeclaration(ASTNode):
-    """Represents a type declaration (e.g., Source is a ViewPoint or Number is.)."""
+class CompilerTypeDeclaration(ASTNode):
+    """Represents a compiler type declaration (e.g., Number is.)."""
 
     type_name: str
-    parent_type: str | None = None
-    is_compiler_type: bool = False
+
+    def __repr__(self) -> str:
+        """Return string representation of CompilerTypeDeclaration."""
+        return f"CompilerTypeDeclaration({self.type_name} is.)"
+
+
+@dataclass
+class TypeDeclaration(CompilerTypeDeclaration):
+    """Represents a type declaration with a parent type (e.g., Source is a ViewPoint)."""
+
+    parent_type: str
 
     def __repr__(self) -> str:
         """Return string representation of TypeDeclaration."""
-        if self.is_compiler_type:
-            return f"TypeDeclaration({self.type_name} is.)"
         return f"TypeDeclaration({self.type_name} is a {self.parent_type})"
 
 

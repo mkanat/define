@@ -74,7 +74,7 @@ def test_type_declaration_with_parent():
 
 
 def test_type_declaration_compiler_type():
-    """Test type declaration without parent: 'Foo is.'."""
+    """Test compiler type declaration: 'Foo is.'."""
     source = _strip(
         """
         AbstractUniverse:
@@ -84,11 +84,11 @@ def test_type_declaration_compiler_type():
     tree = _parse(source)
     universe = _get_first_universe(tree, "AbstractUniverse")
 
-    # Verify type declaration
-    type_decls = list(universe.find_data("type_declaration"))
-    assert len(type_decls) == 1
-    type_decl = type_decls[0]
-    identifiers = _get_identifiers_from_tree(type_decl)
+    # Verify compiler type declaration
+    compiler_type_decls = list(universe.find_data("compiler_type_declaration"))
+    assert len(compiler_type_decls) == 1
+    compiler_type_decl = compiler_type_decls[0]
+    identifiers = _get_identifiers_from_tree(compiler_type_decl)
     assert identifiers == ["Foo"]
 
 

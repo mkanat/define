@@ -26,15 +26,17 @@ _ignored_line: _blank_line
              | comment_line
 
 // A universe block with statements indented by exactly one level.
-universe_section: UNIVERSE_NAME ":" _NEWLINE INDENT (_blank_line | comment_line | type_declaration _NEWLINE | property_declaration _NEWLINE | knowledge_statement _NEWLINE | action_execution _NEWLINE | entity_creation | action_declaration)+ DEDENT
+universe_section: UNIVERSE_NAME ":" _NEWLINE INDENT (_blank_line | comment_line | compiler_type_declaration _NEWLINE | type_declaration _NEWLINE | property_declaration _NEWLINE | knowledge_statement _NEWLINE | action_execution _NEWLINE | entity_creation | action_declaration)+ DEDENT
 
 comment_line: COMMENT _NEWLINE
 
 _blank_line: _NEWLINE
 
-// Type declarations allow both subclassing (`is a`) and compiler-defined roots (`is.`).
+// Compiler type declaration (e.g., Number is.).
+compiler_type_declaration: IDENTIFIER SPACE "is."
+
+// Type declaration with parent type (e.g., Source is a ViewPoint.).
 type_declaration: IDENTIFIER SPACE "is a" SPACE IDENTIFIER "."
-                | IDENTIFIER SPACE "is."
 
 // Property declaration for types.
 property_declaration: IDENTIFIER SPACE "has a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER "."
