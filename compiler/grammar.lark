@@ -26,20 +26,20 @@ _ignored_line: _blank_line
              | comment_line
 
 // A universe block with statements indented by exactly one level.
-universe_section: UNIVERSE_NAME ":" _NEWLINE INDENT (_blank_line | comment_line | compiler_type_declaration _NEWLINE | type_declaration _NEWLINE | property_declaration _NEWLINE | knowledge_statement _NEWLINE | action_execution _NEWLINE | entity_creation | action_declaration)+ DEDENT
+universe_section: UNIVERSE_NAME ":" _NEWLINE INDENT (_blank_line | comment_line | compiler_type_declaration | type_declaration | property_declaration | knowledge_statement | action_execution | entity_creation | action_declaration)+ DEDENT
 
 comment_line: COMMENT _NEWLINE
 
 _blank_line: _NEWLINE
 
 // Compiler type declaration (e.g., Number is.).
-compiler_type_declaration: IDENTIFIER SPACE "is."
+compiler_type_declaration: IDENTIFIER SPACE "is." _NEWLINE
 
 // Type declaration with parent type (e.g., Source is a ViewPoint.).
-type_declaration: IDENTIFIER SPACE "is a" SPACE IDENTIFIER "."
+type_declaration: IDENTIFIER SPACE "is a" SPACE IDENTIFIER "." _NEWLINE
 
 // Property declaration for types.
-property_declaration: IDENTIFIER SPACE "has a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER "."
+property_declaration: IDENTIFIER SPACE "has a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER "." _NEWLINE
 
 // Entity creation with a nested property block.
 entity_creation: IDENTIFIER SPACE "creates a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER ":" _NEWLINE INDENT property_assignment+ DEDENT
@@ -52,25 +52,17 @@ property_assignment: IDENTIFIER ":" SPACE value_reference _NEWLINE
 
 property_or_entity_reference: IDENTIFIER POSSESSIVE SPACE IDENTIFIER
 
-knowledge_statement: IDENTIFIER SPACE "knows" SPACE property_or_entity_reference "."
+knowledge_statement: IDENTIFIER SPACE "knows" SPACE property_or_entity_reference "." _NEWLINE
 
-// Action declarations must have a block body.
-action_declaration: IDENTIFIER SPACE "can" SPACE IDENTIFIER action_parameters? action_terminator
+action_declaration: IDENTIFIER SPACE "can" SPACE IDENTIFIER action_parameters? ":" _NEWLINE INDENT action_body DEDENT
 
 action_parameters: SPACE "using" SPACE action_param (parameter_sep action_param)*
 parameter_sep: "," (SPACE* _NEWLINE)? SPACE*
 action_param: "a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER
 
-action_terminator: ":" _NEWLINE INDENT action_body DEDENT
+action_body: (_blank_line | action_execution)+
 
-// Action bodies may contain blank lines or action executions.
-action_body: action_body_line+
-action_body_line: _blank_line
-                | action_execution_line
-
-action_execution_line: action_execution _NEWLINE
-
-action_execution: IDENTIFIER SPACE "makes" SPACE value_reference SPACE IDENTIFIER SPACE argument_list "."
+action_execution: IDENTIFIER SPACE "makes" SPACE value_reference SPACE IDENTIFIER SPACE argument_list "." _NEWLINE
 
 argument_list: argument (argument_sep argument)*
 argument_sep: "," (SPACE* _NEWLINE)? SPACE*
