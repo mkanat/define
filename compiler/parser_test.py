@@ -272,11 +272,7 @@ def test_comment_allowed():
     tree = _parse(source)
     universe = _get_first_universe(tree, "AbstractUniverse")
 
-    # Verify comment is present in tree
-    comment_tokens = _get_tokens_by_type_from_tree(tree, "COMMENT")
-    assert len(comment_tokens) == 1
-
-    # Verify type declaration still parses correctly
+    # Verify type declaration still parses correctly (comments are ignored)
     type_decls = list(universe.find_data("type_declaration"))
     assert len(type_decls) == 1
     type_decl = type_decls[0]
@@ -296,11 +292,7 @@ def test_comment_before_first_universe():
     tree = _parse(source)
     universe = _get_first_universe(tree, "AbstractUniverse")
 
-    # Verify comment is present in tree
-    comment_tokens = _get_tokens_by_type_from_tree(tree, "COMMENT")
-    assert len(comment_tokens) == 1
-
-    # Verify type declaration still parses correctly
+    # Verify type declaration still parses correctly (comments are ignored)
     type_decls = list(universe.find_data("type_declaration"))
     assert len(type_decls) == 1
     type_decl = type_decls[0]
@@ -320,12 +312,8 @@ def test_universe_in_comment():
     tree = _parse(source)
     universe = _get_first_universe(tree, "AbstractUniverse")
 
-    # Verify comment is present in tree
-    comment_tokens = _get_tokens_by_type_from_tree(tree, "COMMENT")
-    assert len(comment_tokens) == 1
-    assert " AbstractUniverse " in comment_tokens[0].value
-
-    # Verify no UNIVERSE_NAME tokens appear in comments (only in the actual universe name)
+    # Verify no UNIVERSE_NAME tokens appear from comments (only in the actual universe name)
+    # With %ignore COMMENT, comments are filtered out before parsing
     universe_name_tokens = _get_tokens_by_type_from_tree(tree, "UNIVERSE_NAME")
     assert len(universe_name_tokens) == 1
     assert universe_name_tokens[0].value == "AbstractUniverse"
@@ -416,17 +404,6 @@ def test_universe_in_string_literal():
             ),
             "SPACE",
             " ",
-        ),
-        # Trailing inline comment (not at line start)
-        (
-            _strip(
-                """
-                AbstractUniverse:
-                    Foo is a Bar. # trailing comment
-                """
-            ),
-            "COMMENT",
-            " # trailing comment",
         ),
         # Invalid keyword variants people might type
         (
