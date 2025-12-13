@@ -6,12 +6,12 @@
 - Use `uv sync` to install dependencies
 
 ## Code Formatting
-- Formatting is done with `ruff format`
-- Always format code using `ruff format` before committing
+- Formatting is done with `uv run ruff format`
+- Format all code after making a change.
 
 ## Linting
-- Linting must be done with both `pyright` and `ruff check`
-- Always run both linters before committing code:
-  - `pyright` for type checking
-  - `ruff check` for code quality checks
-- Fix all linting errors before submitting code
+- Linting must be done with both `uv run pyright` and `uv run ruff check`
+- Always run both linters after making a change:
+  - `uv run pyright` for type checking
+  - `uv run ruff check` for code quality checks
+- Fix all linting errors that are reported.
