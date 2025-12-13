@@ -244,7 +244,7 @@ def test_action_execution():
 
     # Verify argument identifiers (arguments can be value_references which inline to IDENTIFIER tokens)
     arg_identifiers = []
-    for i, arg_node in enumerate(argument_nodes):
+    for arg_node in argument_nodes:
         arg_idents = _get_identifiers_from_tree(arg_node)
         assert len(arg_idents) == 1
         arg_identifiers.append(arg_idents[0])
@@ -383,8 +383,8 @@ def test_universe_in_string_literal():
                     Foo is .
                 """
             ),
-            "DOT",
-            ".",
+            "IDENTIFIER",
+            "is",
         ),
         # Missing space after colon in property assignment
         (
@@ -440,7 +440,7 @@ def test_universe_in_string_literal():
                 """
             ),
             "IDENTIFIER",
-            "the",
+            "creates",
         ),
         # Missing required keyword 'named'
         (
@@ -512,8 +512,8 @@ def test_unexpected_token(source, token_type, token_value):
         parser.parse(source)
 
     exception = exc_info.value
-    assert exception.token.type == token_type
-    assert exception.token.value == token_value
+    assert exception.token.type == token_type, str(exception)
+    assert exception.token.value == token_value, str(exception)
 
 
 @pytest.mark.parametrize(
@@ -537,4 +537,4 @@ def test_unexpected_characters(source, char):
         parser.parse(source)
 
     exception = exc_info.value
-    assert exception.char == char
+    assert exception.char == char, str(exception)

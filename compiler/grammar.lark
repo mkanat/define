@@ -48,14 +48,14 @@ simple_statement_line: simple_statement _NEWLINE
                  | action_execution
 
 // Type declarations allow both subclassing (`is a`) and compiler-defined roots (`is.`).
-type_declaration: IDENTIFIER SPACE "is" SPACE "a" SPACE IDENTIFIER "."
-                | IDENTIFIER SPACE "is" "."
+type_declaration: IDENTIFIER SPACE "is a" SPACE IDENTIFIER "."
+                | IDENTIFIER SPACE "is."
 
 // Property declaration for types.
-property_declaration: IDENTIFIER SPACE "has" SPACE "a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER "."
+property_declaration: IDENTIFIER SPACE "has a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER "."
 
 // Entity creation with a nested property block.
-entity_creation: IDENTIFIER SPACE "creates" SPACE "a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER ":" _NEWLINE INDENT property_assignment+ DEDENT
+entity_creation: IDENTIFIER SPACE "creates a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER ":" _NEWLINE INDENT property_assignment+ DEDENT
 
 property_assignment: IDENTIFIER ":" SPACE property_value _NEWLINE
 
