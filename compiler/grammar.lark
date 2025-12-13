@@ -44,18 +44,15 @@ property_declaration: IDENTIFIER SPACE "has a" SPACE IDENTIFIER SPACE "named" SP
 // Entity creation with a nested property block.
 entity_creation: IDENTIFIER SPACE "creates a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER ":" _NEWLINE INDENT property_assignment+ DEDENT
 
-property_assignment: IDENTIFIER ":" SPACE property_value _NEWLINE
+property_assignment: IDENTIFIER ":" SPACE value_reference _NEWLINE
 
-?property_value: STRING
-               | NUMBER
-               | value_reference
+?value_reference: STRING
+                | NUMBER
+                | property_or_entity_reference
 
-?value_reference: property_reference
-                | IDENTIFIER
+property_or_entity_reference: IDENTIFIER POSSESSIVE SPACE IDENTIFIER
 
-property_reference: IDENTIFIER POSSESSIVE SPACE IDENTIFIER
-
-knowledge_statement: IDENTIFIER SPACE "knows" SPACE property_reference "."
+knowledge_statement: IDENTIFIER SPACE "knows" SPACE property_or_entity_reference "."
 
 // Action declarations must have a block body.
 action_declaration: IDENTIFIER SPACE "can" SPACE IDENTIFIER action_parameters? action_terminator

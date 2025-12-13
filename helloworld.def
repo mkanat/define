@@ -6,4 +6,4 @@ AbstractUniverse:
 PhysicalUniverse:
     Machine is a Computer.
     Machine knows Source's helloWorld.
-    Machine makes terminal Output helloWorld.
+    Machine makes Machine's terminal Output Source's helloWorld.

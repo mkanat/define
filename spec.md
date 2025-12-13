@@ -45,27 +45,6 @@ This simplifies parsing the language and avoids various security issues where sp
 
 All names of anything and all reserved words in define may only consist of ASCII letters, numbers, and the underscore character.
 
-### Literals
-
-#### String Literals
-
- A string literal begins with a double quote (`"`), contains zero or more UTF-8 characters, and ends with a double quote. Within a string literal, any character may appear except for a newline or an unescaped double quote. Double quotes may be escaped by prefixing them with the `\` character. A literal `\` may be included in a string by writing `\\`.
-
-Example: `content: "Hello, world!"`
-
-When the compiler needs to know the type of a String Literal, it considers it to have the type `String`.
-
-#### Numeric Literals
-
-Numeric literals represent numeric values. A numeric literal may be:
-- A sign: the character `-` at the start to indicate the number is negative.
-- An integer: a sequence of one or more decimal digits (`0` through `9`).
-- A floating-point number: an integer part, optionally followed by a decimal point (`.`) and a fractional part consisting of one or more decimal digits.
-
-Examples: `width: 100`, `radius: 2.5`
-
-When the compiler needs to know the type of a Number Literal, it considers it to have the type `Number`.
-
 ### Comments
 
 A comment is a line of text starting with any number of spaces and then the character `#`. Comments must not have any effect on the behavior of a program. Do not use comments to implement any sort of metaprogramming language on top of define--define is already a metaprogramming language and should be flexible enough to support anything you need.
@@ -150,7 +129,7 @@ The behavior of both of these types are described more later in the specificatio
 
 ### Compiler Types
 
-There are a very few types where the syntax looks like: `TypeName is.` with no ExistingTypeName. These are compiler-defined types. They are reserved for use only in the implementation of define itself and may not be used by programs other than those that implement define itself.
+There are a very few types where the syntax looks like: `TypeName is.` with no ExistingTypeName. These are compiler-defined types. They are reserved for use only in the implementation of define itself. This syntax may not be used unless you are implementing define itself.
 
 ## Entities
 
@@ -158,8 +137,8 @@ The syntax for creating a new entity is:
 
 ```
 Creator creates a TypeName named Name:
-    property1: "value1"
-    property2: "value2"
+    propertyName: value
+    propertyName2: value2
     ...
 ```
 
@@ -167,7 +146,7 @@ Where:
 - `Creator` is a type that is a `ViewPoint` or a subclass of `ViewPoint`.
 - `TypeName` is the type of entity being created.
 - `Name` is the identifier for the created entity.
-- After the colon (`:`), indented property assignments (by exactly four spaces) define the created entity's properties.
+- After the colon (`:`), indented property assignments (by exactly four spaces) define the created entity's properties. See "Setting Properties" for information on the syntax and semantics of property assignments.
 
 This is called an "entity declaration."
 
@@ -224,24 +203,46 @@ Property assignment syntax:
 Where:
 - `propertyName` is an identifier indicating which property you want to set.
 - The colon (`:`) separates the property name from its value.
-- `value` may be a string literal, a numeric literal, or an entity identifier.
+- `value` is a value reference (see "Value References")
 
 Properties must be indented by exactly four spaces relative to the creation statement that creates their parent entity.
 
 Only properties defined on the type may be set.
 
-## Referencing Properties
+## Value References
 
-Properties are referenced in programs using this syntax:
+In define there are three types of values you can pass to a function or use to set a property: string literals, numeric literals, and entity/property references.
 
-`Owner's propertyName`
+### String Literals
+
+ A string literal begins with a double quote (`"`), contains zero or more UTF-8 characters, and ends with a double quote. Within a string literal, any character may appear except for a newline or an unescaped double quote. Double quotes may be escaped by prefixing them with the `\` character. A literal `\` may be included in a string by writing `\\`.
+
+Example: `content: "Hello, world!"`
+
+When the compiler needs to know the type of a string literal, it considers it to have the type `String`.
+
+### Numeric Literals
+
+Numeric literals represent numeric values. A numeric literal may be:
+- An integer: a sequence of one or more decimal digits (`0` through `9`).
+- A floating-point number: an integer part, optionally followed by a decimal point (`.`) and a fractional part consisting of one or more decimal digits.
+
+It may optionally start with the character `-` to indicate the number is negative.
+
+Examples: `width: 100`, `radius: 2.5`
+
+When the compiler needs to know the type of a numeric literal, it considers it to have the type `Number`.
+
+### Property and Entity References
+
+Properties and entities are referenced in programs using only this syntax:
+
+`Owner's propertyOrEntityName`
 
 Where:
-- `Owner` is the entity that has the property.
+- `Owner` is an entity that has that property, or the ViewPoint that owns that entity.
 - `'s` indicates we are referencing a propety belonging to Owner.
-- `propertyName` is the name of the property.
-
-A property reference may be used anywhere an entity identifier may be used.
+- `propertyOrEntityName` is the name of the property or entity.
 
 ## Knowledge
 
@@ -258,9 +259,10 @@ Where:
 - `Owner` is the ViewPoint that owns entityName
 - `entityName` is the identifier of a an entity that Knower wishes to be able to access.
 
-Knower and Owner must not be the same ViewPoint. entityName must be owned by Owner.
+Knower and Owner must not be the same ViewPoint. entityName must be the name of an entity owned by Owner.
 
 This knowledge statement does not create a new entity; it only creates a reference.
+
 Once a ViewPoint knows about an entity, it may access any property or action that entity exposes. `TODO: access controls`
 
 ## Actions
@@ -306,6 +308,6 @@ Where:
 - `Actor` is a ViewPoint
 - `Target` is an existing entity that can execute the specified action.
 - `Action` is a reference to an action defined on Target.
-- `Argument1` through `ArgumentN` are the entity identifiers. Arguments are separated by a comma followed by any number of spaces and up to one newline.
+- `Argument1` through `ArgumentN` are value references. Arguments are separated by a comma followed by any number of spaces and up to one newline.
 
-No space or comma is allowed between the final argument and the period that ends the statement.\
+No space or comma is allowed between the final argument and the period that ends the statement.

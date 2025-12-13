@@ -48,7 +48,8 @@ def _get_first_universe(tree: lark.Tree, expected_name: str) -> lark.Tree:
     assert len(universe_sections) == 1
     universe = universe_sections[0]
 
-    universe_name_tokens = _get_tokens_by_type_from_tree(universe, "UNIVERSE_NAME")
+    universe_name_tokens = _get_tokens_by_type_from_tree(
+        universe, "UNIVERSE_NAME")
     assert [t.value for t in universe_name_tokens] == [expected_name]
 
     return universe
@@ -132,7 +133,8 @@ def test_entity_creation_with_properties():
     assert identifiers == ["Creator", "Thing", "instance", "prop", "count"]
 
     # Verify property assignments
-    property_assignments = list(entity_creation.find_data("property_assignment"))
+    property_assignments = list(
+        entity_creation.find_data("property_assignment"))
     assert len(property_assignments) == 2
 
     # Verify property values
@@ -161,8 +163,9 @@ def test_knowledge_statement():
     identifiers = _get_identifiers_from_tree(knowledge_stmt)
     assert identifiers == ["Foo", "Bar", "baz"]
 
-    # Verify property_reference exists
-    property_refs = list(knowledge_stmt.find_data("property_reference"))
+    # Verify property_or_entity_reference exists
+    property_refs = list(knowledge_stmt.find_data(
+        "property_or_entity_reference"))
     assert len(property_refs) == 1
 
 
@@ -172,7 +175,7 @@ def test_action_declaration_with_parameters_and_body():
         """
         PhysicalUniverse:
             T can Act using a Arg named first, a Arg named second:
-                T makes target Do arg1, arg2.
+                T makes Owner's target Do Owner's arg1, Owner's arg2.
         """
     )
     tree = _parse(source)
@@ -191,9 +194,12 @@ def test_action_declaration_with_parameters_and_body():
         "Arg",
         "second",
         "T",
+        "Owner",
         "target",
         "Do",
+        "Owner",
         "arg1",
+        "Owner",
         "arg2",
     ]
 
@@ -213,12 +219,12 @@ def test_action_declaration_with_parameters_and_body():
 
 
 def test_action_execution():
-    """Test action execution: 'Actor makes target Do arg1, arg2.'."""
+    """Test action execution: 'Actor makes Owner's target Do Owner's arg1, Owner's arg2.'."""
     source = _strip(
         """
         PhysicalUniverse:
-            Actor makes target Do arg1,
-            arg2.
+            Actor makes Owner's target Do Owner's arg1,
+            Owner's arg2.
         """
     )
     tree = _parse(source)
@@ -229,7 +235,16 @@ def test_action_execution():
     assert len(action_execs) == 1
     action_exec = action_execs[0]
     identifiers = _get_identifiers_from_tree(action_exec)
-    assert identifiers == ["Actor", "target", "Do", "arg1", "arg2"]
+    assert identifiers == [
+        "Actor",
+        "Owner",
+        "target",
+        "Do",
+        "Owner",
+        "arg1",
+        "Owner",
+        "arg2",
+    ]
 
     # Verify argument_list exists
     argument_lists = list(action_exec.find_data("argument_list"))
@@ -240,14 +255,11 @@ def test_action_execution():
     argument_nodes = list(argument_list.find_data("argument"))
     assert len(argument_nodes) == 2
 
-    # Verify argument identifiers (arguments can be value_references which inline to IDENTIFIER tokens)
-    arg_identifiers = []
+    # Verify argument value references (arguments are now always value_references)
     for arg_node in argument_nodes:
         arg_idents = _get_identifiers_from_tree(arg_node)
-        assert len(arg_idents) == 1
-        arg_identifiers.append(arg_idents[0])
-
-    assert arg_identifiers == ["arg1", "arg2"]
+        # Property references have 2 identifiers: owner and property/entity name
+        assert len(arg_idents) == 2
 
 
 def test_comment_allowed():
@@ -484,12 +496,12 @@ def test_universe_in_string_literal():
         (
             _strip(
                 """
-                PhysicalUniverse:
-                    actor makes targetaction arg1.
-                """
+                    PhysicalUniverse:
+                        actor makes target'saction arg1.
+                    """
             ),
-            "DOT",
-            ".",
+            "IDENTIFIER",
+            "action",
         ),
         # Action declaration without body (invalid syntax)
         (
