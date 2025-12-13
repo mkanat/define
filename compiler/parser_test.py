@@ -168,30 +168,6 @@ def test_knowledge_statement():
     assert len(property_refs) == 1
 
 
-# TODO: This syntax is actually invalid.
-def test_action_declaration_simple():
-    """Test simple action declaration: 'T can Act.'."""
-    source = _strip(
-        """
-        PhysicalUniverse:
-            T can Act.
-        """
-    )
-    tree = _parse(source)
-    universe = _get_first_universe(tree, "PhysicalUniverse")
-
-    # Verify action declaration
-    action_decls = list(universe.find_data("action_declaration"))
-    assert len(action_decls) == 1
-    action_decl = action_decls[0]
-    identifiers = _get_identifiers_from_tree(action_decl)
-    assert identifiers == ["T", "Act"]
-
-    # Verify no parameters
-    action_params = list(action_decl.find_data("action_parameters"))
-    assert len(action_params) == 0
-
-
 def test_action_declaration_with_parameters_and_body():
     """Test action declaration with parameters and body."""
     source = _strip(
@@ -413,6 +389,17 @@ def test_comment_allowed():
                 """
                 PhysicalUniverse:
                     actor makes targetaction arg1.
+                """
+            ),
+            "DOT",
+            ".",
+        ),
+        # Action declaration without body (invalid syntax)
+        (
+            _strip(
+                """
+                PhysicalUniverse:
+                    T can Act.
                 """
             ),
             "DOT",

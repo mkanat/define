@@ -64,7 +64,7 @@ property_reference: IDENTIFIER POSSESSIVE SPACE IDENTIFIER
 
 knowledge_statement: IDENTIFIER SPACE "knows" SPACE property_reference "."
 
-// Action declarations: either a block body or a terminating period.
+// Action declarations must have a block body.
 action_declaration: IDENTIFIER SPACE "can" SPACE IDENTIFIER action_parameters? action_terminator
 
 action_parameters: SPACE "using" SPACE action_param (parameter_sep action_param)*
@@ -72,7 +72,6 @@ parameter_sep: "," (SPACE* _NEWLINE)? SPACE*
 action_param: "a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER
 
 action_terminator: ":" _NEWLINE INDENT action_body DEDENT
-                 | "."
 
 // Action bodies may contain blank lines or action executions.
 action_body: action_body_line*
