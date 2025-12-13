@@ -286,6 +286,67 @@ def test_comment_before_first_universe():
     assert identifiers == ["Foo", "Bar"]
 
 
+def test_universe_in_comment():
+    """Test that AbstractUniverse in a comment is treated as a comment, not parsed as code."""
+    source = _strip(
+        """
+        AbstractUniverse:
+            # This is a comment with AbstractUniverse in it
+            Foo is a Bar.
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "AbstractUniverse")
+
+    # Verify comment is present in tree
+    comment_tokens = _get_tokens_by_type_from_tree(tree, "COMMENT")
+    assert len(comment_tokens) == 1
+    assert " AbstractUniverse " in comment_tokens[0].value
+
+    # Verify no UNIVERSE_NAME tokens appear in comments (only in the actual universe name)
+    universe_name_tokens = _get_tokens_by_type_from_tree(tree, "UNIVERSE_NAME")
+    assert len(universe_name_tokens) == 1
+    assert universe_name_tokens[0].value == "AbstractUniverse"
+
+    # Verify type declaration still parses correctly
+    type_decls = list(universe.find_data("type_declaration"))
+    assert len(type_decls) == 1
+    type_decl = type_decls[0]
+    identifiers = _get_identifiers_from_tree(type_decl)
+    assert identifiers == ["Foo", "Bar"]
+
+
+def test_universe_in_string_literal():
+    """Test that AbstractUniverse in a string literal is treated as a string, not parsed as code."""
+    source = _strip(
+        """
+        AbstractUniverse:
+            Creator creates a Thing named instance:
+                description: "This is a string with AbstractUniverse in it"
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "AbstractUniverse")
+
+    # Verify string is present in tree
+    string_tokens = _get_tokens_by_type_from_tree(tree, "STRING")
+    assert len(string_tokens) == 1
+    # Verify the string contains "AbstractUniverse"
+    assert "AbstractUniverse" in string_tokens[0].value
+
+    # Verify no UNIVERSE_NAME tokens appear in strings (only in the actual universe name)
+    universe_name_tokens = _get_tokens_by_type_from_tree(tree, "UNIVERSE_NAME")
+    assert len(universe_name_tokens) == 1
+    assert universe_name_tokens[0].value == "AbstractUniverse"
+
+    # Verify entity creation still parses correctly
+    entity_creations = list(universe.find_data("entity_creation"))
+    assert len(entity_creations) == 1
+    entity_creation = entity_creations[0]
+    identifiers = _get_identifiers_from_tree(entity_creation)
+    assert identifiers == ["Creator", "Thing", "instance", "description"]
+
+
 @pytest.mark.parametrize(
     ("source", "token_type", "token_value"),
     [
