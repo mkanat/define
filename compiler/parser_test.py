@@ -249,10 +249,11 @@ def test_action_execution():
     argument_list = argument_lists[0]
 
     # Verify arguments are parsed correctly
-    argument_nodes = list(argument_list.find_data("argument"))
+    # value_reference is an inline rule, so we look for property_or_entity_reference directly
+    argument_nodes = list(argument_list.find_data("property_or_entity_reference"))
     assert len(argument_nodes) == 2
 
-    # Verify argument value references (arguments are now always value_references)
+    # Verify argument value references
     for arg_node in argument_nodes:
         arg_idents = _get_identifiers_from_tree(arg_node)
         # Property references have 2 identifiers: owner and property/entity name

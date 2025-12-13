@@ -63,7 +63,4 @@ action_param: "a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER
 action_body: (_blank_line | action_execution)+
 
 action_execution: IDENTIFIER SPACE "makes" SPACE value_reference SPACE IDENTIFIER SPACE argument_list "." _NEWLINE
-
-argument_list: argument (argument_sep argument)*
-argument_sep: "," (SPACE* _NEWLINE)? SPACE*
-argument: value_reference
+argument_list: value_reference ("," (SPACE* _NEWLINE)? SPACE* value_reference)*
