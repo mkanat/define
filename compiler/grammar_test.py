@@ -1,30 +1,18 @@
-from pathlib import Path
 from textwrap import dedent
 
 import pytest
-from lark import Lark
 from lark.exceptions import LarkError
 
-from compiler.indenter import DefineIndenter
-
-
-def build_parser():
-    grammar_path = Path(__file__).with_name("grammar.lark")
-    return Lark.open(
-        str(grammar_path),
-        parser="lalr",
-        postlex=DefineIndenter(),
-        start="start",
-    )
+from compiler.parser import Parser
 
 
 def parse_ok(text: str):
-    parser = build_parser()
+    parser = Parser()
     return parser.parse(text)
 
 
 def parse_fail(text: str):
-    parser = build_parser()
+    parser = Parser()
     with pytest.raises(LarkError):
         parser.parse(text)
 
