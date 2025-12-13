@@ -511,6 +511,17 @@ def test_universe_in_string_literal():
             "DOT",
             ".",
         ),
+        # Action declaration with colon but no body
+        (
+            _strip(
+                """
+                PhysicalUniverse:
+                    TypeName can ActionName:
+                """
+            ),
+            "DEDENT",
+            "",
+        ),
     ],
 )
 def test_unexpected_token(source, token_type, token_value):

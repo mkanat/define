@@ -64,7 +64,7 @@ action_param: "a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER
 action_terminator: ":" _NEWLINE INDENT action_body DEDENT
 
 // Action bodies may contain blank lines or action executions.
-action_body: action_body_line*
+action_body: action_body_line+
 action_body_line: _blank_line
                 | action_execution_line
 
