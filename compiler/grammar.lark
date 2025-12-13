@@ -26,14 +26,7 @@ _ignored_line: _blank_line
              | comment_line
 
 // A universe block with statements indented by exactly one level.
-universe_section: UNIVERSE_NAME ":" _NEWLINE INDENT universe_line+ DEDENT
-
-// Statements allowed inside a universe.
-universe_line: _blank_line
-             | comment_line
-             | simple_statement_line
-             | entity_creation
-             | action_declaration
+universe_section: UNIVERSE_NAME ":" _NEWLINE INDENT (_blank_line | comment_line | simple_statement_line | entity_creation | action_declaration)+ DEDENT
 
 comment_line: COMMENT _NEWLINE
 
