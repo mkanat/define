@@ -1,24 +1,19 @@
 """Abstract Syntax Tree node definitions for the Define language."""
 
-import enum
 from dataclasses import dataclass, field
+from functools import cached_property
 
 
-@enum.unique
-class PropertyValueType(enum.Enum):
-    """Enumeration of valid property value types."""
+class ASTError(Exception):
+    """Base class for all AST errors."""
 
-    STRING = "string"
-    """A string literal value."""
 
-    NUMBER = "number"
-    """A numeric literal value (integer or floating-point)."""
+class StringLiteralError(ASTError):
+    """Raised when a string literal is invalid."""
 
-    ENTITY = "entity"
-    """A reference to an entity by name."""
 
-    PROPERTY_REFERENCE = "property_reference"
-    """A reference to a property of an entity (e.g., Owner's propertyName)."""
+class NumberLiteralError(ASTError):
+    """Raised when a number literal is invalid."""
 
 
 @dataclass(kw_only=True)
@@ -91,30 +86,53 @@ class PropertyDeclaration(ASTNode):
 
 
 @dataclass
-class Entity(ASTNode):
-    """Represents a value that can be assigned to a property or passed to an action.
+class ValueReference(ASTNode):
+    """Base class for values that can be assigned to a property or passed to an action.
 
-    This can be a string literal, number, or entity reference.
+    This can be a string literal, number, or property/entity reference.
     """
-
-    value_type: PropertyValueType
-    value: str | float | int
-
-    def __repr__(self) -> str:
-        """Return string representation of Entity."""
-        return f"Entity({self.value_type.value}: {self.value})"
 
 
 @dataclass
-class PropertyReference(ASTNode):
-    """Represents a property reference (e.g., Owner's propertyName)."""
+class StringLiteral(ValueReference):
+    """Represents a string literal value."""
+
+    raw_value: str
+
+    @cached_property
+    def value(self) -> str:
+        """Parse the raw string value by removing quotes and unescaping."""
+        if not (self.raw_value.startswith('"') and self.raw_value.endswith('"')):
+            raise StringLiteralError(f"Invalid string literal: '{self.raw_value}'")
+        # TODO: Better string literal parsing
+        return self.raw_value[1:-1].replace('\\"', '"').replace("\\\\", "\\")
+
+
+@dataclass
+class NumberLiteral(ValueReference):
+    """Represents a numeric literal value (integer or floating-point)."""
+
+    raw_value: str
+
+    @cached_property
+    def value(self) -> float | int:
+        """Parse the raw number value to int or float."""
+        try:
+            if "." in self.raw_value:
+                return float(self.raw_value)
+            return int(self.raw_value)
+        except ValueError as e:
+            raise NumberLiteralError(
+                f"Invalid number literal: '{self.raw_value}'"
+            ) from e
+
+
+@dataclass
+class PropertyOrEntityReference(ValueReference):
+    """Represents a reference to a property or entity (e.g., Owner's propertyName)."""
 
     owner: str
     property_name: str
-
-    def __repr__(self) -> str:
-        """Return string representation of PropertyReference."""
-        return f"PropertyReference({self.owner}'s {self.property_name})"
 
 
 @dataclass
@@ -139,7 +157,7 @@ class PropertyAssignment(ASTNode):
     """Represents a property assignment (e.g., value: "Hello, world!")."""
 
     name: str
-    value: Entity
+    value: ValueReference
 
     def __repr__(self) -> str:
         """Return string representation of PropertyAssignment."""
@@ -195,9 +213,9 @@ class ActionExecution(ASTNode):
     """Represents an action execution (e.g., Machine makes terminal Output helloWorld.)."""
 
     actor: str
-    target: Entity
+    target: ValueReference
     action_name: str
-    arguments: list[Entity]
+    arguments: list[ValueReference]
 
     def __repr__(self) -> str:
         """Return string representation of ActionExecution."""
