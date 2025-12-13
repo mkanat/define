@@ -54,6 +54,16 @@ def _get_first_universe(tree: lark.Tree, expected_name: str) -> lark.Tree:
     return universe
 
 
+def _get_universe_by_name(tree: lark.Tree, expected_name: str) -> lark.Tree:
+    """Get a universe section by name."""
+    universe_sections = list(tree.find_data("universe_section"))
+    for universe in universe_sections:
+        universe_name_tokens = _get_tokens_by_type_from_tree(universe, "UNIVERSE_NAME")
+        if universe_name_tokens and universe_name_tokens[0].value == expected_name:
+            return universe
+    raise AssertionError(f"Universe '{expected_name}' not found in tree")
+
+
 def test_type_declaration_with_parent():
     """Test type declaration with parent type: 'Foo is a Bar.'."""
     source = _strip(
@@ -355,6 +365,120 @@ def test_universe_in_string_literal():
     entity_creation = entity_creations[0]
     identifiers = _get_identifiers_from_tree(entity_creation)
     assert identifiers == ["Creator", "Thing", "instance", "description"]
+
+
+def test_blank_line_between_statements():
+    """Test that blank lines are allowed between statements within a universe."""
+    # This test verifies that statements can be separated by blank lines
+    # Blank lines should be filtered out by the lexer, so this should work
+    source = _strip(
+        """
+        AbstractUniverse:
+            Foo is a Bar.
+
+            Baz is a Qux.
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "AbstractUniverse")
+
+    # Verify both type declarations are present
+    type_decls = list(universe.find_data("type_declaration"))
+    assert len(type_decls) == 2
+    first_decl = type_decls[0]
+    second_decl = type_decls[1]
+    assert _get_identifiers_from_tree(first_decl) == ["Foo", "Bar"]
+    assert _get_identifiers_from_tree(second_decl) == ["Baz", "Qux"]
+
+
+def test_multiple_blank_lines():
+    """Test that multiple consecutive blank lines are allowed."""
+    # Multiple blank lines should all be filtered out
+    source = _strip(
+        """
+        AbstractUniverse:
+            Foo is a Bar.
+
+            Baz is a Qux.
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "AbstractUniverse")
+
+    # Verify both type declarations are present (blank lines are ignored)
+    type_decls = list(universe.find_data("type_declaration"))
+    assert len(type_decls) == 2
+    first_decl = type_decls[0]
+    second_decl = type_decls[1]
+    assert _get_identifiers_from_tree(first_decl) == ["Foo", "Bar"]
+    assert _get_identifiers_from_tree(second_decl) == ["Baz", "Qux"]
+
+
+def test_blank_line_before_first_universe():
+    """Test that blank lines are allowed before the first universe block."""
+    source = _strip(
+        """
+
+        AbstractUniverse:
+            Foo is a Bar.
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "AbstractUniverse")
+
+    # Verify type declaration still parses correctly
+    type_decls = list(universe.find_data("type_declaration"))
+    assert len(type_decls) == 1
+    type_decl = type_decls[0]
+    identifiers = _get_identifiers_from_tree(type_decl)
+    assert identifiers == ["Foo", "Bar"]
+
+
+def test_blank_line_between_universes():
+    """Test that blank lines are allowed between universe sections."""
+    source = _strip(
+        """
+        AbstractUniverse:
+            Foo is a Bar.
+
+        PhysicalUniverse:
+            Baz is a Qux.
+        """
+    )
+    tree = _parse(source)
+    abstract_universe = _get_universe_by_name(tree, "AbstractUniverse")
+    physical_universe = _get_universe_by_name(tree, "PhysicalUniverse")
+
+    # Verify both universes parse correctly
+    abstract_decls = list(abstract_universe.find_data("type_declaration"))
+    physical_decls = list(physical_universe.find_data("type_declaration"))
+    assert len(abstract_decls) == 1
+    assert len(physical_decls) == 1
+    assert _get_identifiers_from_tree(abstract_decls[0]) == ["Foo", "Bar"]
+    assert _get_identifiers_from_tree(physical_decls[0]) == ["Baz", "Qux"]
+
+
+def test_blank_lines_in_action_body():
+    """Test that blank lines are allowed in action bodies."""
+    source = _strip(
+        """
+        PhysicalUniverse:
+            Actor can Act:
+                Actor makes Owner's target Do Owner's arg1.
+
+                Actor makes Owner's target Do Owner's arg2.
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "PhysicalUniverse")
+
+    # Verify action declaration is present
+    action_decls = list(universe.find_data("action_declaration"))
+    assert len(action_decls) == 1
+
+    # Verify both action executions are present
+    action_executions = list(action_decls[0].find_data("action_execution"))
+    assert len(action_executions) == 2
 
 
 @pytest.mark.parametrize(

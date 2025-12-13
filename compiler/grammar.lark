@@ -11,7 +11,8 @@ UNIVERSE_NAME.2: "AbstractUniverse" | "PhysicalUniverse"
 SPACE: " "
 
 // Newline carries following indentation so that the parser can see it for indentation purposes.
-_NEWLINE: /\n[ ]*/
+// We allow multiple consecutive newlines so blank lines don't reset indentation.
+_NEWLINES: /(\n[ ]*)+/
 
 POSSESSIVE: "'s"
 
@@ -26,23 +27,23 @@ start: _ignored_line* universe_section (_ignored_line* universe_section)* _ignor
 _ignored_line: _blank_line
 
 // A universe block with statements indented by exactly one level.
-universe_section: UNIVERSE_NAME ":" _NEWLINE INDENT (_blank_line | compiler_type_declaration | type_declaration | property_declaration | knowledge_statement | action_execution | entity_creation | action_declaration)+ DEDENT
+universe_section: UNIVERSE_NAME ":" _NEWLINES INDENT (_blank_line | compiler_type_declaration | type_declaration | property_declaration | knowledge_statement | action_execution | entity_creation | action_declaration)+ DEDENT
 
-_blank_line: _NEWLINE
+_blank_line: _NEWLINES
 
 // Compiler type declaration (e.g., Number is.).
-compiler_type_declaration: IDENTIFIER SPACE "is." _NEWLINE
+compiler_type_declaration: IDENTIFIER SPACE "is." _NEWLINES
 
 // Type declaration with parent type (e.g., Source is a ViewPoint.).
-type_declaration: IDENTIFIER SPACE "is a" SPACE IDENTIFIER "." _NEWLINE
+type_declaration: IDENTIFIER SPACE "is a" SPACE IDENTIFIER "." _NEWLINES
 
 // Property declaration for types.
-property_declaration: IDENTIFIER SPACE "has a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER "." _NEWLINE
+property_declaration: IDENTIFIER SPACE "has a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER "." _NEWLINES
 
 // Entity creation with a nested property block.
-entity_creation: IDENTIFIER SPACE "creates a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER ":" _NEWLINE INDENT property_assignment+ DEDENT
+entity_creation: IDENTIFIER SPACE "creates a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER ":" _NEWLINES INDENT property_assignment+ DEDENT
 
-property_assignment: IDENTIFIER ":" SPACE value_reference _NEWLINE
+property_assignment: IDENTIFIER ":" SPACE value_reference _NEWLINES
 
 ?value_reference: STRING
                 | NUMBER
@@ -50,15 +51,15 @@ property_assignment: IDENTIFIER ":" SPACE value_reference _NEWLINE
 
 property_or_entity_reference: IDENTIFIER POSSESSIVE SPACE IDENTIFIER
 
-knowledge_statement: IDENTIFIER SPACE "knows" SPACE property_or_entity_reference "." _NEWLINE
+knowledge_statement: IDENTIFIER SPACE "knows" SPACE property_or_entity_reference "." _NEWLINES
 
-action_declaration: IDENTIFIER SPACE "can" SPACE IDENTIFIER action_parameters? ":" _NEWLINE INDENT action_body DEDENT
+action_declaration: IDENTIFIER SPACE "can" SPACE IDENTIFIER action_parameters? ":" _NEWLINES INDENT action_body DEDENT
 
 action_parameters: SPACE "using" SPACE action_param (parameter_sep action_param)*
-parameter_sep: "," (SPACE* _NEWLINE)? SPACE*
+parameter_sep: "," (SPACE* _NEWLINES)? SPACE*
 action_param: "a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER
 
 action_body: (_blank_line | action_execution)+
 
-action_execution: IDENTIFIER SPACE "makes" SPACE value_reference SPACE IDENTIFIER SPACE argument_list "." _NEWLINE
-argument_list: value_reference ("," (SPACE* _NEWLINE)? SPACE* value_reference)*
+action_execution: IDENTIFIER SPACE "makes" SPACE value_reference SPACE IDENTIFIER SPACE argument_list "." _NEWLINES
+argument_list: value_reference ("," (SPACE* _NEWLINES)? SPACE* value_reference)*
