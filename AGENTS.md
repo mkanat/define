@@ -21,3 +21,5 @@ We are working together to make a programming language based on epistemology. Se
 ## Imports
 
 - Prefer importing modules instead of classes:. Example: `from compiler import ast` and then reference `ast.ASTNode` in the code.
+- Never import or use `typing.TYPE_CHECKING`.
+
