@@ -65,7 +65,6 @@ def _get_universe_by_name(tree: lark.Tree, expected_name: str) -> lark.Tree:
 
 
 def test_type_declaration_with_parent():
-    """Test type declaration with parent type: 'Foo is a Bar.'."""
     source = _strip(
         """
         AbstractUniverse:
@@ -84,7 +83,6 @@ def test_type_declaration_with_parent():
 
 
 def test_type_declaration_compiler_type():
-    """Test compiler type declaration: 'Foo is.'."""
     source = _strip(
         """
         AbstractUniverse:
@@ -103,7 +101,6 @@ def test_type_declaration_compiler_type():
 
 
 def test_property_declaration():
-    """Test property declaration: 'Foo has a Bar named baz.'."""
     source = _strip(
         """
         AbstractUniverse:
@@ -122,7 +119,6 @@ def test_property_declaration():
 
 
 def test_entity_creation_with_properties():
-    """Test entity creation with properties."""
     source = _strip(
         """
         AbstractUniverse:
@@ -154,7 +150,6 @@ def test_entity_creation_with_properties():
 
 
 def test_entity_creation_without_properties():
-    """Test entity creation without properties."""
     source = _strip(
         """
         AbstractUniverse:
@@ -177,7 +172,6 @@ def test_entity_creation_without_properties():
 
 
 def test_knowledge_statement():
-    """Test knowledge statement: 'Foo knows Bar's baz.'."""
     source = _strip(
         """
         PhysicalUniverse:
@@ -200,7 +194,6 @@ def test_knowledge_statement():
 
 
 def test_action_declaration_with_parameters_and_body():
-    """Test action declaration with parameters and body."""
     source = _strip(
         """
         PhysicalUniverse:
@@ -249,7 +242,6 @@ def test_action_declaration_with_parameters_and_body():
 
 
 def test_action_execution():
-    """Test action execution: 'Actor makes Owner's target Do Owner's arg1, Owner's arg2.'."""
     source = _strip(
         """
         PhysicalUniverse:
@@ -294,7 +286,6 @@ def test_action_execution():
 
 
 def test_comment_allowed():
-    """Test that leading-space comments are allowed."""
     source = _strip(
         """
         AbstractUniverse:
@@ -314,7 +305,6 @@ def test_comment_allowed():
 
 
 def test_comment_before_first_universe():
-    """Test that comments are allowed before the first universe block."""
     source = _strip(
         """
         # This is a comment before the universe block
@@ -334,7 +324,6 @@ def test_comment_before_first_universe():
 
 
 def test_universe_in_comment():
-    """Test that AbstractUniverse in a comment is treated as a comment, not parsed as code."""
     source = _strip(
         """
         AbstractUniverse:
@@ -360,7 +349,6 @@ def test_universe_in_comment():
 
 
 def test_universe_in_string_literal():
-    """Test that AbstractUniverse in a string literal is treated as a string, not parsed as code."""
     source = _strip(
         """
         AbstractUniverse:
@@ -431,6 +419,7 @@ def test_string_literal_with_escaped_backslash():
     entity_creations = list(universe.find_data("entity_creation"))
     assert len(entity_creations) == 1
 
+
 def test_string_literal_empty():
     source = _strip(
         """
@@ -470,7 +459,6 @@ def test_string_literal_with_only_escaped_characters():
 
 
 def test_blank_line_between_statements():
-    """Test that blank lines are allowed between statements within a universe."""
     # This test verifies that statements can be separated by blank lines
     # Blank lines should be filtered out by the lexer, so this should work
     source = _strip(
@@ -494,7 +482,6 @@ def test_blank_line_between_statements():
 
 
 def test_multiple_blank_lines():
-    """Test that multiple consecutive blank lines are allowed."""
     # Multiple blank lines should all be filtered out
     source = _strip(
         """
@@ -517,7 +504,6 @@ def test_multiple_blank_lines():
 
 
 def test_blank_line_before_first_universe():
-    """Test that blank lines are allowed before the first universe block."""
     source = _strip(
         """
 
@@ -537,7 +523,6 @@ def test_blank_line_before_first_universe():
 
 
 def test_blank_line_between_universes():
-    """Test that blank lines are allowed between universe sections."""
     source = _strip(
         """
         AbstractUniverse:
@@ -561,7 +546,6 @@ def test_blank_line_between_universes():
 
 
 def test_blank_lines_in_action_body():
-    """Test that blank lines are allowed in action bodies."""
     source = _strip(
         """
         PhysicalUniverse:

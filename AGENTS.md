@@ -23,3 +23,7 @@ We are working together to make a programming language based on epistemology. Se
 - Prefer importing modules instead of classes:. Example: `from compiler import ast` and then reference `ast.ASTNode` in the code.
 - Never import or use `typing.TYPE_CHECKING`.
 
+## Docstrings
+
+- Avoid docstrings on test methods.
+- Avoid putting "Returns" clauses in docstrings on simple accessors where the return value is obvious from the function signature.
