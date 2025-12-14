@@ -925,7 +925,7 @@ def test_blank_lines_in_action_body():
             "AbstractUniverse:\n     \n\n",
             "$END",
             "",
-            id="empty_universe_block_with_indent_and_dedent"
+            id="empty_universe_block_with_indent_and_dedent",
         ),
         pytest.param(
             _strip(
@@ -937,8 +937,8 @@ def test_blank_lines_in_action_body():
             ),
             "UNIVERSE_NAME",
             "PhysicalUniverse",
-            id="empty_universe_followed_by_another_universe"
-        )
+            id="empty_universe_followed_by_another_universe",
+        ),
     ],
 )
 def test_unexpected_token(source: str, token_type: str, token_value: str):

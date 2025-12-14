@@ -84,7 +84,7 @@ def test_get_statements_by_type_subclass():
     universe = ast.UniverseBlock(
         name="AbstractUniverse", statements=[compiler_type, type_decl]
     )
-    result = universe.get_statements_by_type(ast.CompilerTypeDeclaration)
+    result = universe.get_statements_by_type(ast.BaseTypeDeclaration)
     assert len(result) == 2
     assert result[0] is compiler_type
     assert result[1] is type_decl

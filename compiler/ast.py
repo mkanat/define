@@ -81,14 +81,19 @@ class UniverseBlock(ASTNode):
 
 
 @dataclass
-class CompilerTypeDeclaration(ASTNode):
-    """Represents a compiler type declaration (e.g., Number is.)."""
+class BaseTypeDeclaration(ASTNode):
+    """Base class for type declarations."""
 
     type_name: str
 
 
 @dataclass
-class TypeDeclaration(CompilerTypeDeclaration):
+class CompilerTypeDeclaration(BaseTypeDeclaration):
+    """Represents a compiler type declaration (e.g., Number is.)."""
+
+
+@dataclass
+class TypeDeclaration(BaseTypeDeclaration):
     """Represents a type declaration with a parent type (e.g., Source is a ViewPoint)."""
 
     parent_type: str
