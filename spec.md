@@ -184,9 +184,9 @@ That creates both a type called Source and a hidden entity that the compiler tra
 
 Only one instance of any given ViewPoint may exist in a program. In the above example, no other instances of Source may be created.
 
-## Name Conflicts Between Types and Entities
+## Name Conflicts and Redefinition
 
-Name conflicts are not allowed between types and entities. That is, there may not be two types with the same name, two entities with the same name, and an entity may not share a name with a type.
+Types and entities cannot be redefined after their first definition. Once a name has been assigned to a Type, no other type or entity may use that name. Similarly, once an entity has been assigned a name, no other entity or type may use that name.
 
 ## Properties
 
