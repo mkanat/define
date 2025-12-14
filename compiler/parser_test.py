@@ -241,12 +241,11 @@ def test_action_declaration_with_parameters_and_body():
     assert len(action_execs) == 1
 
 
-def test_action_execution():
+def test_action_execution_with_mixed_arguments():
     source = _strip(
         """
         PhysicalUniverse:
-            Actor makes Owner's target Do Owner's arg1,
-            Owner's arg2.
+            Actor makes Owner's target Do Owner's prop, 42, "hello".
         """
     )
     tree = _parse(source)
@@ -263,9 +262,7 @@ def test_action_execution():
         "target",
         "Do",
         "Owner",
-        "arg1",
-        "Owner",
-        "arg2",
+        "prop",
     ]
 
     # Verify argument_list exists
@@ -273,16 +270,26 @@ def test_action_execution():
     assert len(argument_lists) == 1
     argument_list = argument_lists[0]
 
-    # Verify arguments are parsed correctly
-    # value_reference is an inline rule, so we look for property_or_entity_reference directly
-    argument_nodes = list(argument_list.find_data("property_or_entity_reference"))
-    assert len(argument_nodes) == 2
+    # Filter out SPACE tokens to get only the value references
+    value_refs = [
+        child
+        for child in argument_list.children
+        if not (isinstance(child, lark.Token) and child.type == "SPACE")
+    ]
+    assert len(value_refs) == 3, f"Expected 3 arguments, got {len(value_refs)}"
 
-    # Verify argument value references
-    for arg_node in argument_nodes:
-        arg_idents = _get_identifiers_from_tree(arg_node)
-        # Property references have 2 identifiers: owner and property/entity name
-        assert len(arg_idents) == 2
+    assert isinstance(value_refs[0], lark.Tree)
+    assert value_refs[0].data == "property_or_entity_reference"
+    prop_ref_idents = _get_identifiers_from_tree(value_refs[0])
+    assert prop_ref_idents == ["Owner", "prop"]
+
+    assert isinstance(value_refs[1], lark.Token)
+    assert value_refs[1].type == "NUMBER"
+    assert value_refs[1].value == "42"
+
+    assert isinstance(value_refs[2], lark.Token)
+    assert value_refs[2].type == "STRING"
+    assert value_refs[2].value == '"hello"'
 
 
 def test_comment_allowed():
