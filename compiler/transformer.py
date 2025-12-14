@@ -71,18 +71,18 @@ class DefineTransformer(lark.Transformer):
 
     def action_declaration(self, items: list[Any]) -> ast.ActionDeclaration:
         """Transform an action declaration."""
-        # Items: [IDENTIFIER, IDENTIFIER, list[ActionParameter]?, list[ActionExecution]]
-        parameters = []
-        body: list[ast.ActionExecution] = []
+        # If 3 items: [IDENTIFIER, IDENTIFIER, list[ActionExecution]]
+        # If 4 items: [IDENTIFIER, IDENTIFIER, list[ActionParameter], list[ActionExecution]]
+        if len(items) == 3:
+            parameters = []
+            body = items[2]
+        else:  # len(items) == 4
+            parameters = items[2]
+            body = items[3]
 
-        for item in items:
-            if isinstance(item, list) and len(item) > 0:
-                if isinstance(item[0], ast.ActionParameter):
-                    parameters = item
-                elif isinstance(item[0], ast.ActionExecution):
-                    body = item
-
-        return ast.ActionDeclaration(items[0], items[1], parameters, body)
+        return ast.ActionDeclaration(
+            type_name=items[0], action_name=items[1], parameters=parameters, body=body
+        )
 
     def action_parameters(self, items: list[Any]) -> list[ast.ActionParameter]:
         """Transform action parameters."""
