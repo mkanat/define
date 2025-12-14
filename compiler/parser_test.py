@@ -276,7 +276,7 @@ def test_action_execution_with_mixed_arguments():
         for child in argument_list.children
         if not (isinstance(child, lark.Token) and child.type == "SPACE")
     ]
-    assert len(value_refs) == 3, f"Expected 3 arguments, got {len(value_refs)}"
+    assert len(value_refs) == 3
 
     assert isinstance(value_refs[0], lark.Tree)
     assert value_refs[0].data == "property_or_entity_reference"
@@ -290,6 +290,91 @@ def test_action_execution_with_mixed_arguments():
     assert isinstance(value_refs[2], lark.Token)
     assert value_refs[2].type == "STRING"
     assert value_refs[2].value == '"hello"'
+
+
+def test_action_execution_with_single_entity_reference():
+    source = _strip(
+        """
+        PhysicalUniverse:
+            Actor makes Owner's target Do Owner's entityName.
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "PhysicalUniverse")
+
+    # Verify action execution
+    action_execs = list(universe.find_data("action_execution"))
+    assert len(action_execs) == 1
+    action_exec = action_execs[0]
+    identifiers = _get_identifiers_from_tree(action_exec)
+    assert identifiers == [
+        "Actor",
+        "Owner",
+        "target",
+        "Do",
+        "Owner",
+        "entityName",
+    ]
+
+    # Verify argument_list exists
+    argument_lists = list(action_exec.find_data("argument_list"))
+    assert len(argument_lists) == 1
+    argument_list = argument_lists[0]
+
+    # Filter out SPACE tokens to get only the value references
+    value_refs = [
+        child
+        for child in argument_list.children
+        if not (isinstance(child, lark.Token) and child.type == "SPACE")
+    ]
+    assert len(value_refs) == 1
+
+    # Verify the single argument is an entity reference
+    assert isinstance(value_refs[0], lark.Tree)
+    assert value_refs[0].data == "property_or_entity_reference"
+    entity_ref_idents = _get_identifiers_from_tree(value_refs[0])
+    assert entity_ref_idents == ["Owner", "entityName"]
+
+
+def test_action_execution_with_single_string_literal():
+    source = _strip(
+        """
+        PhysicalUniverse:
+            Actor makes Owner's target Do "hello".
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "PhysicalUniverse")
+
+    # Verify action execution
+    action_execs = list(universe.find_data("action_execution"))
+    assert len(action_execs) == 1
+    action_exec = action_execs[0]
+    identifiers = _get_identifiers_from_tree(action_exec)
+    assert identifiers == [
+        "Actor",
+        "Owner",
+        "target",
+        "Do",
+    ]
+
+    # Verify argument_list exists
+    argument_lists = list(action_exec.find_data("argument_list"))
+    assert len(argument_lists) == 1
+    argument_list = argument_lists[0]
+
+    # Filter out SPACE tokens to get only the value references
+    value_refs = [
+        child
+        for child in argument_list.children
+        if not (isinstance(child, lark.Token) and child.type == "SPACE")
+    ]
+    assert len(value_refs) == 1
+
+    # Verify the single argument is a string literal
+    assert isinstance(value_refs[0], lark.Token)
+    assert value_refs[0].type == "STRING"
+    assert value_refs[0].value == '"hello"'
 
 
 def test_comment_allowed():
