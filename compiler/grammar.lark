@@ -56,7 +56,7 @@ knowledge_statement: IDENTIFIER SPACE "knows" SPACE property_or_entity_reference
 action_declaration: IDENTIFIER SPACE "can" SPACE IDENTIFIER action_parameters? ":" _NEWLINE INDENT action_body DEDENT
 
 action_parameters: SPACE "using" SPACE action_param (parameter_sep action_param)*
-parameter_sep: "," (SPACE* _NEWLINE)? SPACE*
+?parameter_sep: "," (SPACE* _NEWLINE)? SPACE*
 action_param: "a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER
 
 action_body: (_blank_line | action_execution)+
