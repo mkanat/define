@@ -6,7 +6,10 @@ UNIVERSE_NAME.2: "AbstractUniverse" | "PhysicalUniverse"
 
 %import common.CNAME            -> IDENTIFIER
 %import common.ESCAPED_STRING   -> STRING
-%import common.SIGNED_NUMBER    -> NUMBER
+// Define NUMBER to match integers and floats, but not numbers with trailing periods (like 42.)
+// This prevents "42." at the end of a line from being tokenized as a NUMBER, consuming the
+// period that ends a statement.
+NUMBER: /-?\d+(\.\d+)?/
 
 SPACE: " "
 

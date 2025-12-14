@@ -433,6 +433,40 @@ def test_action_execution_with_single_string_literal():
     _assert_token_has_type_and_value(value_refs[0], "STRING", '"hello"')
 
 
+def test_action_execution_with_single_number_literal():
+    source = _strip(
+        """
+        PhysicalUniverse:
+            Actor makes Owner's target Do 42.
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "PhysicalUniverse")
+
+    # Verify action execution
+    action_execs = _get_direct_tree_children(universe, "action_execution")
+    assert len(action_execs) == 1
+    action_exec = action_execs[0]
+    identifiers = _get_identifiers_from_tree(action_exec)
+    assert identifiers == [
+        "Actor",
+        "Owner",
+        "target",
+        "Do",
+    ]
+
+    # Verify argument_list exists
+    argument_lists = _get_direct_tree_children(action_exec, "argument_list")
+    assert len(argument_lists) == 1
+    argument_list = argument_lists[0]
+
+    value_refs = _get_direct_children_without_spaces(argument_list)
+    assert len(value_refs) == 1
+
+    # Verify the single argument is a number literal
+    _assert_token_has_type_and_value(value_refs[0], "NUMBER", "42")
+
+
 def test_comment_allowed():
     source = _strip(
         """
