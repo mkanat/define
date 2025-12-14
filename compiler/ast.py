@@ -16,6 +16,10 @@ class NumberLiteralError(ASTError):
     """Raised when a number literal is invalid."""
 
 
+class UniverseNotFoundError(ASTError):
+    """Raised when a universe with the specified name is not found."""
+
+
 @dataclass(kw_only=True)
 class ASTNode:
     """Base class for all AST nodes."""
@@ -30,9 +34,30 @@ class Program(ASTNode):
 
     universes: list["UniverseBlock"]
 
-    def __repr__(self) -> str:
-        """Return string representation of Program."""
-        return f"Program({len(self.universes)} universes)"
+    def _get_universe_by_name(self, name: str) -> "UniverseBlock":
+        for universe in self.universes:
+            if universe.name == name:
+                return universe
+        available = ", ".join(str(u.name) for u in self.universes) or "none"
+        raise UniverseNotFoundError(
+            f"Universe {name!r} not found. Available universes: {available}"
+        )
+
+    def get_abstract_universe(self) -> "UniverseBlock":
+        """Get the AbstractUniverse block.
+
+        Raises:
+            UniverseNotFoundError: If no AbstractUniverse block exists
+        """
+        return self._get_universe_by_name("AbstractUniverse")
+
+    def get_physical_universe(self) -> "UniverseBlock":
+        """Get the PhysicalUniverse block.
+
+        Raises:
+            UniverseNotFoundError: If no PhysicalUniverse block exists
+        """
+        return self._get_universe_by_name("PhysicalUniverse")
 
 
 @dataclass
@@ -42,9 +67,17 @@ class UniverseBlock(ASTNode):
     name: str
     statements: list[ASTNode]
 
-    def __repr__(self) -> str:
-        """Return string representation of UniverseBlock."""
-        return f"UniverseBlock({self.name}, {len(self.statements)} statements)"
+    def get_statements_by_type[T: ASTNode](self, stmt_type: type[T]) -> list[T]:
+        """Find statements of a specific type in this universe block.
+
+        Args:
+            stmt_type: The type of statement to find (e.g., TypeDeclaration, EntityCreation)
+
+        Returns:
+            A list of statements that are instances of the specified type,
+            or an empty list if no statements of the specified type are found.
+        """
+        return [stmt for stmt in self.statements if isinstance(stmt, stmt_type)]
 
 
 @dataclass
@@ -53,20 +86,12 @@ class CompilerTypeDeclaration(ASTNode):
 
     type_name: str
 
-    def __repr__(self) -> str:
-        """Return string representation of CompilerTypeDeclaration."""
-        return f"CompilerTypeDeclaration({self.type_name} is.)"
-
 
 @dataclass
 class TypeDeclaration(CompilerTypeDeclaration):
     """Represents a type declaration with a parent type (e.g., Source is a ViewPoint)."""
 
     parent_type: str
-
-    def __repr__(self) -> str:
-        """Return string representation of TypeDeclaration."""
-        return f"TypeDeclaration({self.type_name} is a {self.parent_type})"
 
 
 @dataclass
@@ -76,13 +101,6 @@ class PropertyDeclaration(ASTNode):
     type_name: str
     property_type: str
     property_name: str
-
-    def __repr__(self) -> str:
-        """Return string representation of PropertyDeclaration."""
-        return (
-            f"PropertyDeclaration({self.type_name} has a {self.property_type} "
-            f"named {self.property_name})"
-        )
 
 
 @dataclass
@@ -144,13 +162,6 @@ class EntityCreation(ASTNode):
     entity_name: str
     properties: list["PropertyAssignment"]
 
-    def __repr__(self) -> str:
-        """Return string representation of EntityCreation."""
-        return (
-            f"EntityCreation({self.creator} creates a {self.type_name} "
-            f"named {self.entity_name})"
-        )
-
 
 @dataclass
 class PropertyAssignment(ASTNode):
@@ -158,10 +169,6 @@ class PropertyAssignment(ASTNode):
 
     name: str
     value: ValueReference
-
-    def __repr__(self) -> str:
-        """Return string representation of PropertyAssignment."""
-        return f"PropertyAssignment({self.name}: {self.value})"
 
 
 @dataclass
@@ -172,12 +179,6 @@ class KnowledgeStatement(ASTNode):
     owner: str
     entity_name: str
 
-    def __repr__(self) -> str:
-        """Return string representation of KnowledgeStatement."""
-        return (
-            f"KnowledgeStatement({self.knower} knows {self.owner}'s {self.entity_name})"
-        )
-
 
 @dataclass
 class ActionParameter(ASTNode):
@@ -185,10 +186,6 @@ class ActionParameter(ASTNode):
 
     param_type: str
     param_name: str
-
-    def __repr__(self) -> str:
-        """Return string representation of ActionParameter."""
-        return f"ActionParameter({self.param_type} named {self.param_name})"
 
 
 @dataclass
@@ -200,13 +197,6 @@ class ActionDeclaration(ASTNode):
     parameters: list[ActionParameter]
     body: list["ActionExecution"] = field(default_factory=list)
 
-    def __repr__(self) -> str:
-        """Return string representation of ActionDeclaration."""
-        return (
-            f"ActionDeclaration({self.type_name} can {self.action_name} "
-            f"using {len(self.parameters)} parameters)"
-        )
-
 
 @dataclass
 class ActionExecution(ASTNode):
@@ -216,10 +206,3 @@ class ActionExecution(ASTNode):
     target: ValueReference
     action_name: str
     arguments: list[ValueReference]
-
-    def __repr__(self) -> str:
-        """Return string representation of ActionExecution."""
-        return (
-            f"ActionExecution({self.actor} makes {self.target} {self.action_name} "
-            f"with {len(self.arguments)} arguments)"
-        )
