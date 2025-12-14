@@ -624,6 +624,18 @@ def test_blank_lines_in_action_body():
             "DEDENT",
             "",
         ),
+        # Nested universe block (forbidden)
+        (
+            _strip(
+                """
+                AbstractUniverse:
+                    PhysicalUniverse:
+                        Foo is a Bar.
+                """
+            ),
+            "COLON",
+            ":",
+        ),
     ],
 )
 def test_unexpected_token(source, token_type, token_value):

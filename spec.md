@@ -92,6 +92,8 @@ The universe name must be exactly one of the two valid universe identifiers: `Ab
 
 A file may contain at most one `AbstractUniverse` block and at most one `PhysicalUniverse` block. The compiler must reject any file that contains multiple blocks of the same universe type.
 
+Universe blocks mat noy be nested inside of another universe block.
+
 ## Entities and Type Declarations: Overview
 
 Entities are things that exist within a universe. For example, in the physical universe, the monitor you are reading this on is an entity. In an abstract universe, the number `1` is an entity, as is the string `Hello, world!`.
