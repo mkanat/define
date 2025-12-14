@@ -390,6 +390,85 @@ def test_universe_in_string_literal():
     assert identifiers == ["Creator", "Thing", "instance", "description"]
 
 
+def test_string_literal_with_escaped_quote():
+    source = _strip(
+        """
+        AbstractUniverse:
+            Creator creates a Thing named instance:
+                message: "hello \\"world\\""
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "AbstractUniverse")
+
+    # Verify string token is present with escaped quotes
+    string_tokens = _get_tokens_by_type_from_tree(tree, "STRING")
+    assert len(string_tokens) == 1
+    assert string_tokens[0].value == '"hello \\"world\\""'
+
+    # Verify entity creation parses correctly
+    entity_creations = list(universe.find_data("entity_creation"))
+    assert len(entity_creations) == 1
+
+
+def test_string_literal_with_escaped_backslash():
+    source = _strip(
+        """
+        AbstractUniverse:
+            Creator creates a Thing named instance:
+                path: "hello \\\\ world"
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "AbstractUniverse")
+
+    # Verify string token is present with escaped backslash
+    string_tokens = _get_tokens_by_type_from_tree(tree, "STRING")
+    assert len(string_tokens) == 1
+    assert string_tokens[0].value == '"hello \\\\ world"'
+
+    # Verify entity creation parses correctly
+    entity_creations = list(universe.find_data("entity_creation"))
+    assert len(entity_creations) == 1
+
+def test_string_literal_empty():
+    source = _strip(
+        """
+        AbstractUniverse:
+            Creator creates a Thing named instance:
+                text: ""
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "AbstractUniverse")
+
+    string_tokens = _get_tokens_by_type_from_tree(tree, "STRING")
+    assert len(string_tokens) == 1
+    assert string_tokens[0].value == '""'
+
+    entity_creations = list(universe.find_data("entity_creation"))
+    assert len(entity_creations) == 1
+
+
+def test_string_literal_with_only_escaped_characters():
+    source = _strip(
+        """
+        AbstractUniverse:
+            Creator creates a Thing named instance:
+                text: "\\\\\\""
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "AbstractUniverse")
+
+    string_tokens = _get_tokens_by_type_from_tree(tree, "STRING")
+    assert len(string_tokens) == 1
+    assert string_tokens[0].value == '"\\\\\\""'
+
+    entity_creations = list(universe.find_data("entity_creation"))
+    assert len(entity_creations) == 1
+
+
 def test_blank_line_between_statements():
     """Test that blank lines are allowed between statements within a universe."""
     # This test verifies that statements can be separated by blank lines
