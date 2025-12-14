@@ -75,6 +75,17 @@ def _get_universe_by_name(tree: lark.Tree, expected_name: str) -> lark.Tree:
     raise AssertionError(f"Universe '{expected_name}' not found in tree")
 
 
+def _assert_token_has_type_and_value(
+    token: lark.Token | lark.Tree,
+    expected_type: str,
+    expected_value: str,
+) -> None:
+    """Assert that a token has the expected type and value."""
+    assert isinstance(token, lark.Token)
+    assert token.type == expected_type
+    assert token.value == expected_value
+
+
 def test_type_declaration_with_parent():
     source = _strip(
         """
@@ -163,24 +174,16 @@ def test_entity_creation_with_properties():
     assert len(property_assignments) == 2
 
     # Verify first assignment: prop = "value"
-    first_assignment = property_assignments[0]
-    first_children = _get_direct_children_without_spaces(first_assignment)
-    assert isinstance(first_children[0], lark.Token)
-    assert first_children[0].type == "IDENTIFIER"
-    assert first_children[0].value == "prop"
-    assert isinstance(first_children[1], lark.Token)
-    assert first_children[1].type == "STRING"
-    assert first_children[1].value == '"value"'
+    first_children = _get_direct_children_without_spaces(property_assignments[0])
+    assert len(first_children) == 2
+    _assert_token_has_type_and_value(first_children[0], "IDENTIFIER", "prop")
+    _assert_token_has_type_and_value(first_children[1], "STRING", '"value"')
 
     # Verify second assignment: count = 3
-    second_assignment = property_assignments[1]
-    second_children = _get_direct_children_without_spaces(second_assignment)
-    assert isinstance(second_children[0], lark.Token)
-    assert second_children[0].type == "IDENTIFIER"
-    assert second_children[0].value == "count"
-    assert isinstance(second_children[1], lark.Token)
-    assert second_children[1].type == "NUMBER"
-    assert second_children[1].value == "3"
+    second_children = _get_direct_children_without_spaces(property_assignments[1])
+    assert len(second_children) == 2
+    _assert_token_has_type_and_value(second_children[0], "IDENTIFIER", "count")
+    _assert_token_has_type_and_value(second_children[1], "NUMBER", "3")
 
 
 def test_entity_creation_without_properties():
@@ -263,24 +266,16 @@ def test_action_declaration_with_parameters_and_body():
     assert len(param_nodes) == 2
 
     # Verify first parameter: Arg named first
-    first_param = param_nodes[0]
-    first_param_children = _get_direct_children_without_spaces(first_param)
-    assert isinstance(first_param_children[0], lark.Token)
-    assert first_param_children[0].type == "IDENTIFIER"
-    assert first_param_children[0].value == "Arg"
-    assert isinstance(first_param_children[1], lark.Token)
-    assert first_param_children[1].type == "IDENTIFIER"
-    assert first_param_children[1].value == "first"
+    first_param_children = _get_direct_children_without_spaces(param_nodes[0])
+    assert len(first_param_children) == 2
+    _assert_token_has_type_and_value(first_param_children[0], "IDENTIFIER", "Arg")
+    _assert_token_has_type_and_value(first_param_children[1], "IDENTIFIER", "first")
 
     # Verify second parameter: Arg named second
-    second_param = param_nodes[1]
-    second_param_children = _get_direct_children_without_spaces(second_param)
-    assert isinstance(second_param_children[0], lark.Token)
-    assert second_param_children[0].type == "IDENTIFIER"
-    assert second_param_children[0].value == "Arg"
-    assert isinstance(second_param_children[1], lark.Token)
-    assert second_param_children[1].type == "IDENTIFIER"
-    assert second_param_children[1].value == "second"
+    second_param_children = _get_direct_children_without_spaces(param_nodes[1])
+    assert len(second_param_children) == 2
+    _assert_token_has_type_and_value(second_param_children[0], "IDENTIFIER", "Arg")
+    _assert_token_has_type_and_value(second_param_children[1], "IDENTIFIER", "second")
 
     # Get action executions in order from action_body
     action_bodies = list(action_decl.find_data("action_body"))
@@ -296,16 +291,12 @@ def test_action_declaration_with_parameters_and_body():
     # Verify action execution: T makes Owner's target Do Owner's arg1, Owner's arg2
     action_exec = action_executions[0]
     exec_children = _get_direct_children_without_spaces(action_exec)
-    assert isinstance(exec_children[0], lark.Token)
-    assert exec_children[0].type == "IDENTIFIER"
-    assert exec_children[0].value == "T"
+    _assert_token_has_type_and_value(exec_children[0], "IDENTIFIER", "T")
     assert isinstance(exec_children[1], lark.Tree)
     assert exec_children[1].data == "property_or_entity_reference"
     target_idents = _get_identifiers_from_tree(exec_children[1])
     assert target_idents == ["Owner", "target"]
-    assert isinstance(exec_children[2], lark.Token)
-    assert exec_children[2].type == "IDENTIFIER"
-    assert exec_children[2].value == "Do"
+    _assert_token_has_type_and_value(exec_children[2], "IDENTIFIER", "Do")
     assert isinstance(exec_children[3], lark.Tree)
     assert exec_children[3].data == "argument_list"
 
@@ -360,13 +351,8 @@ def test_action_execution_with_mixed_arguments():
     prop_ref_idents = _get_identifiers_from_tree(value_refs[0])
     assert prop_ref_idents == ["Owner", "prop"]
 
-    assert isinstance(value_refs[1], lark.Token)
-    assert value_refs[1].type == "NUMBER"
-    assert value_refs[1].value == "42"
-
-    assert isinstance(value_refs[2], lark.Token)
-    assert value_refs[2].type == "STRING"
-    assert value_refs[2].value == '"hello"'
+    _assert_token_has_type_and_value(value_refs[1], "NUMBER", "42")
+    _assert_token_has_type_and_value(value_refs[2], "STRING", '"hello"')
 
 
 def test_action_execution_with_single_entity_reference():
@@ -439,9 +425,7 @@ def test_action_execution_with_single_string_literal():
     assert len(value_refs) == 1
 
     # Verify the single argument is a string literal
-    assert isinstance(value_refs[0], lark.Token)
-    assert value_refs[0].type == "STRING"
-    assert value_refs[0].value == '"hello"'
+    _assert_token_has_type_and_value(value_refs[0], "STRING", '"hello"')
 
 
 def test_comment_allowed():
@@ -743,8 +727,7 @@ def test_blank_lines_in_action_body():
 @pytest.mark.parametrize(
     ("source", "token_type", "token_value"),
     [
-        # Double space between tokens
-        (
+        pytest.param(
             _strip(
                 """
                 AbstractUniverse:
@@ -753,9 +736,9 @@ def test_blank_lines_in_action_body():
             ),
             "SPACE",
             " ",
+            id="double_space_between_tokens",
         ),
-        # Space before period in `is.` form
-        (
+        pytest.param(
             _strip(
                 """
                 AbstractUniverse:
@@ -764,9 +747,9 @@ def test_blank_lines_in_action_body():
             ),
             "IDENTIFIER",
             "is",
+            id="space_before_period_in_is_form",
         ),
-        # Missing space after colon in property assignment
-        (
+        pytest.param(
             _strip(
                 """
                 AbstractUniverse:
@@ -776,9 +759,9 @@ def test_blank_lines_in_action_body():
             ),
             "STRING",
             '"value"',
+            id="missing_space_after_colon_in_property_assignment",
         ),
-        # Space before period
-        (
+        pytest.param(
             _strip(
                 """
                 AbstractUniverse:
@@ -787,9 +770,9 @@ def test_blank_lines_in_action_body():
             ),
             "SPACE",
             " ",
+            id="space_before_period",
         ),
-        # Invalid keyword variants people might type
-        (
+        pytest.param(
             _strip(
                 """
                 AbstractUniverse:
@@ -798,8 +781,9 @@ def test_blank_lines_in_action_body():
             ),
             "IDENTIFIER",
             "n",
+            id="invalid_keyword_has_an",
         ),
-        (
+        pytest.param(
             _strip(
                 """
                 AbstractUniverse:
@@ -809,9 +793,9 @@ def test_blank_lines_in_action_body():
             ),
             "IDENTIFIER",
             "creates",
+            id="invalid_keyword_creates_the",
         ),
-        # Missing required keyword 'named'
-        (
+        pytest.param(
             _strip(
                 """
                 AbstractUniverse:
@@ -821,9 +805,9 @@ def test_blank_lines_in_action_body():
             ),
             "IDENTIFIER",
             "baz",
+            id="missing_required_keyword_named",
         ),
-        # Bad universe header spacing
-        (
+        pytest.param(
             _strip(
                 """
                 AbstractUniverse :
@@ -832,15 +816,15 @@ def test_blank_lines_in_action_body():
             ),
             "SPACE",
             " ",
+            id="bad_universe_header_spacing",
         ),
-        # Missing final newline
-        (
+        pytest.param(
             "AbstractUniverse:\n    Foo is a Bar.",
             "DEDENT",
             "",
+            id="missing_final_newline",
         ),
-        # Action declaration with extra spaces
-        (
+        pytest.param(
             _strip(
                 """
                 PhysicalUniverse:
@@ -849,20 +833,20 @@ def test_blank_lines_in_action_body():
             ),
             "SPACE",
             " ",
+            id="action_declaration_with_extra_spaces",
         ),
-        # Action execution missing space between target and action
-        (
+        pytest.param(
             _strip(
                 """
-                    PhysicalUniverse:
-                        actor makes target'saction arg1.
-                    """
+                PhysicalUniverse:
+                    actor makes target'saction arg1.
+                """
             ),
             "IDENTIFIER",
             "action",
+            id="action_execution_missing_space_between_target_and_action",
         ),
-        # Action declaration without body (invalid syntax)
-        (
+        pytest.param(
             _strip(
                 """
                 PhysicalUniverse:
@@ -871,9 +855,9 @@ def test_blank_lines_in_action_body():
             ),
             "DOT",
             ".",
+            id="action_declaration_without_body",
         ),
-        # Action declaration with colon but no body
-        (
+        pytest.param(
             _strip(
                 """
                 PhysicalUniverse:
@@ -882,9 +866,9 @@ def test_blank_lines_in_action_body():
             ),
             "DEDENT",
             "",
+            id="action_declaration_with_colon_but_no_body",
         ),
-        # Nested universe block (forbidden)
-        (
+        pytest.param(
             _strip(
                 """
                 AbstractUniverse:
@@ -894,10 +878,11 @@ def test_blank_lines_in_action_body():
             ),
             "COLON",
             ":",
+            id="nested_universe_block_forbidden",
         ),
     ],
 )
-def test_unexpected_token(source, token_type, token_value):
+def test_unexpected_token(source: str, token_type: str, token_value: str):
     parser = Parser()
     with pytest.raises(UnexpectedToken) as exc_info:
         parser.parse(source)
@@ -910,19 +895,19 @@ def test_unexpected_token(source, token_type, token_value):
 @pytest.mark.parametrize(
     ("source", "char"),
     [
-        # Tab indentation
-        (
+        pytest.param(
             "AbstractUniverse:\n\tFoo is a Bar.\n",
             "\t",
+            id="tab_indentation",
         ),
-        # Carriage return usage
-        (
+        pytest.param(
             "AbstractUniverse:\r\n    Foo is a Bar.\r\n",
             "\r",
+            id="carriage_return_usage",
         ),
     ],
 )
-def test_unexpected_characters(source, char):
+def test_unexpected_characters(source: str, char: str):
     parser = Parser()
     with pytest.raises(UnexpectedCharacters) as exc_info:
         parser.parse(source)
