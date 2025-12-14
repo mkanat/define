@@ -145,19 +145,42 @@ def test_entity_creation_with_properties():
     entity_creations = list(universe.find_data("entity_creation"))
     assert len(entity_creations) == 1
     entity_creation = entity_creations[0]
-    identifiers = _get_identifiers_from_tree(entity_creation)
-    assert identifiers == ["Creator", "Thing", "instance", "prop", "count"]
 
-    # Verify property assignments
-    property_assignments = list(entity_creation.find_data("property_assignment"))
+    # Verify entity creation identifiers: Creator, Thing, instance
+    entity_idents = [
+        child.value
+        for child in entity_creation.children
+        if isinstance(child, lark.Token) and child.type == "IDENTIFIER"
+    ]
+    assert entity_idents == ["Creator", "Thing", "instance"]
+
+    # Get property assignments in order from direct children
+    property_assignments = [
+        child
+        for child in entity_creation.children
+        if isinstance(child, lark.Tree) and child.data == "property_assignment"
+    ]
     assert len(property_assignments) == 2
 
-    # Verify property values
-    string_tokens = _get_tokens_by_type_from_tree(entity_creation, "STRING")
-    assert [t.value for t in string_tokens] == ['"value"']
+    # Verify first assignment: prop = "value"
+    first_assignment = property_assignments[0]
+    first_children = _get_direct_children_without_spaces(first_assignment)
+    assert isinstance(first_children[0], lark.Token)
+    assert first_children[0].type == "IDENTIFIER"
+    assert first_children[0].value == "prop"
+    assert isinstance(first_children[1], lark.Token)
+    assert first_children[1].type == "STRING"
+    assert first_children[1].value == '"value"'
 
-    number_tokens = _get_tokens_by_type_from_tree(entity_creation, "NUMBER")
-    assert [t.value for t in number_tokens] == ["3"]
+    # Verify second assignment: count = 3
+    second_assignment = property_assignments[1]
+    second_children = _get_direct_children_without_spaces(second_assignment)
+    assert isinstance(second_children[0], lark.Token)
+    assert second_children[0].type == "IDENTIFIER"
+    assert second_children[0].value == "count"
+    assert isinstance(second_children[1], lark.Token)
+    assert second_children[1].type == "NUMBER"
+    assert second_children[1].value == "3"
 
 
 def test_entity_creation_without_properties():
@@ -219,37 +242,85 @@ def test_action_declaration_with_parameters_and_body():
     action_decls = list(universe.find_data("action_declaration"))
     assert len(action_decls) == 1
     action_decl = action_decls[0]
-    identifiers = _get_identifiers_from_tree(action_decl)
-    assert identifiers == [
-        "T",
-        "Act",
-        "Arg",
-        "first",
-        "Arg",
-        "second",
-        "T",
-        "Owner",
-        "target",
-        "Do",
-        "Owner",
-        "arg1",
-        "Owner",
-        "arg2",
-    ]
 
-    # Verify parameters exist
-    action_params = list(action_decl.find_data("action_parameters"))
-    assert len(action_params) == 1
-    param_nodes = list(action_decl.find_data("action_param"))
+    # Verify action declaration identifiers: T, Act
+    action_idents = [
+        child.value
+        for child in action_decl.children
+        if isinstance(child, lark.Token) and child.type == "IDENTIFIER"
+    ]
+    assert action_idents[:2] == ["T", "Act"]
+
+    # Get parameters in order from action_parameters
+    action_params_trees = list(action_decl.find_data("action_parameters"))
+    assert len(action_params_trees) == 1
+    action_params_tree = action_params_trees[0]
+    param_nodes = [
+        child
+        for child in action_params_tree.children
+        if isinstance(child, lark.Tree) and child.data == "action_param"
+    ]
     assert len(param_nodes) == 2
 
-    # Verify body exists
+    # Verify first parameter: Arg named first
+    first_param = param_nodes[0]
+    first_param_children = _get_direct_children_without_spaces(first_param)
+    assert isinstance(first_param_children[0], lark.Token)
+    assert first_param_children[0].type == "IDENTIFIER"
+    assert first_param_children[0].value == "Arg"
+    assert isinstance(first_param_children[1], lark.Token)
+    assert first_param_children[1].type == "IDENTIFIER"
+    assert first_param_children[1].value == "first"
+
+    # Verify second parameter: Arg named second
+    second_param = param_nodes[1]
+    second_param_children = _get_direct_children_without_spaces(second_param)
+    assert isinstance(second_param_children[0], lark.Token)
+    assert second_param_children[0].type == "IDENTIFIER"
+    assert second_param_children[0].value == "Arg"
+    assert isinstance(second_param_children[1], lark.Token)
+    assert second_param_children[1].type == "IDENTIFIER"
+    assert second_param_children[1].value == "second"
+
+    # Get action executions in order from action_body
     action_bodies = list(action_decl.find_data("action_body"))
     assert len(action_bodies) == 1
+    action_body = action_bodies[0]
+    action_executions = [
+        child
+        for child in action_body.children
+        if isinstance(child, lark.Tree) and child.data == "action_execution"
+    ]
+    assert len(action_executions) == 1
 
-    # Verify action execution in body
-    action_execs = list(action_decl.find_data("action_execution"))
-    assert len(action_execs) == 1
+    # Verify action execution: T makes Owner's target Do Owner's arg1, Owner's arg2
+    action_exec = action_executions[0]
+    exec_children = _get_direct_children_without_spaces(action_exec)
+    assert isinstance(exec_children[0], lark.Token)
+    assert exec_children[0].type == "IDENTIFIER"
+    assert exec_children[0].value == "T"
+    assert isinstance(exec_children[1], lark.Tree)
+    assert exec_children[1].data == "property_or_entity_reference"
+    target_idents = _get_identifiers_from_tree(exec_children[1])
+    assert target_idents == ["Owner", "target"]
+    assert isinstance(exec_children[2], lark.Token)
+    assert exec_children[2].type == "IDENTIFIER"
+    assert exec_children[2].value == "Do"
+    assert isinstance(exec_children[3], lark.Tree)
+    assert exec_children[3].data == "argument_list"
+
+    # Verify arguments
+    argument_list = exec_children[3]
+    arguments = _get_direct_children_without_spaces(argument_list)
+    assert len(arguments) == 2
+    assert isinstance(arguments[0], lark.Tree)
+    assert arguments[0].data == "property_or_entity_reference"
+    arg1_idents = _get_identifiers_from_tree(arguments[0])
+    assert arg1_idents == ["Owner", "arg1"]
+    assert isinstance(arguments[1], lark.Tree)
+    assert arguments[1].data == "property_or_entity_reference"
+    arg2_idents = _get_identifiers_from_tree(arguments[1])
+    assert arg2_idents == ["Owner", "arg2"]
 
 
 def test_action_execution_with_mixed_arguments():
@@ -650,9 +721,23 @@ def test_blank_lines_in_action_body():
     action_decls = list(universe.find_data("action_declaration"))
     assert len(action_decls) == 1
 
-    # Verify both action executions are present
-    action_executions = list(action_decls[0].find_data("action_execution"))
+    # Verify both action executions are present and in correct order
+    action_bodies = list(action_decls[0].find_data("action_body"))
+    assert len(action_bodies) == 1
+    action_body = action_bodies[0]
+
+    # Get action executions from body, filtering out blank_line trees
+    action_executions = [
+        child
+        for child in action_body.children
+        if isinstance(child, lark.Tree) and child.data == "action_execution"
+    ]
     assert len(action_executions) == 2
+
+    # Verify they match the found executions
+    found_executions = list(action_decls[0].find_data("action_execution"))
+    assert action_executions[0] == found_executions[0]
+    assert action_executions[1] == found_executions[1]
 
 
 @pytest.mark.parametrize(
