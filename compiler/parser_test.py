@@ -44,6 +44,24 @@ def _get_direct_children_without_spaces(
     ]
 
 
+def _get_direct_token_children_by_type(tree: lark.Tree, token_type: str) -> list[str]:
+    """Get token values of a specific type from direct children of a tree."""
+    return [
+        child.value
+        for child in tree.children
+        if isinstance(child, lark.Token) and child.type == token_type
+    ]
+
+
+def _get_direct_tree_children_by_data(tree: lark.Tree, data: str) -> list[lark.Tree]:
+    """Get Tree children with a specific data value from direct children of a tree."""
+    return [
+        child
+        for child in tree.children
+        if isinstance(child, lark.Tree) and child.data == data
+    ]
+
+
 def _parse(source: str) -> lark.Tree:
     """Parse source and verify root structure."""
     parser = Parser()
@@ -157,19 +175,13 @@ def test_entity_creation_with_properties():
     entity_creation = entity_creations[0]
 
     # Verify entity creation identifiers: Creator, Thing, instance
-    entity_idents = [
-        child.value
-        for child in entity_creation.children
-        if isinstance(child, lark.Token) and child.type == "IDENTIFIER"
-    ]
+    entity_idents = _get_direct_token_children_by_type(entity_creation, "IDENTIFIER")
     assert entity_idents == ["Creator", "Thing", "instance"]
 
     # Get property assignments in order from direct children
-    property_assignments = [
-        child
-        for child in entity_creation.children
-        if isinstance(child, lark.Tree) and child.data == "property_assignment"
-    ]
+    property_assignments = _get_direct_tree_children_by_data(
+        entity_creation, "property_assignment"
+    )
     assert len(property_assignments) == 2
 
     # Verify first assignment: prop = "value"
@@ -246,22 +258,14 @@ def test_action_declaration_with_parameters_and_body():
     action_decl = action_decls[0]
 
     # Verify action declaration identifiers: T, Act
-    action_idents = [
-        child.value
-        for child in action_decl.children
-        if isinstance(child, lark.Token) and child.type == "IDENTIFIER"
-    ]
+    action_idents = _get_direct_token_children_by_type(action_decl, "IDENTIFIER")
     assert action_idents[:2] == ["T", "Act"]
 
     # Get parameters in order from action_parameters
     action_params_trees = list(action_decl.find_data("action_parameters"))
     assert len(action_params_trees) == 1
     action_params_tree = action_params_trees[0]
-    param_nodes = [
-        child
-        for child in action_params_tree.children
-        if isinstance(child, lark.Tree) and child.data == "action_param"
-    ]
+    param_nodes = _get_direct_tree_children_by_data(action_params_tree, "action_param")
     assert len(param_nodes) == 2
 
     # Verify first parameter: Arg named first
@@ -280,11 +284,9 @@ def test_action_declaration_with_parameters_and_body():
     action_bodies = list(action_decl.find_data("action_body"))
     assert len(action_bodies) == 1
     action_body = action_bodies[0]
-    action_executions = [
-        child
-        for child in action_body.children
-        if isinstance(child, lark.Tree) and child.data == "action_execution"
-    ]
+    action_executions = _get_direct_tree_children_by_data(
+        action_body, "action_execution"
+    )
     assert len(action_executions) == 1
 
     # Verify action execution: T makes Owner's target Do Owner's arg1, Owner's arg2
@@ -710,11 +712,9 @@ def test_blank_lines_in_action_body():
     action_body = action_bodies[0]
 
     # Get action executions from body, filtering out blank_line trees
-    action_executions = [
-        child
-        for child in action_body.children
-        if isinstance(child, lark.Tree) and child.data == "action_execution"
-    ]
+    action_executions = _get_direct_tree_children_by_data(
+        action_body, "action_execution"
+    )
     assert len(action_executions) == 2
 
     # Verify they match the found executions
