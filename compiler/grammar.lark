@@ -6,22 +6,23 @@ UNIVERSE_NAME.2: "AbstractUniverse" | "PhysicalUniverse"
 
 %import common.CNAME            -> IDENTIFIER
 %import common.ESCAPED_STRING   -> STRING
+%import common.INT
 // Define NUMBER to match integers and floats, but not numbers with trailing periods (like 42.)
 // This prevents "42." at the end of a line from being tokenized as a NUMBER, consuming the
 // period that ends a statement.
-NUMBER: /-?\d+(\.\d+)?/
+NUMBER: ("+"|"-")? (INT | (INT "." INT))
 
 SPACE: " "
 
 // Newline carries following indentation so that the parser can see it for indentation purposes.
 // We allow multiple consecutive newlines so blank lines don't reset indentation.
-_NEWLINE: /(\n[ ]*)+/
+_NEWLINE: ("\n" SPACE*)+
 
 POSSESSIVE: "'s"
 
 %declare INDENT DEDENT
 
-COMMENT: /[ ]*#[^\n]*/
+COMMENT: SPACE* "#" /[^\n]*/
 %ignore COMMENT
 
 // A file is one or more universe blocks.
