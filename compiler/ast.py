@@ -24,9 +24,6 @@ class UniverseNotFoundError(ASTError):
 class ASTNode:
     """Base class for all AST nodes."""
 
-    line: int | None = None
-    column: int | None = None
-
 
 @dataclass
 class Program(ASTNode):
