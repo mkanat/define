@@ -915,6 +915,30 @@ def test_blank_lines_in_action_body():
             ":",
             id="nested_universe_block_forbidden",
         ),
+        pytest.param(
+            "AbstractUniverse:\n",
+            "$END",
+            "",
+            id="empty_universe_block",
+        ),
+        pytest.param(
+            "AbstractUniverse:\n     \n\n",
+            "$END",
+            "",
+            id="empty_universe_block_with_indent_and_dedent"
+        ),
+        pytest.param(
+            _strip(
+                """
+                AbstractUniverse:
+                PhysicalUniverse:
+                    Foo is a Bar.
+                """
+            ),
+            "UNIVERSE_NAME",
+            "PhysicalUniverse",
+            id="empty_universe_followed_by_another_universe"
+        )
     ],
 )
 def test_unexpected_token(source: str, token_type: str, token_value: str):
