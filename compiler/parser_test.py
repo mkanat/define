@@ -53,7 +53,7 @@ def _get_direct_token_children_by_type(tree: lark.Tree, token_type: str) -> list
     ]
 
 
-def _get_direct_tree_children_by_data(tree: lark.Tree, data: str) -> list[lark.Tree]:
+def _get_direct_tree_children(tree: lark.Tree, data: str) -> list[lark.Tree]:
     """Get Tree children with a specific data value from direct children of a tree."""
     return [
         child
@@ -73,7 +73,7 @@ def _parse(source: str) -> lark.Tree:
 
 def _get_first_universe(tree: lark.Tree, expected_name: str) -> lark.Tree:
     """Get the first universe section and verify its name."""
-    universe_sections = list(tree.find_data("universe_section"))
+    universe_sections = _get_direct_tree_children(tree, "universe_section")
     assert len(universe_sections) == 1
     universe = universe_sections[0]
 
@@ -85,7 +85,7 @@ def _get_first_universe(tree: lark.Tree, expected_name: str) -> lark.Tree:
 
 def _get_universe_by_name(tree: lark.Tree, expected_name: str) -> lark.Tree:
     """Get a universe section by name."""
-    for universe in tree.find_data("universe_section"):
+    for universe in _get_direct_tree_children(tree, "universe_section"):
         universe_name_tokens = _get_tokens_by_type_from_tree(universe, "UNIVERSE_NAME")
         if universe_name_tokens and universe_name_tokens[0].value == expected_name:
             return universe
@@ -114,7 +114,7 @@ def test_type_declaration_with_parent():
     universe = _get_first_universe(tree, "AbstractUniverse")
 
     # Verify type declaration
-    type_decls = list(universe.find_data("type_declaration"))
+    type_decls = _get_direct_tree_children(universe, "type_declaration")
     assert len(type_decls) == 1
     type_decl = type_decls[0]
     identifiers = _get_identifiers_from_tree(type_decl)
@@ -132,7 +132,9 @@ def test_type_declaration_compiler_type():
     universe = _get_first_universe(tree, "AbstractUniverse")
 
     # Verify compiler type declaration
-    compiler_type_decls = list(universe.find_data("compiler_type_declaration"))
+    compiler_type_decls = _get_direct_tree_children(
+        universe, "compiler_type_declaration"
+    )
     assert len(compiler_type_decls) == 1
     compiler_type_decl = compiler_type_decls[0]
     identifiers = _get_identifiers_from_tree(compiler_type_decl)
@@ -150,7 +152,7 @@ def test_property_declaration():
     universe = _get_first_universe(tree, "AbstractUniverse")
 
     # Verify property declaration
-    prop_decls = list(universe.find_data("property_declaration"))
+    prop_decls = _get_direct_tree_children(universe, "property_declaration")
     assert len(prop_decls) == 1
     prop_decl = prop_decls[0]
     identifiers = _get_identifiers_from_tree(prop_decl)
@@ -170,7 +172,7 @@ def test_entity_creation_with_properties():
     universe = _get_first_universe(tree, "AbstractUniverse")
 
     # Verify entity creation
-    entity_creations = list(universe.find_data("entity_creation"))
+    entity_creations = _get_direct_tree_children(universe, "entity_creation")
     assert len(entity_creations) == 1
     entity_creation = entity_creations[0]
 
@@ -179,7 +181,7 @@ def test_entity_creation_with_properties():
     assert entity_idents == ["Creator", "Thing", "instance"]
 
     # Get property assignments in order from direct children
-    property_assignments = _get_direct_tree_children_by_data(
+    property_assignments = _get_direct_tree_children(
         entity_creation, "property_assignment"
     )
     assert len(property_assignments) == 2
@@ -208,14 +210,16 @@ def test_entity_creation_without_properties():
     universe = _get_first_universe(tree, "AbstractUniverse")
 
     # Verify entity creation
-    entity_creations = list(universe.find_data("entity_creation"))
+    entity_creations = _get_direct_tree_children(universe, "entity_creation")
     assert len(entity_creations) == 1
     entity_creation = entity_creations[0]
     identifiers = _get_identifiers_from_tree(entity_creation)
     assert identifiers == ["Creator", "Thing", "instance"]
 
     # Verify no property assignments
-    property_assignments = list(entity_creation.find_data("property_assignment"))
+    property_assignments = _get_direct_tree_children(
+        entity_creation, "property_assignment"
+    )
     assert len(property_assignments) == 0
 
 
@@ -230,14 +234,16 @@ def test_knowledge_statement():
     universe = _get_first_universe(tree, "PhysicalUniverse")
 
     # Verify knowledge statement
-    knowledge_stmts = list(universe.find_data("knowledge_statement"))
+    knowledge_stmts = _get_direct_tree_children(universe, "knowledge_statement")
     assert len(knowledge_stmts) == 1
     knowledge_stmt = knowledge_stmts[0]
     identifiers = _get_identifiers_from_tree(knowledge_stmt)
     assert identifiers == ["Foo", "Bar", "baz"]
 
     # Verify property_or_entity_reference exists
-    property_refs = list(knowledge_stmt.find_data("property_or_entity_reference"))
+    property_refs = _get_direct_tree_children(
+        knowledge_stmt, "property_or_entity_reference"
+    )
     assert len(property_refs) == 1
 
 
@@ -253,7 +259,7 @@ def test_action_declaration_with_parameters_and_body():
     universe = _get_first_universe(tree, "PhysicalUniverse")
 
     # Verify action declaration
-    action_decls = list(universe.find_data("action_declaration"))
+    action_decls = _get_direct_tree_children(universe, "action_declaration")
     assert len(action_decls) == 1
     action_decl = action_decls[0]
 
@@ -262,10 +268,10 @@ def test_action_declaration_with_parameters_and_body():
     assert action_idents[:2] == ["T", "Act"]
 
     # Get parameters in order from action_parameters
-    action_params_trees = list(action_decl.find_data("action_parameters"))
+    action_params_trees = _get_direct_tree_children(action_decl, "action_parameters")
     assert len(action_params_trees) == 1
     action_params_tree = action_params_trees[0]
-    param_nodes = _get_direct_tree_children_by_data(action_params_tree, "action_param")
+    param_nodes = _get_direct_tree_children(action_params_tree, "action_param")
     assert len(param_nodes) == 2
 
     # Verify first parameter: Arg named first
@@ -281,12 +287,10 @@ def test_action_declaration_with_parameters_and_body():
     _assert_token_has_type_and_value(second_param_children[1], "IDENTIFIER", "second")
 
     # Get action executions in order from action_body
-    action_bodies = list(action_decl.find_data("action_body"))
+    action_bodies = _get_direct_tree_children(action_decl, "action_body")
     assert len(action_bodies) == 1
     action_body = action_bodies[0]
-    action_executions = _get_direct_tree_children_by_data(
-        action_body, "action_execution"
-    )
+    action_executions = _get_direct_tree_children(action_body, "action_execution")
     assert len(action_executions) == 1
 
     # Verify action execution: T makes Owner's target Do Owner's arg1, Owner's arg2
@@ -326,7 +330,7 @@ def test_action_execution_with_mixed_arguments():
     universe = _get_first_universe(tree, "PhysicalUniverse")
 
     # Verify action execution
-    action_execs = list(universe.find_data("action_execution"))
+    action_execs = _get_direct_tree_children(universe, "action_execution")
     assert len(action_execs) == 1
     action_exec = action_execs[0]
     identifiers = _get_identifiers_from_tree(action_exec)
@@ -340,7 +344,7 @@ def test_action_execution_with_mixed_arguments():
     ]
 
     # Verify argument_list exists
-    argument_lists = list(action_exec.find_data("argument_list"))
+    argument_lists = _get_direct_tree_children(action_exec, "argument_list")
     assert len(argument_lists) == 1
     argument_list = argument_lists[0]
 
@@ -367,7 +371,7 @@ def test_action_execution_with_single_entity_reference():
     universe = _get_first_universe(tree, "PhysicalUniverse")
 
     # Verify action execution
-    action_execs = list(universe.find_data("action_execution"))
+    action_execs = _get_direct_tree_children(universe, "action_execution")
     assert len(action_execs) == 1
     action_exec = action_execs[0]
     identifiers = _get_identifiers_from_tree(action_exec)
@@ -381,7 +385,7 @@ def test_action_execution_with_single_entity_reference():
     ]
 
     # Verify argument_list exists
-    argument_lists = list(action_exec.find_data("argument_list"))
+    argument_lists = _get_direct_tree_children(action_exec, "argument_list")
     assert len(argument_lists) == 1
     argument_list = argument_lists[0]
 
@@ -406,7 +410,7 @@ def test_action_execution_with_single_string_literal():
     universe = _get_first_universe(tree, "PhysicalUniverse")
 
     # Verify action execution
-    action_execs = list(universe.find_data("action_execution"))
+    action_execs = _get_direct_tree_children(universe, "action_execution")
     assert len(action_execs) == 1
     action_exec = action_execs[0]
     identifiers = _get_identifiers_from_tree(action_exec)
@@ -418,7 +422,7 @@ def test_action_execution_with_single_string_literal():
     ]
 
     # Verify argument_list exists
-    argument_lists = list(action_exec.find_data("argument_list"))
+    argument_lists = _get_direct_tree_children(action_exec, "argument_list")
     assert len(argument_lists) == 1
     argument_list = argument_lists[0]
 
@@ -441,7 +445,7 @@ def test_comment_allowed():
     universe = _get_first_universe(tree, "AbstractUniverse")
 
     # Verify type declaration still parses correctly (comments are ignored)
-    type_decls = list(universe.find_data("type_declaration"))
+    type_decls = _get_direct_tree_children(universe, "type_declaration")
     assert len(type_decls) == 1
     type_decl = type_decls[0]
     identifiers = _get_identifiers_from_tree(type_decl)
@@ -460,7 +464,7 @@ def test_comment_before_first_universe():
     universe = _get_first_universe(tree, "AbstractUniverse")
 
     # Verify type declaration still parses correctly (comments are ignored)
-    type_decls = list(universe.find_data("type_declaration"))
+    type_decls = _get_direct_tree_children(universe, "type_declaration")
     assert len(type_decls) == 1
     type_decl = type_decls[0]
     identifiers = _get_identifiers_from_tree(type_decl)
@@ -485,7 +489,7 @@ def test_universe_in_comment():
     assert universe_name_tokens[0].value == "AbstractUniverse"
 
     # Verify type declaration still parses correctly
-    type_decls = list(universe.find_data("type_declaration"))
+    type_decls = _get_direct_tree_children(universe, "type_declaration")
     assert len(type_decls) == 1
     type_decl = type_decls[0]
     identifiers = _get_identifiers_from_tree(type_decl)
@@ -515,7 +519,7 @@ def test_universe_in_string_literal():
     assert universe_name_tokens[0].value == "AbstractUniverse"
 
     # Verify entity creation still parses correctly
-    entity_creations = list(universe.find_data("entity_creation"))
+    entity_creations = _get_direct_tree_children(universe, "entity_creation")
     assert len(entity_creations) == 1
     entity_creation = entity_creations[0]
     identifiers = _get_identifiers_from_tree(entity_creation)
@@ -539,7 +543,7 @@ def test_string_literal_with_escaped_quote():
     assert string_tokens[0].value == '"hello \\"world\\""'
 
     # Verify entity creation parses correctly
-    entity_creations = list(universe.find_data("entity_creation"))
+    entity_creations = _get_direct_tree_children(universe, "entity_creation")
     assert len(entity_creations) == 1
 
 
@@ -560,7 +564,7 @@ def test_string_literal_with_escaped_backslash():
     assert string_tokens[0].value == '"hello \\\\ world"'
 
     # Verify entity creation parses correctly
-    entity_creations = list(universe.find_data("entity_creation"))
+    entity_creations = _get_direct_tree_children(universe, "entity_creation")
     assert len(entity_creations) == 1
 
 
@@ -579,7 +583,7 @@ def test_string_literal_empty():
     assert len(string_tokens) == 1
     assert string_tokens[0].value == '""'
 
-    entity_creations = list(universe.find_data("entity_creation"))
+    entity_creations = _get_direct_tree_children(universe, "entity_creation")
     assert len(entity_creations) == 1
 
 
@@ -598,7 +602,7 @@ def test_string_literal_with_only_escaped_characters():
     assert len(string_tokens) == 1
     assert string_tokens[0].value == '"\\\\\\""'
 
-    entity_creations = list(universe.find_data("entity_creation"))
+    entity_creations = _get_direct_tree_children(universe, "entity_creation")
     assert len(entity_creations) == 1
 
 
@@ -617,7 +621,7 @@ def test_blank_line_between_statements():
     universe = _get_first_universe(tree, "AbstractUniverse")
 
     # Verify both type declarations are present
-    type_decls = list(universe.find_data("type_declaration"))
+    type_decls = _get_direct_tree_children(universe, "type_declaration")
     assert len(type_decls) == 2
     first_decl = type_decls[0]
     second_decl = type_decls[1]
@@ -639,7 +643,7 @@ def test_multiple_blank_lines():
     universe = _get_first_universe(tree, "AbstractUniverse")
 
     # Verify both type declarations are present (blank lines are ignored)
-    type_decls = list(universe.find_data("type_declaration"))
+    type_decls = _get_direct_tree_children(universe, "type_declaration")
     assert len(type_decls) == 2
     first_decl = type_decls[0]
     second_decl = type_decls[1]
@@ -659,7 +663,7 @@ def test_blank_line_before_first_universe():
     universe = _get_first_universe(tree, "AbstractUniverse")
 
     # Verify type declaration still parses correctly
-    type_decls = list(universe.find_data("type_declaration"))
+    type_decls = _get_direct_tree_children(universe, "type_declaration")
     assert len(type_decls) == 1
     type_decl = type_decls[0]
     identifiers = _get_identifiers_from_tree(type_decl)
@@ -681,8 +685,8 @@ def test_blank_line_between_universes():
     physical_universe = _get_universe_by_name(tree, "PhysicalUniverse")
 
     # Verify both universes parse correctly
-    abstract_decls = list(abstract_universe.find_data("type_declaration"))
-    physical_decls = list(physical_universe.find_data("type_declaration"))
+    abstract_decls = _get_direct_tree_children(abstract_universe, "type_declaration")
+    physical_decls = _get_direct_tree_children(physical_universe, "type_declaration")
     assert len(abstract_decls) == 1
     assert len(physical_decls) == 1
     assert _get_identifiers_from_tree(abstract_decls[0]) == ["Foo", "Bar"]
@@ -703,18 +707,16 @@ def test_blank_lines_in_action_body():
     universe = _get_first_universe(tree, "PhysicalUniverse")
 
     # Verify action declaration is present
-    action_decls = list(universe.find_data("action_declaration"))
+    action_decls = _get_direct_tree_children(universe, "action_declaration")
     assert len(action_decls) == 1
 
     # Verify both action executions are present and in correct order
-    action_bodies = list(action_decls[0].find_data("action_body"))
+    action_bodies = _get_direct_tree_children(action_decls[0], "action_body")
     assert len(action_bodies) == 1
     action_body = action_bodies[0]
 
     # Get action executions from body, filtering out blank_line trees
-    action_executions = _get_direct_tree_children_by_data(
-        action_body, "action_execution"
-    )
+    action_executions = _get_direct_tree_children(action_body, "action_execution")
     assert len(action_executions) == 2
 
     # Verify they match the found executions
