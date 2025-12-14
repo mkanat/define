@@ -33,6 +33,17 @@ def _get_tokens_by_type_from_tree(tree: lark.Tree, token_type: str) -> list[lark
     return tokens
 
 
+def _get_direct_children_without_spaces(
+    tree: lark.Tree,
+) -> list[lark.Tree | lark.Token]:
+    """Get direct children of a tree, filtering out SPACE tokens."""
+    return [
+        child
+        for child in tree.children
+        if not (isinstance(child, lark.Token) and child.type == "SPACE")
+    ]
+
+
 def _parse(source: str) -> lark.Tree:
     """Parse source and verify root structure."""
     parser = Parser()
@@ -270,12 +281,7 @@ def test_action_execution_with_mixed_arguments():
     assert len(argument_lists) == 1
     argument_list = argument_lists[0]
 
-    # Filter out SPACE tokens to get only the value references
-    value_refs = [
-        child
-        for child in argument_list.children
-        if not (isinstance(child, lark.Token) and child.type == "SPACE")
-    ]
+    value_refs = _get_direct_children_without_spaces(argument_list)
     assert len(value_refs) == 3
 
     assert isinstance(value_refs[0], lark.Tree)
@@ -321,12 +327,7 @@ def test_action_execution_with_single_entity_reference():
     assert len(argument_lists) == 1
     argument_list = argument_lists[0]
 
-    # Filter out SPACE tokens to get only the value references
-    value_refs = [
-        child
-        for child in argument_list.children
-        if not (isinstance(child, lark.Token) and child.type == "SPACE")
-    ]
+    value_refs = _get_direct_children_without_spaces(argument_list)
     assert len(value_refs) == 1
 
     # Verify the single argument is an entity reference
@@ -363,12 +364,7 @@ def test_action_execution_with_single_string_literal():
     assert len(argument_lists) == 1
     argument_list = argument_lists[0]
 
-    # Filter out SPACE tokens to get only the value references
-    value_refs = [
-        child
-        for child in argument_list.children
-        if not (isinstance(child, lark.Token) and child.type == "SPACE")
-    ]
+    value_refs = _get_direct_children_without_spaces(argument_list)
     assert len(value_refs) == 1
 
     # Verify the single argument is a string literal
