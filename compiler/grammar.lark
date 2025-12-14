@@ -40,8 +40,8 @@ type_declaration: IDENTIFIER SPACE "is a" SPACE IDENTIFIER "." _NEWLINE
 // Property declaration for types.
 property_declaration: IDENTIFIER SPACE "has a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER "." _NEWLINE
 
-// Entity creation with a nested property block.
-entity_creation: IDENTIFIER SPACE "creates a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER ":" _NEWLINE INDENT property_assignment+ DEDENT
+// Entity creation with optional nested property block.
+entity_creation: IDENTIFIER SPACE "creates a" SPACE IDENTIFIER SPACE "named" SPACE IDENTIFIER (":" _NEWLINE INDENT property_assignment+ DEDENT | "." _NEWLINE)
 
 property_assignment: IDENTIFIER ":" SPACE value_reference _NEWLINE
 

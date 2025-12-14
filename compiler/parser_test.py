@@ -153,6 +153,29 @@ def test_entity_creation_with_properties():
     assert [t.value for t in number_tokens] == ["3"]
 
 
+def test_entity_creation_without_properties():
+    """Test entity creation without properties."""
+    source = _strip(
+        """
+        AbstractUniverse:
+            Creator creates a Thing named instance.
+        """
+    )
+    tree = _parse(source)
+    universe = _get_first_universe(tree, "AbstractUniverse")
+
+    # Verify entity creation
+    entity_creations = list(universe.find_data("entity_creation"))
+    assert len(entity_creations) == 1
+    entity_creation = entity_creations[0]
+    identifiers = _get_identifiers_from_tree(entity_creation)
+    assert identifiers == ["Creator", "Thing", "instance"]
+
+    # Verify no property assignments
+    property_assignments = list(entity_creation.find_data("property_assignment"))
+    assert len(property_assignments) == 0
+
+
 def test_knowledge_statement():
     """Test knowledge statement: 'Foo knows Bar's baz.'."""
     source = _strip(

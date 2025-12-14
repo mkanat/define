@@ -144,15 +144,22 @@ Creator creates a TypeName named Name:
     ...
 ```
 
+Or, to create an entity without setting any properties:
+
+```
+Creator creates a TypeName named Name.
+```
+
 Where:
 - `Creator` is a type that is a `ViewPoint` or a subclass of `ViewPoint`.
 - `TypeName` is the type of entity being created.
 - `Name` is the identifier for the created entity.
-- After the colon (`:`), indented property assignments (by exactly four spaces) define the created entity's properties. See "Setting Properties" for information on the syntax and semantics of property assignments.
+- When using the colon (`:`) form, indented property assignments (by exactly four spaces) define the created entity's properties. See "Setting Properties" for information on the syntax and semantics of property assignments.
+- When using the period (`.`) form, no properties are set on the created entity.
 
 This is called an "entity declaration."
 
-### Example
+### Examples
 
 ```
 Source creates a String named helloWorld:
@@ -160,6 +167,12 @@ Source creates a String named helloWorld:
 ```
 
 This statement creates a new `String` entity named `helloWorld` with a `content` property set to `"Hello, world!"`.
+
+```
+Creator creates a Thing named isinstance.
+```
+
+This statement creates a new `Thing` entity named `isinstance` without setting any properties.
 
 ### ViewPoint Creation
 
