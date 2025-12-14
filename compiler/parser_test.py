@@ -67,8 +67,7 @@ def _get_first_universe(tree: lark.Tree, expected_name: str) -> lark.Tree:
 
 def _get_universe_by_name(tree: lark.Tree, expected_name: str) -> lark.Tree:
     """Get a universe section by name."""
-    universe_sections = list(tree.find_data("universe_section"))
-    for universe in universe_sections:
+    for universe in tree.find_data("universe_section"):
         universe_name_tokens = _get_tokens_by_type_from_tree(universe, "UNIVERSE_NAME")
         if universe_name_tokens and universe_name_tokens[0].value == expected_name:
             return universe
