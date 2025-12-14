@@ -27,3 +27,7 @@ We are working together to make a programming language based on epistemology. Se
 
 - Avoid docstrings on test methods.
 - Avoid putting "Returns" clauses in docstrings on simple accessors where the return value is obvious from the function signature.
+
+## Tests
+
+- Avoid adding debug messages to assert calls.
