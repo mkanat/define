@@ -6,6 +6,9 @@ from lark.exceptions import UnexpectedCharacters, UnexpectedToken
 
 from compiler.parser import Parser
 
+# Shared parser instance to avoid rebuilding the Lark parser for each test
+_parser = Parser()
+
 
 def _strip(text: str) -> str:
     return textwrap.dedent(text).lstrip("\n")
@@ -64,8 +67,7 @@ def _get_direct_tree_children(tree: lark.Tree, data: str) -> list[lark.Tree]:
 
 def _parse(source: str) -> lark.Tree:
     """Parse source and verify root structure."""
-    parser = Parser()
-    tree = parser.parse(source)
+    tree = _parser.parse(source)
     assert isinstance(tree, lark.Tree)
     assert tree.data == "start"
     return tree
@@ -942,9 +944,8 @@ def test_blank_lines_in_action_body():
     ],
 )
 def test_unexpected_token(source: str, token_type: str, token_value: str):
-    parser = Parser()
     with pytest.raises(UnexpectedToken) as exc_info:
-        parser.parse(source)
+        _parser.parse(source)
 
     exception = exc_info.value
     assert exception.token.type == token_type, str(exception)
@@ -967,9 +968,8 @@ def test_unexpected_token(source: str, token_type: str, token_value: str):
     ],
 )
 def test_unexpected_characters(source: str, char: str):
-    parser = Parser()
     with pytest.raises(UnexpectedCharacters) as exc_info:
-        parser.parse(source)
+        _parser.parse(source)
 
     exception = exc_info.value
     assert exception.char == char, str(exception)

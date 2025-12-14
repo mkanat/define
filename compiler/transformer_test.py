@@ -4,6 +4,9 @@ from compiler import ast
 from compiler.parser import Parser
 from compiler.transformer import DefineTransformer
 
+# Shared parser instance to avoid rebuilding the Lark parser for each test
+_parser = Parser()
+
 
 def _strip(text: str) -> str:
     return textwrap.dedent(text).lstrip("\n")
@@ -11,8 +14,7 @@ def _strip(text: str) -> str:
 
 def _parse_and_transform(source: str) -> ast.Program:
     """Parse source and transform to AST."""
-    parser = Parser()
-    tree = parser.parse(source)
+    tree = _parser.parse(source)
     transformer = DefineTransformer()
     return transformer.transform(tree)
 
