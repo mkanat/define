@@ -203,6 +203,6 @@ class ActionExecution(ASTNode):
     """Represents an action execution (e.g., Machine makes terminal Output helloWorld.)."""
 
     actor: str
-    target: ValueReference
+    target: PropertyOrEntityReference
     action_name: str
     arguments: list[ValueReference]

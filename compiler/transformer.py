@@ -9,7 +9,11 @@ from compiler import ast
 
 
 class DefineTransformer(lark.Transformer):
-    """Transforms Lark parse tree into AST nodes."""
+    """Transforms the Parse tree from DefineParser into AST nodes.
+
+    Note that this expects a valid parse tree from DefineParser. Giving it
+    an invalid parse tree will result in undefined behavior.
+    """
 
     def start(self, items: list[Any]) -> ast.Program:
         """Transform the root start rule."""
@@ -90,7 +94,7 @@ class DefineTransformer(lark.Transformer):
 
     def action_param(self, items: list[Any]) -> ast.ActionParameter:
         """Transform an action parameter."""
-        # Items: [IDENTIFIER, IDENTIFIER] (after "a", SPACE, "named", SPACE are discarded/not included)
+        # Items: [IDENTIFIER, IDENTIFIER]
         return ast.ActionParameter(param_type=items[0], param_name=items[1])
 
     def action_body(self, items: list[Any]) -> list[ast.ActionExecution]:
@@ -99,28 +103,16 @@ class DefineTransformer(lark.Transformer):
 
     def action_execution(self, items: list[Any]) -> ast.ActionExecution:
         """Transform an action execution."""
-        # Items: [IDENTIFIER, ValueReference, IDENTIFIER, list[ValueReference]] (after SPACE, "makes", SPACE, ".", _NEWLINE are discarded/not included)
+        # Items: [IDENTIFIER, PropertyOrEntityReference, IDENTIFIER] or
+        #        [IDENTIFIER, PropertyOrEntityReference, IDENTIFIER, list[ValueReference]]
         actor = items[0]
-        target = (
-            items[1]
-            if len(items) > 1 and isinstance(items[1], ast.ValueReference)
-            else None
+        target = items[1]
+        action_name = items[2]
+        arguments = items[3] if len(items) == 4 else []
+
+        return ast.ActionExecution(
+            actor=actor, target=target, action_name=action_name, arguments=arguments
         )
-        action_name = items[2] if len(items) > 2 else None
-        arguments = []
-
-        # Collect arguments from items[3] if present (argument_list is transformed to list[ValueReference])
-        if len(items) > 3:
-            if isinstance(items[3], list):
-                arguments = items[3]
-            elif isinstance(items[3], ast.ValueReference):
-                # Single argument
-                arguments = [items[3]]
-
-        if actor is None or target is None or action_name is None:
-            raise ValueError("Invalid action execution structure")
-
-        return ast.ActionExecution(actor, target, action_name, arguments)
 
     def argument_list(self, items: list[Any]) -> list[ast.ValueReference]:
         """Transform an argument list."""
