@@ -1,7 +1,5 @@
 import textwrap
 
-import pytest
-
 from compiler import ast
 from compiler.parser import Parser
 from compiler.transformer import DefineTransformer
