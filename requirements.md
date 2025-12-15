@@ -21,3 +21,9 @@ Code in the physical universe part of a program must be about something concrete
 Code in the abstract universe must be abstract and have nothing to do with the physical universe.
 
 Of course, the two universes provide data to each other. The restriction here is about what code can execute in each universe.
+
+## Knowledge Does Not Have Side Effects
+
+Knowing a symbol must never cause code to execute. There are no "static initializers" in define. Simply loading a file of define code does not run the code (other than what the compiler and runtime need to do behind the scenes to make the symbols available or do any optimizations).
+
+The only way action occurs is by a user triggering an action by requesting that it run, and then the programmer triggering other actions inside of that action.

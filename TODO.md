@@ -7,6 +7,8 @@ Eventually we will have a bug tracker, but while I am iterating on the language 
 * Events system
 # Need some sort of registry and system to prevent naming conflicts.
 * Versioning?
+* Dependent properties.
+* Detect dead "exposes" statements.
 
 ## Invariants and Checks
 
