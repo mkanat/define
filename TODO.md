@@ -6,6 +6,7 @@ Eventually we will have a bug tracker, but while I am iterating on the language 
 * Need some form of namespacing. Maybe that's what a ViewPoint is.
 * Events system
 # Need some sort of registry and system to prevent naming conflicts.
+* Versioning?
 
 ## Invariants and Checks
 

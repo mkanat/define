@@ -1,140 +1,129 @@
-# TODO: Should we instead enforce directory structure names for abstract and physical?
-# The problem is that it would make it harder to ever in the future provide some attribute
-# about a universe.
-universe abstract {
-    # These are language constructs (instead of just files on the disk) because we may
-    # want to add attributes to a viewpoint.
+viewpoint abstract:
+
+defines Adder {
+    it is a Machine. # A Machine is a Form that can define actions.
+    # This allows you to say "Foo is a Adder". Unless this is specified, the
+    # default is that a DimensionPoint cannot be extended.
+    it may be extended.
+    # This allows the Program entity in the physical universe to see this DimensionPoint.
+    # This is the one aspect of the syntax that creates circular dependencies and thus does
+    # not require declaration before use. However, if the compiler already knows this symbol
+    # ("Computer") then it can verify that this is valid now, and otherwise, it will verify
+    # the symbol's validity when it encounters the symbol (or spit out an error after validation)
+    # is fully complete.
     #
-    # However, we could possibly make this the top level.
-    viewpoint Source {
-        defines Adder {
-            it is a Machine. # A Machine is a Form that can define actions.
-            # This allows you to say "Foo is a Adder". Unless this is specified, the
-            # default is that a DimensionPoint cannot be extended.
-            it may be extended.
-            # This allows the Computer viewpoint in the physical universe to see this DimensionPoint.
-            # This is the one aspect of the syntax that creates circular dependencies and thus does
-            # not require declaration before use. However, if the compiler already knows this symbol
-            # ("Computer") then it can verify that this is valid now, and otherwise, it will verify
-            # the symbol's validity when it encounters the symbol (or spit out an error after validation)
-            # is fully complete.
-            #
-            # The default is for a DimensionPoint to be exposed to only itself.
-            it is exposed to physical Computer.
+    # The default is for a DimensionPoint to be exposed to only itself.
+    it is exposed to physical Program.
 
-            # This defines a property.
-            #
-            # Note that for certain types, we assume all programs have access to them, such as
-            # Number, String, Boolean, Integer, etc.
-            it has a Number named argumentOne {
-                that is exposed for creation.
-                that must be set on creation. # TODO: Make this the default if not specified?
-                that must not be changed after creation. # TODO: Make this be the default.
-            }
-            it has a Number named argumentTwo {
-                that is exposed for creation.
-                that must be set on creation.
-                that must not be changed after creation.
-            }
-            it can Add {
-                returning a Number named result.
-                by doing {
-                    return result: argumentOne + argumentTwo.
-                }
-            }
+    # This defines a property.
+    #
+    # Note that for certain types, we assume all programs have access to them, such as
+    # Number, String, Boolean, Integer, etc.
+    it has a Number named argumentOne {
+        that is exposed for creation.
+        that must be set on creation. # TODO: Make this the default if not specified?
+        that must not be changed after creation. # TODO: Make this be the default.
+    }
+    it has a Number named argumentTwo {
+        that is exposed for creation.
+        that must be set on creation.
+        that must not be changed after creation.
+    }
+    it can Add {
+        returning a Number named result.
+        by doing {
+            return result: argumentOne + argumentTwo.
         }
-
-        defines TwoStrings {
-            # A Form is simply a collection of properties. The logical concept here
-            # is that it is simply a collection of defined DimensionPoints.
-            it is a Form.
-            # "its viewpoint's" here is built-in syntax that indicates you're referencing
-            # something else in this viewpoint. It must always be used instead of referring
-            # to the viewpoint by name, just in the spirit of "there is only one way."
-            it is exposed to its viewpoint's StringCombiner.
-            # This limits it to being exposed just to one entity.
-            it is exposed to physical Computer's Program.
-            it has a String named stringOne {
-                that is exposed for creation.
-                that must be set on creation.
-                that must not be changed after creation.
-            }
-            it has a String named stringTwo {
-                that is exposed for creation.
-                that defaults to "".
-                that must not be changed after creation.
-            }
-        }
-
-        defines StringCombiner {
-            it is a Machine.
-            it is exposed to physical.
-            it is exposed to abstract.
-
-            it has a TwoStrings named myStrings {
-                that is exposed for creation.
-                that must be set on creation.
-                that must not be changed after creation.
-            }
-
-            it has a String named combination {
-                that is not exposed for creation.
-                # A "this is set" clause indicates this is the only way to set this.
-                that is set {
-                    by doing {
-                        # TODO: This is probably not the string append syntax we want, because it's ambiguous.
-                        return container.stringOne + container.stringTwo.
-                    }
-                }
-                that is cached.
-            }
-        }
-
-        # TODO: Invariant syntax.
-        # TODO: Dependent properties.
-        # TODO: Event definition syntax.
-        # TODO: "on event" syntax.
     }
 }
 
-universe physical {
-    viewpoint Computer {
-        defines Program {
-            # We are assuming TerminalProgram has a Terminal, instance "terminal", that has two actions:
-            #     OutputNumber: takes a single Number named num and outputs it to the terminal.
-            #     OutputString: takes a single String named str and outputs it to the terminal.
-            it is a TerminalProgram.
-            # TODO: Run is probably abstract in TerminalProgram, or has a very basic implementation.
-            # Need some syntax to indicate we are modifying something in the superclass instead of
-            # defining a new action.
-            it can Run {
-                by doing {
-                    # We don't have to say who does action executions, because it's
-                    # the _programmer_ who provides the instruction for them to happen.
-                    #
-                    # There are only two beings involved in a program: the programmer and the user.
-                    create a abstract Source's Adder named myAdder {
-                        with argumentOne = 2.
-                        with argumentTwo = 5.
-                    }
-                    make myAdder Add {
-                        returning result named sum.
-                    }
-                    make my terminal OutputNumber {
-                        with: num: sum.
-                    }
+defines TwoStrings {
+    # A Form is simply a collection of properties. The logical concept here
+    # is that it is simply a collection of defined DimensionPoints.
+    it is a Form.
+    # "its viewpoint's" here is built-in syntax that indicates you're referencing
+    # something else in this viewpoint. It must always be used instead of referring
+    # to the viewpoint by name, just in the spirit of "there is only one way."
+    it is exposed to its viewpoint's StringCombiner.
+    # This limits it to being exposed just to one entity.
+    it is exposed to physical Computer's Program.
+    it has a String named stringOne {
+        that is exposed for creation.
+        that must be set on creation.
+        that must not be changed after creation.
+    }
+    it has a String named stringTwo {
+        that is exposed for creation.
+        that defaults to "".
+        that must not be changed after creation.
+    }
+}
 
-                    create a abstract Source's TwoStrings named strings {
-                        with stringOne: "first".
-                        with stringTwo: "second".
-                    }
-                    create a abstract Source's StringCombiner named combiner {
-                        with myStrings: strings.
-                    }
-                    make my terminal OutputString {
-                        str: combiner's combination
-                    }
-                }
+defines StringCombiner {
+    it is a Machine.
+    it is exposed to physical.
+    it is exposed to abstract.
+
+    it has a TwoStrings named myStrings {
+        that is exposed for creation.
+        that must be set on creation.
+        that must not be changed after creation.
+    }
+
+    it has a String named combination {
+        that is not exposed for creation.
+        # A "this is set" clause indicates this is the only way to set this.
+        that is set {
+            by doing {
+                # TODO: This is probably not the string append syntax we want, because it's ambiguous.
+                return container.stringOne + container.stringTwo.
+            }
+        }
+        that is cached.
+    }
+}
+
+# TODO: Invariant syntax.
+# TODO: Dependent properties.
+# TODO: Event definition syntax.
+# TODO: "on event" syntax.
+
+viewpoint physical:
+
+defines Program {
+    # We are assuming TerminalProgram has a Terminal, instance "terminal", that has two actions:
+    #     OutputNumber: takes a single Number named num and outputs it to the terminal.
+    #     OutputString: takes a single String named str and outputs it to the terminal.
+    it is a TerminalProgram.
+    # TODO: Run is probably abstract in TerminalProgram, or has a very basic implementation.
+    # Need some syntax to indicate we are modifying something in the superclass instead of
+    # defining a new action.
+    it can Run {
+        by doing {
+            # We don't have to say who does action executions, because it's
+            # the _programmer_ who provides the instruction for them to happen.
+            #
+            # There are only two beings involved in a program: the programmer and the user.
+            create a abstract Source's Adder named myAdder {
+                with argumentOne = 2.
+                with argumentTwo = 5.
+            }
+            make myAdder Add {
+                returning result named sum.
+            }
+            make my terminal OutputNumber {
+                with num: sum.
+            }
+
+            create a abstract Source's TwoStrings named strings {
+                with stringOne: "first".
+                with stringTwo: "second".
+            }
+            create a abstract Source's StringCombiner named combiner {
+                with myStrings: strings.
+            }
+            make my terminal OutputString {
+                str: combiner's combination
             }
         }
     }
