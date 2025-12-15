@@ -1,0 +1,20 @@
+{
+  "scopeName": "source.define",
+  "patterns": [
+    {
+      "comment": "Comments starting with #",
+      "name": "comment.line.number-sign",
+      "match": "#.*$"
+    },
+    {
+      "comment": "Keywords",
+      "name": "keyword.control.define",
+      "match": "\\b(universe|viewpoint|defines|it|is a|can|by doing|with|knows|has a|is exposed to|return|that)\\b"
+    },
+    {
+      "comment": "Curly Braces",
+      "name": "punctuation.section.block",
+      "match": "\\{|\\}"
+    }
+  ]
+}

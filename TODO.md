@@ -5,6 +5,7 @@ Eventually we will have a bug tracker, but while I am iterating on the language 
 * Create an auto-formatter.
 * Need some form of namespacing. Maybe that's what a ViewPoint is.
 * Events system
+# Need some sort of registry and system to prevent naming conflicts.
 
 ## Invariants and Checks
 
