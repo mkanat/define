@@ -19,3 +19,11 @@ Total standardization enables a lot of very powerful abilities with a programmin
 There are a lot of great lessons we can and should take from previous programming languages. We should not throw away decades of lessons we have learned in programming language design. However, one of the goals of define is to create an ideal programming language regardless of how any other programming language has worked in the past. So, although we can be _informed_ by past programming languages, saying "this is how other programming languages have worked" or "this is what programmers will be familiar with from other programming languages" is not a sufficient justification _by itself_ for any language design decision.
 
 We realize that this might make define less popular, because it's different from how other languages work. It's already so different from how other languages work that I don't think that's we're adding significantly more barriers by making different decisions than past languages have made.
+
+## Verbosity Is Okay
+
+Typing is not the hard part of programming. Define is intentionally very verbose as a language, for a few reasons:
+
+* It helps us guarantee forward compatibility. It is unlikely the string "has a Number named start" will conflict with future syntax we want to create, compared to the syntax "Number start." (That syntax would greatly limit our future choices for how we modify the language.)
+* It makes intent clearer to readers.
+* It makes the language naturally interpretable by an AI coding assistant.
