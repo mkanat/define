@@ -180,3 +180,21 @@ negative_number has the quality NegativeInteger
 `negative_number` is a name of the dimension point we created, `has the quality` is syntax, and `NegativeInteger` is the name of the quality we defined above.
 
 This _syntax_ is how we would indicate we are assigning a quality to a dimension point.
+
+## What About View Points?
+
+There are only two _real_ view points involved in a computer programm: the programmer(s) and the user(s). All dimension points inside of the program are "created" by the programmer. The user creates input in the physical universe, and sees output in the physical universe, but the program only knows about that because it gets a symbolic _representation_ of the input and sends symbols out that _represent_ the output.
+
+If we want to get more specific, the program doesn't actually know that its inputs are coming from a user, or that its outputs are going to a user. It only knows that they are going to and from the physical universe.
+
+So essentially we can consider that a program interacts with two universes: its own universe (the one defined by the programmer(s)), and the physical universe.
+
+### Interfaces Between the Program and the Physical Universe
+
+The universe of the program has a certain limit to its complexity---it is defined by the programmer, and it has certain rules based on the qualities that have been assigned to dimension points. The physical universe also has rules, but has nearly infinite potential complexity. Thus, it is important for programs to clearly define and limit how they interact with the physical universe, to limit how the physical universe's complexity can affect the program.
+
+How to design this interaction between the physical universe and the program is often thought about only minimally by programmers. Programmers often spend quite a bit of time making sure that the program's own universe behaves correctly (that is, that it's internally consistent) but don't ensure that it continues to behave correctly when the physical universe intervenes in unexpected ways. However, unexpected behavior on the part of the physical universe is a very common source of error in real software systems.
+
+You as a programmer could, theoretically, know every possible behavior of a program that you wrote. It is unlikely that you could know every possible behavior of the physical universe.
+
+It is worthwhile for a programming language to make it very clear when this boundary is being crossed, provide ways to strictly limit how that interaction works, and provide mechanisms for programmers to help ensure their program behaves correctly in unexpected scenarios. The best solution is to constrain the program's interface with the physical universe so much that you can essentially guarantee the program's correct behavior.
