@@ -1,4 +1,4 @@
-# Language Specification
+# The Define Language Specification
 
 ## Introduction
 
