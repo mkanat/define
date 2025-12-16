@@ -10,7 +10,9 @@ A computer is a _universe simulator_.
 
 A program is a universe that exists and is operating on that simulator.
 
-A programming language exists to define the universe.
+The code of the program describes that universe.
+
+A programming language exists to define universes.
 
 ## The Basic Components of a Universe
 
