@@ -42,8 +42,6 @@ I mentioned above that a view point can consider a dimension point to have certa
 
 Some of the things around you might also be machines: objects that _do_ something when interacted with. A sink is a machine: I turn the faucet and water comes out. I didn't go manually pull the water from its source and make it come here. I just took one small action and some other action occurred. So "this performs some action when interacted with" is also a quality that a dimension point can have.
 
-_Side note_: If you want to get very technical, what's really happening is you're saying, "this dimension point's qualities will change in this way when I consider they should" and then the trigger can be anything you want: "when I think so," or "when I shoot this other dimension point at it," or "when these other dimension points change in this way." Then you make _that_ (the idea that the dimension point reacts a certain way) a permament quality of the dimension point. Voilà, you have a machine! But that might feel a little too abstract, here.
-
 ### Qualities in Programming
 
 This is almost the entire basis of a computer program. A computer program is mostly a description of qualities that dimension points have, including a description of how they behave when certain other things happen.
@@ -169,7 +167,7 @@ create negative_number
 
 In our imaginary syntax, this would simply create a dimension point with no quality other than having a name.
 
-## Assigning Qualities to Dimension Points
+### Assigning Qualities to Dimension Points
 
 Yet another made-up language:
 
@@ -180,6 +178,174 @@ negative_number has the quality NegativeInteger
 `negative_number` is a name of the dimension point we created, `has the quality` is syntax, and `NegativeInteger` is the name of the quality we defined above.
 
 This _syntax_ is how we would indicate we are assigning a quality to a dimension point.
+
+## Forms
+
+A form is:
+
+**A set of dimension points with a defined relationship to each other in space.**
+
+In the physical universe, the simplest form is two dimension points that always stay the same distance apart from each other. For example, here's two points that are exactly eight spaces away from each other in this text:
+
+```
+.        .
+```
+
+Conceptually, what really happens there is we tell the point on the left "you are eight spaces away from the point on the right," or we tell the point on the right "you are eight spaces away from the point on the left," or we tell that to both of them.
+
+If you made it four points with defined relationships between them, you could have a rectangle:
+
+```
+.        .
+
+.        .
+```
+
+We tend to then just think of this as "a rectangle," but in reality "a rectangle" doesn't exist, and only the four dimension points exist. Each of the four dimension points has a quality that causes it to stay in position relative to the other four dimension points.
+
+### Forms in Programming Languages
+
+Remember, the way that we make space in programming languages is by names. A "form" in a programming language is a set of dimension points whose _names_ have a fixed relationship to each other.
+
+Let's look at how the concept of "a form" is defined in traditional programming languages.
+
+For example, let's imagine we wanted to represent a seat in a theater, in our program. Theater seats are usually split into sections: "Orchestra" for the seats on the ground level closest to the stage, "Balcony" for the second story seats, and so forth. Within those sections, rows of seats are usually given a letter, like Row A, Row B. And then seats in a row are given a number: 1, 2, 3. All combined, those three points (section, row, seat) uniquely identify a seat.
+
+Here's the simplest version of how we would represent that concept (a theater seat) in Python:
+
+```Python
+class TheaterSeat:
+    section: str
+    row: str
+    number: int
+```
+
+Then when we want to actually create a TheaterSeat and print out where it is, the code might look like:
+
+```Python
+front_seat = TheaterSeat(section="Orchestra", row="A", number=1)
+print(front_seat.section + " Row " + front_seat.row + " Seat " + front_row.number)
+```
+
+That prints out: `Orchestra Row A Seat 1`.
+
+Conceptually, the way a Python programmer thinks about this is that they have defined a concept called TheaterSeat. Then they have created a TheaterSeat named `front_seat` with certain fields set to certain values. Finally they have requested the `section`, `row`, and `number` fields from `front_seat`.
+
+However, that example only actually _requires_ three dimension points: a section, a row, and a seat. `front_seat.section` is simply the name of one of those dimension points. In how we think about defining universes, `front_seat` _does not exist_. It is simply a name that creates a defined relationship between `section`, `row`, and `orchestra` in this program. Remember that in a program, space is created by names, so `front_seat` is actually _empty space_.
+
+### Talking About Forms
+
+There are multiple ways a programming language can express that dimension points are in a form. However, they almost always do something like "a name, followed by a separator, followed by another name." So you see `front_seat.section` or `front_seat->section` or `front_seat::section`. You could also do something like `front_seat<section>`. Since we must use symbols and names to solve this problem, when we refer to a form, it is going to have to be via a mechanism like this.
+
+### Defining Forms
+
+Let's now take into account a few things:
+
+1. We have a rule that no two things may have the same name.
+2. Syntax creates dimension points and defines qualities.
+3. Forms are purely about how dimension points are named, and referring to them requires special syntax.
+
+What this means is that how we define forms (and in fact, **anything to do with spatial relationships between dimension points**) has to be a defined part of the _language syntax_. You can think through alternatives (some way where we just say "in a form" is just like any other Quality), but they all result in some sort of logical contradiction or some impossible situation.
+
+There are various syntaxes one could imagine for indicating that dimension points are in a named form. For example:
+
+```
+front_seat {
+    section
+    row
+    number
+}
+```
+
+Or:
+
+```
+put {section, row, number} into a form named front_seat
+```
+
+Both of those simply provide a form to section, row, and number, without giving them any other qualities.
+
+## Machines
+
+Let's get into a bit more detail about what a machine really is and how we would think about it in a programming language.
+
+The technical definition of a machine is:
+
+**A dimension point that changes the qualities of itself or other dimension points in a defined way when the qualities of certain dimension points change in defined ways.**
+
+So basically, one thing changes and thus another thing changes.
+
+For example, when I press a key on my keyboard, a letter appears on my screen. The key on my keyboard developed a particular quality (it was pressed down) and so the screen changed its quality (it displayed a letter).
+
+A machine can change just itself, or it can change other things, too. For example, if I turn on a blender, it turns starts spinning its own blade (it changes itself). But when I put a carrot into a blender, the blender cuts up the carrot into very small pieces (it changes something else).
+
+### Machines in Programming Languages
+
+A program is, in some sense, one giant machine. You tell it to start (for example, you type `ls` at the command line---you typing and hitting enter are the dimension points you sent) and then it does stuff.
+
+However, within the universe of the program itself, conceptually there are many, many machines. These are the machines we care about, when we are talking about a programming language.
+
+For example, a program might have a concept of a toaster: a machine that heats bread. In Python, you might define and use toaster like:
+
+```Python
+class Toaster:
+    def toast(bread_type: str) -> result: str:
+        return "toasted " + bread_type
+
+my_toaster = Toaster()
+my_bread = "white bread"
+result = my_toaster.toast(my_bread)
+print(result)
+```
+
+That would print out `toasted white bread`.
+
+The way a Python programmer thinks about that is that they have created a Toaster named my_toaster. A toaster has the ability to toast bread. You give it some bread, and gives us some toasted bread.
+
+In the way that we think about universes, here is the sequence of events that actually occurred:
+
+1. We created a dimension point named `my_toaster`.
+2. We assigned that dimension point the quality of `Toaster`.
+3. We created a dimension point named `result`.
+4. We created a dimension point named `my_bread`.
+5. We assigned `my_bread` the quality of being the string "white bread."
+6. We moved `my_bread` in space so that it had a defined relationship to `my_toaster`. (This was the call to `my_toaster.toast(my_bread)`.)
+7. `my_toaster` has the quality that if it sees a string in that specific location in relationship to itself, it will modify a second dimension point (`result`) to have the quality of being the string string "toasted " followed by the input string.
+8. Those conditions are met so `my_toaster` modifies `result` accordingly.
+
+There are only three dimension points: `my_toaster`, `my_bread`, and `result`. The function `toast` doesn't exist---it is simply a quality that `my_toaster` has.
+
+### Triggering Machines
+
+Machines can take action based on any quality of any dimension point or set of dimension points. For example, one could imagine a syntax to trigger a machine that looks like:
+
+```
+when room.light_switch has the quality of being the string "on":
+    assign the quality TurnedOn to room.light_bulb
+
+when room.light_switch has the quality of being the string "off":
+    remove the quality TurnedOn from room.light_bulb
+```
+
+There we imagine two dimension points: `room.light_switch` and `room.light_bulb` (two dimension points in a form named `room`), and flipping the switch changes the quality of the lightbulb. That would be a trigger on a quality.
+
+However, the most common triggering mechanism is that dimension points have entered a particular space in a particular form. Because this has to do with space, it requires syntax for this particular form of trigger. For example, the syntax for triggering a machine that toasts a piece of bread might look like:
+
+```
+    create a dimension point named my_toaster.
+    assign the quality Toaster to my_toaster.
+    create a dimension point named my_bread.
+    assign the quality String to my_bread {
+        value: "white bread"
+    }
+    make my_toaster Toast my_bread
+```
+
+`make some_dimension_point ______ some_other_dimension_point` would be the special syntax there for triggering the toasting of the bread. It moves `my_bread` into a particular spatial relationship with `my_toaster`.
+
+### Defining Machines
+
+`TODO`
 
 ## What About View Points?
 
@@ -198,3 +364,5 @@ How to design this interaction between the physical universe and the program is 
 You as a programmer could, theoretically, know every possible behavior of a program that you wrote. It is unlikely that you could know every possible behavior of the physical universe.
 
 It is worthwhile for a programming language to make it very clear when this boundary is being crossed, provide ways to strictly limit how that interaction works, and provide mechanisms for programmers to help ensure their program behaves correctly in unexpected scenarios. The best solution is to constrain the program's interface with the physical universe so much that you can essentially guarantee the program's correct behavior.
+
+It is also important to think about this in the design of the language itself. Code lives in files on a filesystem. Files and directories are abstract concepts, but bits on a disk are real physical universe things. The language itself (or its implementation) has to interact with those, and should constrain its interactions to limit how much the complexity of the physical universe can affect the general success of all programs in Define in unexpected ways.
