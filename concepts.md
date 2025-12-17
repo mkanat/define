@@ -179,6 +179,26 @@ negative_number has the quality NegativeInteger
 
 This _syntax_ is how we would indicate we are assigning a quality to a dimension point.
 
+## What About View Points?
+
+There are only two _real_ view points involved in a computer programm: the programmer(s) and the user(s). All dimension points inside of the program are "created" by the programmer. The user creates input in the physical universe, and sees output in the physical universe, but the program only knows about that because it gets a symbolic _representation_ of the input and sends symbols out that _represent_ the output.
+
+If we want to get more specific, the program doesn't actually know that its inputs are coming from a user, or that its outputs are going to a user. It only knows that they are going to and from the physical universe.
+
+So essentially we can consider that a program interacts with two universes: its own universe (the one defined by the programmer(s)), and the physical universe.
+
+### Interfaces Between the Program and the Physical Universe
+
+The universe of the program has a certain limit to its complexity---it is defined by the programmer, and it has certain rules based on the qualities that have been assigned to dimension points. The physical universe also has rules, but has nearly infinite potential complexity. Thus, it is important for programs to clearly define and limit how they interact with the physical universe, to limit how the physical universe's complexity can affect the program.
+
+How to design this interaction between the physical universe and the program is often thought about only minimally by programmers. Programmers often spend quite a bit of time making sure that the program's own universe behaves correctly (that is, that it's internally consistent) but don't ensure that it continues to behave correctly when the physical universe intervenes in unexpected ways. However, unexpected behavior on the part of the physical universe is a very common source of error in real software systems.
+
+You as a programmer could, theoretically, know every possible behavior of a program that you wrote. It is unlikely that you could know every possible behavior of the physical universe.
+
+It is worthwhile for a programming language to make it very clear when this boundary is being crossed, provide ways to strictly limit how that interaction works, and provide mechanisms for programmers to help ensure their program behaves correctly in unexpected scenarios. The best solution is to constrain the program's interface with the physical universe so much that you can essentially guarantee the program's correct behavior.
+
+It is also important to think about this in the design of the language itself. Code lives in files on a filesystem. Files and directories are abstract concepts, but bits on a disk are real physical universe things. The language itself (or its implementation) has to interact with those, and should constrain its interactions to limit how much the complexity of the physical universe can affect the general success of all programs in Define in unexpected ways.
+
 ## Forms
 
 A form is:
@@ -327,6 +347,14 @@ when room.light_switch has the quality of being the string "off":
     remove the quality TurnedOn from room.light_bulb
 ```
 
+And then it would trigger whenever you did something like:
+
+```
+assign the quality String to room.light_switch {
+    value: "on"
+}
+```
+
 There we imagine two dimension points: `room.light_switch` and `room.light_bulb` (two dimension points in a form named `room`), and flipping the switch changes the quality of the lightbulb. That would be a trigger on a quality.
 
 However, the most common triggering mechanism is that dimension points have entered a particular space in a particular form. Because this has to do with space, it requires syntax for this particular form of trigger. For example, the syntax for triggering a machine that toasts a piece of bread might look like:
@@ -338,31 +366,70 @@ However, the most common triggering mechanism is that dimension points have ente
     assign the quality String to my_bread {
         value: "white bread"
     }
-    make my_toaster Toast my_bread
+    make my_toaster operate with my_bread
 ```
 
-`make some_dimension_point ______ some_other_dimension_point` would be the special syntax there for triggering the toasting of the bread. It moves `my_bread` into a particular spatial relationship with `my_toaster`.
+`make X operate with Y` would be the special syntax there for triggering the machine's action (the toasting of the bread, in this case). It moves `my_bread` into a particular spatial relationship with `my_toaster`.
 
 ### Defining Machines
 
-`TODO`
+Machines essentially need to be able to define two things:
 
-## What About View Points?
+1. The conditions under which they trigger.
+2. What they do when they are triggered.
 
-There are only two _real_ view points involved in a computer programm: the programmer(s) and the user(s). All dimension points inside of the program are "created" by the programmer. The user creates input in the physical universe, and sees output in the physical universe, but the program only knows about that because it gets a symbolic _representation_ of the input and sends symbols out that _represent_ the output.
+Here's a possible syntax for defining a direct execution trigger (bringing dimension points into a defined spatial relationship with a Toaster):
 
-If we want to get more specific, the program doesn't actually know that its inputs are coming from a user, or that its outputs are going to a user. It only knows that they are going to and from the physical universe.
+```
+quality Toaster {
+    it can operate {
+        with a dimension point named bread_type.
+        require bread_type has the quality String.
+        with a dimension point named result.
+        by doing {
+            assign the quality String to result {
+                value: "toasted " + bread_type
+            }
+        }
+    }
+}
+```
 
-So essentially we can consider that a program interacts with two universes: its own universe (the one defined by the programmer(s)), and the physical universe.
+Another way of expressing the same thing might be:
 
-### Interfaces Between the Program and the Physical Universe
+```
+quality Toaster {
+    has a dimension point named operate
+    when operate is reached by a form named inputs {
+        a dimension point named bread_type.
+        require bread_type has the quality String.
+        with a dimension point named result.
+    } then do {
+        assign the quality String to inputs.result {
+            value: "toasted " + inputs.bread_type
+        }
+    }
+}
+```
 
-The universe of the program has a certain limit to its complexity---it is defined by the programmer, and it has certain rules based on the qualities that have been assigned to dimension points. The physical universe also has rules, but has nearly infinite potential complexity. Thus, it is important for programs to clearly define and limit how they interact with the physical universe, to limit how the physical universe's complexity can affect the program.
+There are many ways to potentially express it. The important part is that we define what the spatial relationship has to be (in this case `operate`) and what qualities we have to see in what dimension points.
 
-How to design this interaction between the physical universe and the program is often thought about only minimally by programmers. Programmers often spend quite a bit of time making sure that the program's own universe behaves correctly (that is, that it's internally consistent) but don't ensure that it continues to behave correctly when the physical universe intervenes in unexpected ways. However, unexpected behavior on the part of the physical universe is a very common source of error in real software systems.
+A syntax for a trigger that doesn't involve a spatial relationship might look like:
 
-You as a programmer could, theoretically, know every possible behavior of a program that you wrote. It is unlikely that you could know every possible behavior of the physical universe.
+```
+quality Toaster {
+    when {
+        a dimension point named slice exists.
+        require slice has the quality Bread.
+        require slice has the quality NeedsToasting.
+    } then {
+        assign the quality Toasted to slice.
+    }
+}
+```
 
-It is worthwhile for a programming language to make it very clear when this boundary is being crossed, provide ways to strictly limit how that interaction works, and provide mechanisms for programmers to help ensure their program behaves correctly in unexpected scenarios. The best solution is to constrain the program's interface with the physical universe so much that you can essentially guarantee the program's correct behavior.
+One of the tricky points about defining a machine is that we have to assign names to things that don't yet actually exist---the dimension points outside of the machine that the machine triggers on or modifies. For example, in the last code block above, `slice` is a name for something that doesn't exist at the time we define this quality---it's just a convenient name for any slice of bread that might happen to fit the required qualities.
 
-It is also important to think about this in the design of the language itself. Code lives in files on a filesystem. Files and directories are abstract concepts, but bits on a disk are real physical universe things. The language itself (or its implementation) has to interact with those, and should constrain its interactions to limit how much the complexity of the physical universe can affect the general success of all programs in Define in unexpected ways.
+If we wanted to be mentally lazy about it, we would just say "`slice` is an _alias_ for some other named dimension point." That doesn't explain things based on our principles, but it is pretty understandable (and accurate, actually). But what we are really dealing with is just a different _view_ of another, existing dimension point.
+
+It's like if we were looking down at a cube from the top, it would look like a square, but looking at it from inside of it, it would be obvious that it's a cube. It would stil be the same cube, but it would look different to us. We are just declaring a point from which we _could view_ a dimension point. Like, a point in space that a dimension point could occupy. That's the alias `slice` in the above code.
