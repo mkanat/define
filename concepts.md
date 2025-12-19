@@ -114,7 +114,7 @@ This fools programmers into believing that qualities have concrete existence in 
 
 **Qualities do not have real existence. Only dimension points exist.**
 
-Qualities only manifest when they are assigned to a dimension point that actually exists.
+Qualities only manifest when they are assigned to a dimension point that actually exists. Even then, it's only the dimension point that really exists. It just now a dimension point with a quality.
 
 This is why programmers get themselves into endless trouble when they use or rely on reflection in their programs: they get confused about the difference between the two universes (the universe of their program and the universe of reflection). They make the behavior of the reflection universe affect the behavior of the program's universe (or worse, vice-versa, where they make logic in the program's universe change the fundamental structure of the program). This becomes very hard to reason about and tends to cause all sorts of trouble.
 
@@ -140,7 +140,7 @@ This is what **syntax** is for in programming languages. Let's look at some exam
 
 ### Describing Qualities
 
-Here's a description of a positive integer in an imaginary programming language:
+Here's a description of a negative integer in an imaginary programming language:
 
 ```bash
 quality NegativeInteger {
@@ -149,7 +149,7 @@ quality NegativeInteger {
 }
 ```
 
-We see three names in that code: `PositiveInteger` (the name of the quality), `Minus` (presumably a name for the character `-`), and `Digit` (a quality representing a single number from 0 to 9).
+We see three names in that code: `NegativeInteger` (the name of the quality), `Minus` (presumably a name for the character `-`), and `Digit` (a quality representing a single number from 0 to 9).
 
 Everything else is part of the syntax:
 
@@ -157,7 +157,7 @@ Everything else is part of the syntax:
 * `{` says "we are about to describe the quality we just named"
 * `it starts with` indicates we require that the dimension point starts with this character.
 * `.` indicates "we are done with describing that aspect of this quality"
-* `it then has many` indicates that we expect many characters of a particular typee.
+* `it then has many` indicates that we expect many characters of a particular type.
 * `.` again indicates we are done with that statement.
 * `}` indicates we are done describing that quality.
 
@@ -189,7 +189,7 @@ This _syntax_ is how we would indicate we are assigning a quality to a dimension
 
 ## What About View Points?
 
-There are only two _real_ view points involved in a computer programm: the programmer(s) and the user(s). All dimension points inside of the program are "created" by the programmer. The user creates input in the physical universe, and sees output in the physical universe, but the program only knows about that because it gets a symbolic _representation_ of the input and sends symbols out that _represent_ the output.
+There are only two _real_ view points involved in a computer program: the programmer(s) and the user(s). All dimension points inside of the program are "created" by the programmer. The user creates input in the physical universe, and sees output in the physical universe, but the program only knows about that because it gets a symbolic _representation_ of the input and sends symbols out that _represent_ the output.
 
 If we want to get more specific, the program doesn't actually know that its inputs are coming from a user, or that its outputs are going to a user. It only knows that they are going to and from the physical universe.
 
@@ -297,6 +297,8 @@ put {section, row, number} into a form named front_seat
 
 Both of those simply provide a form to section, row, and number, without giving them any other qualities.
 
+The point is simply that a programming language must have a syntax for defining forms.
+
 ## Machines
 
 Let's get into a bit more detail about what a machine really is and how we would think about it in a programming language.
@@ -317,11 +319,11 @@ A program is, in some sense, one giant machine. You tell it to start (for exampl
 
 However, within the universe of the program itself, conceptually there are many, many machines. These are the machines we care about, when we are talking about a programming language.
 
-For example, a program might have a concept of a toaster: a machine that heats bread. In Python, you might define and use toaster like:
+For example, a program might have a concept of a toaster: a machine that heats bread. In Python, you might define and use a toaster like:
 
 ```Python
 class Toaster:
-    def toast(bread_type: str) -> result: str:
+    def toast(bread_type: str) -> str:
         return "toasted " + bread_type
 
 my_toaster = Toaster()
@@ -338,9 +340,9 @@ In the way that we think about universes, here is the sequence of events that ac
 
 1. We created a dimension point named `my_toaster`.
 2. We assigned that dimension point the quality of `Toaster`.
-3. We created a dimension point named `result`.
-4. We created a dimension point named `my_bread`.
-5. We assigned `my_bread` the quality of being the string "white bread."
+3. We created a dimension point named `my_bread`.
+4. We assigned `my_bread` the quality of being the string "white bread."
+5. We created a dimension point named `result`.
 6. We moved `my_bread` in space so that it had a defined relationship to `my_toaster`. (This was the call to `my_toaster.toast(my_bread)`.)
 7. `my_toaster` has the quality that if it sees a string in that specific location in relationship to itself, it will modify a second dimension point (`result`) to have the quality of being the string string "toasted " followed by the input string.
 8. Those conditions are met so `my_toaster` modifies `result` accordingly.
@@ -369,7 +371,9 @@ assign the quality String to room.light_switch {
 
 There we imagine two dimension points: `room.light_switch` and `room.light_bulb` (two dimension points in a form named `room`), and flipping the switch changes the quality of the lightbulb. That would be a trigger on a quality.
 
-However, the most common triggering mechanism is that dimension points have entered a particular space in a particular form. Because this has to do with space, it requires syntax for this particular form of trigger. For example, the syntax for triggering a machine that toasts a piece of bread might look like:
+However, the most common triggering mechanism in a program is that dimension points have entered a particular space in a particular form. For example, in the physical universe, you might have a light bulb that turns on just because a person (a particular form) has walked into a room (a space). In a program, a function call would be an example of this, like the call to `my_toaster.toast(my_bread)` in the Python example further up: the dimension point `my_bread` has entered the space `toast`.
+
+Because this has to do with space, it requires syntax for this particular form of trigger. For example, the syntax for triggering a machine that toasts a piece of bread might look like:
 
 ```
     create a dimension point named my_toaster.
@@ -462,7 +466,7 @@ However, we can also define special spatial relationships between dimension poin
 
 There is a special sort of trigger condition called a "function." Machines in the phsyical universe have certain abilities: different things a single machine can do. For example, a car can start, stop, move forward, move backwards, turn, etc. In the physical universe these things are triggered by moving around objects---in other words, changing the spatial relationship of dimension points. For example, if you want to turn a car to the right, you turn the steering wheel to the right. You moved the steering wheel's position in space.
 
-In a program, you need to be able to somehow tell a machine "specifically execute this function." Above in the "Triggering Machines" section we talked about how you might expres a trigger like this when you want to execute it: `make my_toaster toast my_bread`. But when you're defining a function, how do you indicate this trigger?
+In a program, you need to be able to somehow tell a machine "specifically execute this function." Above in the "Triggering Machines" section we talked about how you might express a trigger like this when you want to execute it: `make my_toaster toast my_bread`. But when you're defining a function, how do you indicate this trigger?
 
 Basically you need to define a special spatial _relationship_ that will occur between two dimension points. We do this with a new **type of name**: a function name. If you wanted to enforce name separation, you might name these like `function<turn_right>`.
 
