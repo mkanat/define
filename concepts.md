@@ -629,3 +629,11 @@ As an interesting side note, what we are seeing here is that we are doing our be
 #### In the Physical Universe
 
 In the physical universe, what's really happening when you run a program is that the computer is grabbing existing dimension points (electrons) and making them _represent_ the program's dimension points. Qualities from the program's universe don't exist (so there is no assignment of qualities). Destruction is just represented by turning off the machine, the absence of electrons, or a particular configuration of electrons that the computer designers agreed means "nothing here."
+
+## Fundamental Functions
+
+As noted at the very start of this document, programs are simulations of a universe, and they are running on a simulation machine we call a "computer."
+
+The simulation machine has fundamental things it can do. For example, the most basic functions of computers today are all about numbers. They can store numbers in certain locations, move those numbers to other locations, and manipulate those numbers (for example, by doing math with them).
+
+At some point, when designing a language, you have to have a way to indicate you are instructing a computer to execute one of its fundamental functions. While you could write out a long logical description of addition using only dimension points, that doesn't really make sense if addition is a fundamental function of the computer. Just have a way of expressing that you're executing a fundamental function, so you can say "now the computer adds these numbers."
