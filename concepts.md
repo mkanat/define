@@ -83,8 +83,6 @@ We accomplish points 1 and 2 with **names**. Names are how we create space in ou
 
 **No two dimension points or qualities may have the same name.**
 
-In most programming languages, we also enforce that the name of a quality can't be used as the name of a dimension point, and vice-versa, to avoid confusion.
-
 ### A Note About Reflection
 
 Many programming languages have a concept of "reflection" where you can, while running the program, ask questions about the program itself. For example, imagine you have Python code that looks like this:
@@ -119,6 +117,16 @@ This fools programmers into believing that qualities have concrete existence in 
 Qualities only manifest when they are assigned to a dimension point that actually exists.
 
 This is why programmers get themselves into endless trouble when they use or rely on reflection in their programs: they get confused about the difference between the two universes (the universe of their program and the universe of reflection). They make the behavior of the reflection universe affect the behavior of the program's universe (or worse, vice-versa, where they make logic in the program's universe change the fundamental structure of the program). This becomes very hard to reason about and tends to cause all sorts of trouble.
+
+### Types of Names
+
+Taking into account all of the above, we can see that we have at least two different "things" that can be named: dimension points and qualities. (There are actually more things that require names, which we will talk about later in this document.)
+
+Qualities, though, only exist in the universe of reflection before they are made "real" by being assigned to dimension points. So in a sense, the names of qualities are actually in a _different universe_ from the names of dimension points.
+
+Most programming languages have conventions about how you _ought_ to name both of those things, to keep them separate. These conventions help the programmer understand, when reading code, whether you are referring to a dimension point or a quality. For example, in Python, variables (dimension points) are _supposed_ to be named like `some_name` and classes (qualities) are _supposed_ to be named like `SomeName`. However, there's nothing that enforces that. Sometimes you get variables named like `ThisVariable` or `thisVariable` and sometimes you get classes named like `this_is_a_class` and the programmer can't differentiate them just by looking at them, anymore.
+
+One actually could (and probably should) make a programming language inherently enforce that by requiring some name format that always differentiates them. For example, you could say that dimension points must always be named like `dp<some_name>` and qualities must always be named like `q<some_name>`. Most of the rest of this document does _not_ do that (this document is meant to be read by people who are not already familiar with Define, as I am writing the document before the language even exists) but the language we actually design _should_ have some way of keeping the names of different types of things inherently separate.
 
 ## Describing Qualities and Dimension Points
 
@@ -255,7 +263,11 @@ However, that example only actually _requires_ three dimension points: a section
 
 ### Talking About Forms
 
-There are multiple ways a programming language can express that dimension points are in a form. However, they almost always do something like "a name, followed by a separator, followed by another name." So you see `front_seat.section` or `front_seat->section` or `front_seat::section`. You could also do something like `front_seat<section>`. Since we must use symbols and names to solve this problem, when we refer to a form, it is going to have to be via a mechanism like this.
+Forms are another **type of name** that a program must know about: the name of a _form_. To keep those totally separate from other names, you would need to always name them something like `form<some_form_name>`.
+
+You also have to be able to refer to the dimension points inside of the form, somehow. There are multiple ways a programming language can do this. Most programming languages do something like "a name, followed by a separator, followed by another name." So you see `front_seat.section` or `front_seat->section` or `front_seat::section`. Since we must use symbols and names to solve this problem, when we refer to a form, it is going to have to be via some sort of mechanism like this.
+
+Given our system of making names fully unique, syntax like this might be acceptable: `form<front_seat>dp<section>`. And then forms that contain other forms would look like: `form<theater>form<front_seat>dp<section>`. That might not be the most readable syntax, though, so perhaps other syntaxes would be preferable.
 
 ### Defining Forms
 
@@ -366,10 +378,10 @@ However, the most common triggering mechanism is that dimension points have ente
     assign the quality String to my_bread {
         value: "white bread"
     }
-    make my_toaster operate with my_bread
+    make my_toaster toast my_bread
 ```
 
-`make X operate with Y` would be the special syntax there for triggering the machine's action (the toasting of the bread, in this case). It moves `my_bread` into a particular spatial relationship with `my_toaster`.
+`make X ________ with Y` would be the special syntax there for triggering the machine's action (the toasting of the bread, in this case). It moves `my_bread` and `my_toaster` into a particular spatial relationship named `toast`.
 
 ### Defining Machines
 
@@ -378,58 +390,219 @@ Machines essentially need to be able to define two things:
 1. The conditions under which they trigger.
 2. What they do when they are triggered.
 
-Here's a possible syntax for defining a direct execution trigger (bringing dimension points into a defined spatial relationship with a Toaster):
+#### Trigger Conditions
+
+There are three events that can cause a machine to trigger:
+
+1. A new dimension point is created.
+2. Something about a dimension point changes.
+3. A dimension point is destroyed.
+
+So this gives us three things we need to cover with syntax. Here's some imaginary examples:
 
 ```
-quality Toaster {
-    it can operate {
-        with a dimension point named bread_type.
-        require bread_type has the quality String.
-        with a dimension point named result.
-        by doing {
-            assign the quality String to result {
-                value: "toasted " + bread_type
+    when (a dimension point is crated)
+    when (a dimension point changes)
+    when (a dimension point is destroyed)
+```
+
+However, most machines want to be more specific than that---they don't want to trigger on every single creation, change, or destruction. Instead, they want to limit what kinds of creations, changes, or destruction they trigger on. They can do this in three ways:
+
+1. By the quality of the relevant dimension point.
+2. By specifically naming which dimension points they act on.
+2. By some spatial relationship between this dimension point and others.
+
+For qualities, the potential syntax is relatively straightforward:
+
+```
+    when (a dimension point is created with the quality IsGreen)
+    when (a dimension point changes to having the quality IsRed)
+    when (a dimension point changes from having the quality IsPurple)
+    when (a dimension point changes from having the quality IsBlack to having the quality IsWhite)
+    when (a dimension point is destroyed with the quality IsBlue)
+```
+
+Note also that we need some way to indicate what happens when _this_ quality is assigned to a dimension point (like, does something happen immediately after we assign the quality "LightSwitch" to a dimension point?):
+
+```
+    when (this dimension point is assigned this quality)
+```
+
+Referring to dimension points by name is actually pretty straightforward:
+
+```
+    create a dimension point named traffic_light.
+    when (traffic light is destroyed)
+```
+
+Though (as you might have already realized above) we need special syntax for talking about "this" dimension point (the one that _is_ the machine):
+
+```
+    when (this dimension point is destroyed)
+```
+
+There are various ways to talk about spatial relationships in a trigger:
+
+```
+    when (a dimension point in the form front_seat is destroyed)
+    when (a dimension point in the form front_seat changes)
+```
+
+We don't even have to refer to a specific form, we could do something like:
+
+```
+    when (a form like {String, Number, String} is created)
+```
+
+Which would trigger whenever a new form with a String, Number, and String in it was made.
+
+However, we can also define special spatial relationships between dimension points and trigger on those special relationships. This needs its own section to talk about it.
+
+#### Functions
+
+There is a special sort of trigger condition called a "function." Machines in the phsyical universe have certain abilities: different things a single machine can do. For example, a car can start, stop, move forward, move backwards, turn, etc. In the physical universe these things are triggered by moving around objects---in other words, changing the spatial relationship of dimension points. For example, if you want to turn a car to the right, you turn the steering wheel to the right. You moved the steering wheel's position in space.
+
+In a program, you need to be able to somehow tell a machine "specifically execute this function." Above in the "Triggering Machines" section we talked about how you might expres a trigger like this when you want to execute it: `make my_toaster toast my_bread`. But when you're defining a function, how do you indicate this trigger?
+
+Basically you need to define a special spatial _relationship_ that will occur between two dimension points. We do this with a new **type of name**: a function name. If you wanted to enforce name separation, you might name these like `function<turn_right>`.
+
+The syntax for calling a function might look like:
+
+```
+    when (my_toaster has the relationship toast with a dimension point that has the quality IsBread)
+    when (my_car_horn has the relationship pushed_down with itself)
+```
+
+#### Uniqueness of Function Names
+
+Function names only _need_ to be unique on the dimension point they are assigned to. (That is, if I have a `calculator` object, there can't be two functions that have exactly the name `function<add>`). It may be beneficial, for the sake of simplicity, for a programming language to put broader restrictions on how unique function names need to be, though.
+
+Some languages _look_ like they allow multiple functions with the same name. For example, in Java, you could do:
+
+```Java
+    class Adder {
+        int add(int x, int y) {
+            return x + y
+        }
+
+        float add(float x, float y) {
+            return x + y
+        }
+    }
+```
+
+And then Java would call the right function based on the arguments you passed. However, what's really happening is a bunch of gymnastics behind the scenes to figure out what function to call when you, the programmer, do something like `add(1, 2)`. The program actually knows there are two different functions and it actually gives them different names (you can think of it like there is one function named `add_int_int` and another function named `add_float_float`).
+
+#### Functions Do Not Have Real Existence
+
+Note that functions, like qualities and forms, do not have real existence. They are just a relationship between dimension points. They exist only in the universe of reflection.
+
+Some programming languages do act as though functions are real objects. For example, in Python, one can do something like:
+
+```Python
+   def add_numbers(x, y):
+        return x + y
+
+    def do_math(some_function, x, y):
+        return some_function(x, y)
+
+    do_math(add_numbers, x, y)
+```
+
+There we provide `add_numbers` as an argument to a function. Conceptually, what Python is actually doing is creating a _whole machine_ named `add_numbers` that has real existence, then (invisibly) giving that machine a function (we can imagine it's named `run` or something). Then there is a function named `do_math` that takes as arguments a machine and two numbers, and puts those two numbers into the relationship `run` with the machine `add_numbers`.
+
+The things that have real existence there are:
+
+* A dimension point named `add_numbers`, which has the quality of being a machine.
+* Two dimension points named `x` and `y` that both have the quality of being particular numbers.
+
+It is interesting to realize here why traditional programming languages have such problems optimizing their code: they have given real existence to things that, very often, don't need to be real.
+
+### Defining a Machine's Action
+
+Now we understand how machines can be triggered, how do we say what they will _do_ after they are triggered? Well, the basics of that are pretty simple. You would have a trigger and then you would say what happens:
+
+```
+    when (a dimension point has the quality Number with the value 5)
+    then (change that dimension point to having the value 4)
+```
+
+And then what goes into the "then" block is the actual _action_ of a program. That's not too hard to understand: we have some syntax for describing action that occurs, which involves the creation of dimension points, the assignment of qualities to dimension points, and the triggering of other machines.
+
+However, there are two tricky things we have to deal with:
+
+1. How do we talk about the dimension points we are changing, especially when there is more than one? Above we said `change that dimension point`. That's not going to work when a machine operates on more than one dimension point.
+2. Can machines create new dimension points, and if so, what happens to those?
+
+Let's address both of those.
+
+#### Talking About the Dimension Points a Machine Cares About
+
+One of the tricky points about defining a machine is that we have to assign names to things that don't yet actually exist---the dimension points outside of the machine that the machine triggers on or modifies. For example, imagine this syntax:
+
+```
+    quality Adder {
+        it can add {
+            with a Number named x
+            with a Number named y
+            with a Number named result
+            by doing {
+                result = x + y
             }
         }
     }
-}
 ```
 
-Another way of expressing the same thing might be:
+That's just a machine that takes two numbers, adds them, and returns the result. In that example, `x`, `y`, and `result` don't actually _exist_ when we are defining the machine. They are just theoretical dimension points that we would operate on if they were given to the `add` function.
+
+Here we are using names simply to differentiate concepts---the idea that `x`,`y`, and `result` _could_ exist and we need some way to talk about them when describing the machine's action.
+
+In fact, there are actually two different concepts we need some way to talk about.
+
+##### Views
+
+When defiing a machine, we could consider we are simply viewing a dimension point where it is, without moving it. The machine simply "knows" the dimension point exists and it's going to inspect or modify that dimension point. We could think of this as the machine is simply _viewing_ the dimension point where it sits. We tell the machine "operate on that dimension point, over there."
+
+For example, `result` in the `Adder` code above would be a view: we want to change what's sitting in the space named `result` without moving the thing that's there.
+
+We need some way to talk about that when we are writing out the code for a machine.We do this with a new **type of name** which we can call a "view." It's just us "looking" at a dimension point. If you wanted to keep these separate from other names, you might require they be named something like `view<result>`.
+
+##### Positions
+
+Very often, a machine triggers when you move dimension points from their current location into a new location. They stop occupying their current space, and they start occupying a new space---a new position.
+
+In a programming language, moving a dimension point would mean that its old name no longer refers to the dimension point. In fact, its old name is now empty space. The dimension point has a totally new name.
+
+In our Adder example, we could say "you have to actually move dimension points into the positions `x` and `y` in order for the Adder to function." They would cease to occupy their existing space.
+
+Let's make up some imaginary syntax to demonstrate this concept:
 
 ```
-quality Toaster {
-    has a dimension point named operate
-    when operate is reached by a form named inputs {
-        a dimension point named bread_type.
-        require bread_type has the quality String.
-        with a dimension point named result.
-    } then do {
-        assign the quality String to inputs.result {
-            value: "toasted " + inputs.bread_type
-        }
-    }
-}
+    my_Adder is an Adder.
+    input_one is a Number with the value 5.
+    input_two is a Number with the value 4.
+    result is a Number.
+    make my_adder add with input_one, input_two, result.
 ```
 
-There are many ways to potentially express it. The important part is that we define what the spatial relationship has to be (in this case `operate`) and what qualities we have to see in what dimension points.
+In that example, `input_one` gets _moved_ into `x` and `input_two` gets _moved_ into `y`. The names `input_one` and `input_two` now refer to empty space, and it would be an error for the program to refer to them again later.
 
-A syntax for a trigger that doesn't involve a spatial relationship might look like:
+There are very few languages that have implemented this concept before---Rust is the only one I am familiar with. However, you will see that the syntax above makes it very confusing whether we are moving a dimension point or simply viewing it, which is a problem we should rectify in our programming language.
 
+Once again, we would need a new **type of name** to indicate empty positions in space that a dimension point could occupy. These would look something like `position<x>`, `position<y>`, etc.
+
+#### Creating Dimension Points
+
+When we write code, it looks like we tell machines to create dimension points, destroy dimension points, and assign them qualities. That's not _exactly_ what's happening, though.
+
+In the conceptual universe of the program, the _programmer_ creates all dimension points, assigns all qualities, and causes dimension points to be destroyed.
+
+In order for a dimension point to exist, the programmer must write some sort of code. Mostly this is simple to see. For example, in a Python program, a developer might write:
+
+```Python
+x = 2 + 3
 ```
-quality Toaster {
-    when {
-        a dimension point named slice exists.
-        require slice has the quality Bread.
-        require slice has the quality NeedsToasting.
-    } then {
-        assign the quality Toasted to slice.
-    }
-}
-```
 
-One of the tricky points about defining a machine is that we have to assign names to things that don't yet actually exist---the dimension points outside of the machine that the machine triggers on or modifies. For example, in the last code block above, `slice` is a name for something that doesn't exist at the time we define this quality---it's just a convenient name for any slice of bread that might happen to fit the required qualities.
+The programmer defined the dimension points `2`, `3`, and `x`.
 
-If we wanted to be mentally lazy about it, we would just say "`slice` is an _alias_ for some other named dimension point." That doesn't explain things based on our principles, but it is pretty understandable (and accurate, actually). But what we are really dealing with is just a different _view_ of another, existing dimension point.
-
-It's like if we were looking down at a cube from the top, it would look like a square, but looking at it from inside of it, it would be obvious that it's a cube. It would stil be the same cube, but it would look different to us. We are just declaring a point from which we _could view_ a dimension point. Like, a point in space that a dimension point could occupy. That's the alias `slice` in the above code.
+In the physical universe, what's really happening is that the computer is grabbing existing dimension points (electrons) and making them _represent_ the program's dimension points. Qualities from the program's universe don't exist (so there is no assignment of qualities). Destruction is just represented by turning off the machine, the absence of electrons, or a particular configuration of electrons that the computer designers agreed means "nothing here."
