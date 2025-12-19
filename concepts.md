@@ -603,6 +603,29 @@ In order for a dimension point to exist, the programmer must write some sort of 
 x = 2 + 3
 ```
 
-The programmer defined the dimension points `2`, `3`, and `x`.
+The programmer defined the dimension points `2`, `3`, and `x`. However, it gets a little more complex when the programmer describes logic that creates some uncertain number of dimension points. Let's take another Python example:
 
-In the physical universe, what's really happening is that the computer is grabbing existing dimension points (electrons) and making them _represent_ the program's dimension points. Qualities from the program's universe don't exist (so there is no assignment of qualities). Destruction is just represented by turning off the machine, the absence of electrons, or a particular configuration of electrons that the computer designers agreed means "nothing here."
+```Python
+    def say_hello(times: int) -> str:
+        list_of_hellos = []
+        for n in range(times):
+            list_of_hellos.append("hello")
+```
+
+That creates a varying number of strings depending on the value you pass in for `times`. The programmer is still creating those dimension points, they just are doing it in a more complex way. They are saying: "I decide to create dimension points according to the logic this machine dictates." But it's still the programmer's decision. Dimension points are not actually created by "the program" or "the machine." They are created by you, the definer of the universe.
+
+#### Users
+
+What about the user? The user is also a view point, right? Totally true. The user provides input to the program, which we _could_ conceptually think of as dimension points they created. However,  you can't actually represent the user's dimension points in the program without the programmer creating a dimension point inside of the program that _represents_ the user's input. For example, in Python:
+
+```Python
+name = input("Please enter your name: ")
+```
+
+The user typed their name, but we represent that as our own dimension point called `name`. So we see once again that it's actually the _programmer_ that creates all dimension points.
+
+As an interesting side note, what we are seeing here is that we are doing our best to _duplicate_ the user's dimension point into a dimension point in the program. This means that _communication_ is occurring between the program and the outside world. This deserves special attention in a program, as noted before when we talked about the boundary between a program and the physical universe. How to handle communication effectively in a program is a topic for another section or another document, but it struck me as interesting so I thought I'd call it out here.
+
+#### In the Physical Universe
+
+In the physical universe, what's really happening when you run a program is that the computer is grabbing existing dimension points (electrons) and making them _represent_ the program's dimension points. Qualities from the program's universe don't exist (so there is no assignment of qualities). Destruction is just represented by turning off the machine, the absence of electrons, or a particular configuration of electrons that the computer designers agreed means "nothing here."
