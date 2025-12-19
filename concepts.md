@@ -187,6 +187,80 @@ negative_number has the quality NegativeInteger
 
 This _syntax_ is how we would indicate we are assigning a quality to a dimension point.
 
+## Locations in Space
+
+So we see that names create space in a program. The most important names we use are the names of dimension points (the things that really _exist_ in a program). For example, in a traditional programming language, we say:
+
+```Python
+x = 5
+```
+
+That means we have created a dimension point named `x` that is a number with the value 5.
+
+However, what is happening when we do this?
+
+```Python
+x = 5
+z = x
+```
+
+What is `z` there? Well, it could actually be three different things, depending on the programming language:
+
+1. We have moved the dimension point `x` into a new **position** named `z`, and `x` is now empty space.
+2. `z` is a different **view** of `x`. That is, `x` didn't change positions. Instead, we are just somehow talking about `x` with an additional name that now _also_ means `x`. (This is a little confusing, but will become clearer later.)
+3. We have created a new dimension point named `z` that is a **duplicate** of `x`.
+
+Let's talk about each of these options.
+
+### Positions
+
+If a dimension point is moved to a new position, it no longer occupies its old position. In a program, this would mean that you actually _change the name_ of a dimension point. For example, look at this imaginary syntax:
+
+```
+    define a position named ball.
+    create a dimension point in position ball.
+    define a position named goal.
+    move the dimension point in position ball to position goal.
+```
+
+In that form, it's pretty straightforward what is happening. We had a dimension point named "ball" and we actually _renamed_ it (moved it) to "goal."
+
+In a programming language, moving a dimension point would mean that its old name no longer refers to the dimension point. In fact, its old name is now empty space. The dimension point has a totally new name. Referring to the old name at any point after that in the program would be an error. For example, in the above code, the program must not refer to the name "ball" after that dimension point is moved into the name "goal."
+
+In the phsyical universe, it is quite common to move an existing dimension point into a new position. However, this concept in programming languages is quite rare. The only programming language I have used that implements this concept is Rust, and even there, it's done in a way that is very hard for programmers to understand.
+
+Programming languages often need a way of indicating there is an empty space that _could_ be occupied by a dimension point. (This will become clearer as we describe more concepts futher on in this document.)
+
+We need a new **type of name** to indicate empty positions in space that a dimension point could occupy. These would look something like `position<goal>`, `position<ball>`, etc. Only one dimension point may occupy a position. So in fact, we may not need the syntax for referring to dimension points (the earlier naming concept of `dp<some_name>`) and possibly we only need the syntax for indicating there is a position a dimension point could occupy.
+
+### Views
+
+Sometimes in a programming language, we need some way to indicate that we are simply viewing a dimension point where it is, without moving it. For example, imagine let's take this function in C:
+
+```C
+    void add(int x, int y, int* result) {
+        *result = x + y
+    }
+```
+
+That modifies the dimension point `result` in place without moving it to a new location. (More specifically, it changes the quality of `result` to being a number that is the sum of `x` and `y`).
+
+We need some way to indicate that a name is just a _view_ of some already-existing dimension point. This would require a new **type of name**. If you wanted to keep these separate from other names, you might require they be named something like `view<result>`.
+
+### Duplicates
+
+In some programming languages, doing `z = x` might actually create a _copy_ of the data that is in `x`. In other words, it creates a new dimension point with the same qualities as `x`, but in a different position.
+
+This does not require a new type of name. Instead, it should be represented as explicit syntax anywhere it happens. We could imagine syntax like this:
+
+```
+create a dimension point in position<apple1>.
+assign the dimension point in position<apple1> the quality IsAnApple.
+create a duplicate of position<apple1> in position<apple2>.
+```
+
+Basically, we have an apple, and then we make a copy of that apple in another position.
+
 ## What About View Points?
 
 There are only two _real_ view points involved in a computer program: the programmer(s) and the user(s). All dimension points inside of the program are "created" by the programmer. The user creates input in the physical universe, and sees output in the physical universe, but the program only knows about that because it gets a symbolic _representation_ of the input and sends symbols out that _represent_ the output.
@@ -259,7 +333,7 @@ That prints out: `Orchestra Row A Seat 1`.
 
 Conceptually, the way a Python programmer thinks about this is that they have defined a concept called TheaterSeat. Then they have created a TheaterSeat named `front_seat` with certain fields set to certain values. Finally they have requested the `section`, `row`, and `number` fields from `front_seat`.
 
-However, that example only actually _requires_ three dimension points: a section, a row, and a seat. `front_seat.section` is simply the name of one of those dimension points. In how we think about defining universes, `front_seat` _does not exist_. It is simply a name that creates a defined relationship between `section`, `row`, and `orchestra` in this program. Remember that in a program, space is created by names, so `front_seat` is actually _empty space_.
+However, that example only actually _requires_ three dimension points: a section, a row, and a seat. `front_seat.section` is simply the name of one of those dimension points. In how we think about defining universes, `front_seat` _does not exist_. It is simply a name that creates a defined relationship between `section`, `row`, and `orchestra` in this program. Remember that in a program, space is created by names, so `front_seat` is actually _empty space_. It's not even a position---it's a name we are using for a particular arrangement of dimension points.
 
 ### Talking About Forms
 
@@ -561,23 +635,20 @@ That's just a machine that takes two numbers, adds them, and returns the result.
 
 Here we are using names simply to differentiate concepts---the idea that `x`,`y`, and `result` _could_ exist and we need some way to talk about them when describing the machine's action.
 
-In fact, there are actually two different concepts we need some way to talk about.
+This is where the concepts of _views_ and _positions_ become the most useful.
 
-##### Views
+#### Views in Machine Definitions
 
-When defiing a machine, we could consider we are simply viewing a dimension point where it is, without moving it. The machine simply "knows" the dimension point exists and it's going to inspect or modify that dimension point. We could think of this as the machine is simply _viewing_ the dimension point where it sits. We tell the machine "operate on that dimension point, over there."
+When defining a machine, we could consider we are simply viewing a dimension point where it is, without moving it. The machine simply "knows" the dimension point exists and it's going to inspect or modify that dimension point. We could think of this as the machine is simply _viewing_ the dimension point where it sits. We tell the machine "operate on that dimension point, over there."
 
 For example, `result` in the `Adder` code above would be a view: we want to change what's sitting in the space named `result` without moving the thing that's there.
 
-We need some way to talk about that when we are writing out the code for a machine.We do this with a new **type of name** which we can call a "view." It's just us "looking" at a dimension point. If you wanted to keep these separate from other names, you might require they be named something like `view<result>`.
+#### Positions in Machine Definitions
 
-##### Positions
+Very often, a machine triggers when you move dimension points from their current location into a new location. They stop occupying their current space, and they start occupying a new space---a new position. Our steering wheel example above was an example of this, in the physical universe: the steering wheel turns to the position called "right" so the wheels of the car turn right.
 
-Very often, a machine triggers when you move dimension points from their current location into a new location. They stop occupying their current space, and they start occupying a new space---a new position.
+In our Adder example, we might say "you have to actually move dimension points into the positions `x` and `y` in order for the Adder to function." They would cease to occupy their existing space.
 
-In a programming language, moving a dimension point would mean that its old name no longer refers to the dimension point. In fact, its old name is now empty space. The dimension point has a totally new name.
-
-In our Adder example, we could say "you have to actually move dimension points into the positions `x` and `y` in order for the Adder to function." They would cease to occupy their existing space.
 
 Let's make up some imaginary syntax to demonstrate this concept:
 
@@ -586,14 +657,10 @@ Let's make up some imaginary syntax to demonstrate this concept:
     input_one is a Number with the value 5.
     input_two is a Number with the value 4.
     result is a Number.
-    make my_adder add with input_one, input_two, result.
+    make my_adder add with move(input_one), move(input_two), view(result).
 ```
 
 In that example, `input_one` gets _moved_ into `x` and `input_two` gets _moved_ into `y`. The names `input_one` and `input_two` now refer to empty space, and it would be an error for the program to refer to them again later.
-
-There are very few languages that have implemented this concept before---Rust is the only one I am familiar with. However, you will see that the syntax above makes it very confusing whether we are moving a dimension point or simply viewing it, which is a problem we should rectify in our programming language.
-
-Once again, we would need a new **type of name** to indicate empty positions in space that a dimension point could occupy. These would look something like `position<x>`, `position<y>`, etc.
 
 #### Creating Dimension Points
 
