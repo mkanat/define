@@ -397,7 +397,7 @@ For example, a program might have a concept of a toaster: a machine that heats b
 
 ```Python
 class Toaster:
-    def toast(bread_type: str) -> str:
+    def toast(self, bread_type: str) -> str:
         return "toasted " + bread_type
 
 my_toaster = Toaster()
@@ -538,63 +538,78 @@ However, we can also define special spatial relationships between dimension poin
 
 #### Functions
 
-There is a special sort of trigger condition called a "function." Machines in the phsyical universe have certain abilities: different things a single machine can do. For example, a car can start, stop, move forward, move backwards, turn, etc. In the physical universe these things are triggered by moving around objects---in other words, changing the spatial relationship of dimension points. For example, if you want to turn a car to the right, you turn the steering wheel to the right. You moved the steering wheel's position in space.
+There is a special sort of trigger condition called a "function." Machines in the physical universe have certain abilities: different things a single machine can do. For example, a car can start, stop, move forward, move backwards, turn, etc. In the physical universe these things are triggered by moving objects---in other words, changing the spatial relationship of dimension points. For example, if you want to turn a car to the right, you turn the steering wheel to the right. You moved the steering wheel's position in space.
 
-In a program, you need to be able to somehow tell a machine "specifically execute this function." Above in the "Triggering Machines" section we talked about how you might express a trigger like this when you want to execute it: `make my_toaster toast my_bread`. But when you're defining a function, how do you indicate this trigger?
+In a program, you need to be able to somehow tell a machine "specifically execute this function." Above in the "Triggering Machines" section we talked about how you might express a trigger like this when you want to execute it: `make my_toaster toast my_bread`. But when you're defining a function, how do you indicate this trigger exists? That is, how do you say "toast is a function this machine can do?"
 
-Basically you need to define a special spatial _relationship_ that will occur between two dimension points. We do this with a new **type of name**: a function name. If you wanted to enforce name separation, you might name these like `function<turn_right>`.
+Basically you need to define a special spatial _relationship_ that will occur between dimension points. As we have noted a few times before, syntax in other programming languages for this looks something like: `my_toaster.toast(my_bread)`. That puts `my_bread` into a relationship with `my_toaster`. The relationship is called `toast`.
 
-The syntax for calling a function might look like:
+But what is a "function" really, on a pure conceptual level? Well:
+
+**A function is the statement that a machine will behave a certain way when dimension points with certain qualities occupy certain positions.**
+
+For example, let's take an actual toaster in the physical universe. When you push the handle down (a dimension point with the quality of being the handle) it heats up. If there is bread _inside_ the machine (a position) that bread gets toasted. In order to describe this toaster conceptually, before we even _have_ a toaster, we have to say things like "there is a handle" and "there is a space for bread." That's what we are doing when we define a machine, in programming.
+
+Most languages solve all of this by creating named functions, like our `Toaster` example from earlier, where there is a function named `toast`. The "space for bread" is the `bread_type` argument to `toast`.
+
+But let's think about what we actually need, minimally, in order to describe a function:
+
+* A dimension point that represents a trigger (like a steering wheel on a car, or the handle on a toaster)
+* A set of possible positions for the trigger, where different actions will happen depending on where that trigger is located.
+* A set of positions that represent locations for dimension points we might take action on
+
+We also often require that the dimension points in all those positions also have certain qualities.
+
+Note that the position for the trigger can be the same as one of the positions the function takes action on. That is, the function can modify or "look at" the trigger itself, if needed.
+
+Theoretically, you could even require multiple dimension points in multiple different locations, for the trigger. On my keyboard right now, I have to press Shift and press the letter "a" if I want to get a capital A. That required two dimension points to be in particular locations---simply pressing Shift by itself did nothing.
+
+#### Functions Are Potential Forms
+
+In the way that we think about universes, we notice something interesting here: everything about a function sounds an awful lot like a _form_---a defined spatial relationship between dimension points. It's like saying, "when the trigger is here and some other dimension points are in these other positions, then take an action." The one addition is that we can require certain qualities be in that form.
+
+We could, in fact, describe a function like this, in an imaginary language:
 
 ```
-    when (my_toaster has the relationship toast with a dimension point that has the quality IsBread)
-    when (my_car_horn has the relationship pushed_down with itself)
+potential form toast {
+    position<handle_down> is a ToasterHandle
+    position<bread_space> is a Bread
+}
 ```
 
-#### Uniqueness of Function Names
+And then the trigger would just look like:
 
-Function names only _need_ to be unique on the dimension point they are assigned to. (That is, if I have a `calculator` object, there can't be two functions that have exactly the name `function<add>`). It may be beneficial, for the sake of simplicity, for a programming language to put broader restrictions on how unique function names need to be, though.
-
-Some languages _look_ like they allow multiple functions with the same name. For example, in Java, you could do:
-
-```Java
-    class Adder {
-        int add(int x, int y) {
-            return x + y
-        }
-
-        float add(float x, float y) {
-            return x + y
-        }
-    }
+```
+when (potential_form<toast> exists)
 ```
 
-And then Java would call the right function based on the arguments you passed. However, what's really happening is a bunch of gymnastics behind the scenes to figure out what function to call when you, the programmer, do something like `add(1, 2)`. The program actually knows there are two different functions and it actually gives them different names (you can think of it like there is one function named `add_int_int` and another function named `add_float_float`).
+Meaning "when dimension points are in that form."
 
-#### Functions Do Not Have Real Existence
+You'll notice we need a new **type of name** for a potential form. (It's not even a form, it's just a description of a form that _could_ exist.) Since potential forms have theoretical uses outside of functions, we would probably want to name them something like `potential_form<some_name>`.
 
-Note that functions, like qualities and forms, do not have real existence. They are just a relationship between dimension points. They exist only in the universe of reflection.
+In most languages, there is only one type of trigger. The `Toaster` example above would look something like:
 
-Some programming languages do act as though functions are real objects. For example, in Python, one can do something like:
-
-```Python
-   def add_numbers(x, y):
-        return x + y
-
-    def do_math(some_function, x, y):
-        return some_function(x, y)
-
-    do_math(add_numbers, x, y)
+```
+potential form toast_function {
+    position<self> is a Toaster
+    position<toast> is a Function
+    position<bread_type> is a String
+    view<result> is a String
+}
 ```
 
-There we provide `add_numbers` as an argument to a function. Conceptually, what Python is actually doing is creating a _whole machine_ named `add_numbers` that has real existence, then (invisibly) giving that machine a function (we can imagine it's named `run` or something). Then there is a function named `do_math` that takes as arguments a machine and two numbers, and puts those two numbers into the relationship `run` with the machine `add_numbers`.
+There's just a generic quality called "Function" that dimension points can have. You can think of it as "when I shoot this magic dimension point at my Toaster, it toasts the bread." If the Toaster's function was very limited, you actually could simplify that to:
 
-The things that have real existence there are:
+```
+potential form toast {
+    position<self> is a Toaster
+    position<bread_type> is a String
+}
+```
 
-* A dimension point named `add_numbers`, which has the quality of being a machine.
-* Two dimension points named `x` and `y` that both have the quality of being particular numbers.
+We would think of that as a sort of automatic Toaster---whenever a Toaster exists and bread is inside of it, it will simply toast the bread.
 
-It is interesting to realize here why traditional programming languages have such problems optimizing their code: they have given real existence to things that, very often, don't need to be real.
+Interestingly, I suspect this also solves many of the problems of parallelism (doing multiple things simultaneously) in programs. If you want to toast multiple pieces of bread, you clearly need to either have multiple toasters, or a toaster with multiple bread slots, or something, and it seems easier to detect if you're trying to simultaneously put the same piece of bread into multiple toasters. (The one thing it doesn't inherently solve is: what if multiple toasters just _view_ the same piece of bread?)
 
 ### Defining a Machine's Action
 
