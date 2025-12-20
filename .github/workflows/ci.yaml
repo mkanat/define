@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: "lts/*"
 
-      - run: npx prettier --check "**/*.md"
+      - run: npx prettier --check "**/*.md" "**/*.yaml"
 
       - uses: actions/setup-python@v5
         with:
