@@ -47,6 +47,7 @@ convention = "pep257"
 
 [dependency-groups]
 dev = [
+    "pre-commit",
     "pyright[nodejs]",
     "pytest",
     "ruff",
