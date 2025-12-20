@@ -1,6 +1,7 @@
 # Define
 
-A programming language based in epistemology (the study of how knowledge is known).
+A programming language based in epistemology (the study of how knowledge is
+known).
 
 The language is currently in early prototyping stages.
 
@@ -8,21 +9,32 @@ The language is currently in early prototyping stages.
 
 ### Language Design
 
-* [The Conceptual Basis of Define](concepts.md): The highest-level concepts that guide the design of Define as a language.
-* [Principles for Define](principles.md): A set of guiding principles for how we design the language, at a lower level than the Concepts, but not a description of a specific implementation.
-* [Requirements for Define](requirements.md): Similar to the Principles, but indicates things that must always be true about Define as a language or programs written in it.
-* [The Define Language Specification](spec.md): The detailed spec, ideally with sufficient information to implement a compiler for the language. Describes an actual programming language.
+- [The Conceptual Basis of Define](concepts.md): The highest-level concepts that
+  guide the design of Define as a language.
+- [Principles for Define](principles.md): A set of guiding principles for how we
+  design the language, at a lower level than the Concepts, but not a description
+  of a specific implementation.
+- [Requirements for Define](requirements.md): Similar to the Principles, but
+  indicates things that must always be true about Define as a language or
+  programs written in it.
+- [The Define Language Specification](spec.md): The detailed spec, ideally with
+  sufficient information to implement a compiler for the language. Describes an
+  actual programming language.
 
 ### Philosophy
 
-[The Phillsophy of Define](philosophy.md): A document originally written in 2016 by mkanat that explains the motivations and thoughts that were originally behind the language.
+[The Phillsophy of Define](philosophy.md): A document originally written in 2016
+by mkanat that explains the motivations and thoughts that were originally behind
+the language.
 
 ### Writing Define
 
-Define has a basic [Style Guide](style.md) describing rules around how code sould be structured in the language.
+Define has a basic [Style Guide](style.md) describing rules around how code
+sould be structured in the language.
 
 ### Contributing
 
-We aren't yet accepting external contributions, but I've started to collect some docs for the future when we are, as I think about them:
+We aren't yet accepting external contributions, but I've started to collect some
+docs for the future when we are, as I think about them:
 
-* [How to Write a Language Proposal](language-proposals.md)
+- [How to Write a Language Proposal](language-proposals.md)
