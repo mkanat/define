@@ -409,11 +409,11 @@ indicating there is a position a dimension point could occupy.
 
 Sometimes in a programming language, we need some way to indicate that we are
 simply viewing a dimension point where it is, without moving it. For example,
-imagine let's take this function in C:
+let's take this function in C:
 
 ```C
     void add(int x, int y, int* result) {
-        *result = x + y
+        *result = x + y;
     }
 ```
 
@@ -449,15 +449,26 @@ position.
 There are only two _real_ view points involved in a computer program: the
 programmer(s) and the user(s). All dimension points inside of the program are
 "created" by the programmer. The user creates input in the physical universe,
-and sees output in the physical universe, but the program only knows about that
-because it gets a symbolic _representation_ of the input and sends symbols out
-that _represent_ the output.
+and sees output in the physical universe. However, the program only knows about
+that because it gets a symbolic _representation_ of the input and sends symbols
+out that _represent_ the output.
 
 If we want to get more specific, the program doesn't actually know that its
 inputs are coming from a user, or that its outputs are going to a user. It only
 knows that they are going to and from the physical universe.
 
-So essentially we can consider that a program interacts with two universes: its
+For example, when I hit the "a" key on my keyboard, the computer gets an
+electrical signal. The program then interprets this electrical signal as the
+number 97, which represents the letter "a" in ASCII. The electrical signal is a
+representation of me pressing "a", and then the number 97 in the program is a
+representation of that electrical signal. The program only knows that it got the
+number 97 from outside of itself.
+
+The same thing happens for output. When the program wants to show me the letter
+"a", it sends an electrical signal to the video card, which sends it to the
+monitor, which translates that signal into the character "a".
+
+So essentially, we can consider that a program interacts with two universes: its
 own universe (the one defined by the programmer(s)), and the physical universe.
 
 ### Interfaces Between the Program and the Physical Universe
@@ -575,9 +586,9 @@ section, a row, and a seat. `front_seat.section` is simply the name of one of
 those dimension points. In how we think about defining universes, `front_seat`
 _does not exist_. It is simply a name that creates a defined relationship
 between `section`, `row`, and `orchestra` in this program. Remember that in a
-program, space is created by names, so `front_seat` is actually _empty space_.
-It's not even a position---it's a name we are using for a particular arrangement
-of dimension points.
+program, names are space, so `front_seat` is actually _empty space_. It's not
+even a position---it's a name we are using for a particular arrangement of
+dimension points.
 
 ### Talking About Forms
 
@@ -644,11 +655,13 @@ think about it in a programming language.
 
 The technical definition of a machine is:
 
-**A dimension point that changes the qualities of itself or other dimension
-points in a defined way when the qualities of certain dimension points change in
-defined ways.**
+**A dimension point that changes the qualities of certain dimension points in a
+defined way when the qualities of certain dimension points change in defined
+ways.**
 
-So basically, one thing changes and thus another thing changes.
+So basically, one thing changes and thus another thing changes. A machine is a
+dimension point that reacts to the changes of itself or other dimension points
+somehow.
 
 For example, when I press a key on my keyboard, a letter appears on my screen.
 The key on my keyboard developed a particular quality (it was pressed down) and
@@ -701,8 +714,8 @@ actually occurred:
    `my_toaster`. (This was the call to `my_toaster.toast(my_bread)`.)
 7. `my_toaster` has the quality that if it sees a string in that specific
    location in relationship to itself, it will modify a second dimension point
-   (`result`) to have the quality of being the string string "toasted " followed
-   by the input string.
+   (`result`) to have the quality of being the string string `"toasted "`
+   followed by the input string.
 8. Those conditions are met so `my_toaster` modifies `result` accordingly.
 
 There are only three dimension points: `my_toaster`, `my_bread`, and `result`.
@@ -883,7 +896,7 @@ for bread." That's what we are doing when we define a machine, in programming.
 
 Most languages solve all of this by creating named functions, like our `Toaster`
 example from earlier, where there is a function named `toast`. The "space for
-bread" is the `bread_type` argument to `toast`.
+bread" is the `bread_type` argument to `toast`, and `toast` is the "handle."
 
 But let's think about what we actually need, minimally, in order to describe a
 function:
@@ -915,7 +928,7 @@ everything about a function sounds an awful lot like a _form_---a defined
 spatial relationship between dimension points. It's like saying, "when the
 trigger is here and some other dimension points are in these other positions,
 then take an action." The one addition is that we can require certain qualities
-be in that form.
+be assigned to the dimension points in that form.
 
 We could, in fact, describe a function like this, in an imaginary language:
 
