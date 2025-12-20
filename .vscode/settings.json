@@ -4,5 +4,9 @@
     "[python]": {
         "editor.defaultFormatter": "astral-sh.ruff"
     },
+    "[markdown]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
     "ruff.lint.enable": true
 }
