@@ -117,7 +117,7 @@ and easier to reason about, but all of them _could_ happen.
 ## Space
 
 A view point needs some universal mechanism to differentiate all dimension
-points from each other. In the physical universe, this mechnism is _space_. You
+points from each other. In the physical universe, this mechanism is _space_. You
 say "dimension point 1 has this location, and dimension point 2 has a different
 location." The view point can change the position of the dimension points, and
 the view point can change its own position in relation to the dimension points.
@@ -143,7 +143,7 @@ dimension points.
 
 When a computer runs a computer program, it actually puts different objects into
 different _physical locations_. It locates them somewhere in memory, inside of
-the CPU, etc. They are represented by electricity, and that electricty has a
+the CPU, etc. They are represented by electricity, and that electricity has a
 real location in the physical universe. Space _is_ the mechanism a computer is
 using to keep things separate.
 
@@ -396,7 +396,7 @@ understand.
 
 Programming languages often need a way of indicating there is an empty space
 that _could_ be occupied by a dimension point. (This will become clearer as we
-describe more concepts futher on in this document.)
+describe more concepts further on in this document.)
 
 We need a new **type of name** to indicate empty positions in space that a
 dimension point could occupy. These would look something like `position<goal>`,
