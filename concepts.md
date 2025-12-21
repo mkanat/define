@@ -950,7 +950,10 @@ Meaning "when dimension points are in that form."
 You'll notice we need a new **type of name** for a potential form. (It's not
 even a form, it's just a description of a form that _could_ exist.) Since
 potential forms have theoretical uses outside of functions, we would probably
-want to name them something like `potential_form<some_name>`.
+want to name them something like `potential_form<some_name>`. Or we might use
+the term "shape," (so `shape<some_name>`) because they sort of indicate how
+dimension points are _shaped_ (as opposed to a form, which is a concrete
+object).
 
 In most languages, there is only one type of trigger. The `Toaster` example
 above would look something like:
