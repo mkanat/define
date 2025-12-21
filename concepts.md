@@ -1172,3 +1172,52 @@ you could write out a long logical description of addition using only dimension
 points, that doesn't really make sense if addition is a fundamental function of
 the computer. Just have a way of expressing that you're executing a fundamental
 function, so you can say "now the computer adds these numbers."
+
+## Optimization: Sequence and Dependencies
+
+When we write programs, we tend to think of them as executing a series of steps
+in a sequence. For example, let's imagine a program that looks like:
+
+```
+create a dimension point named ball
+assign the quality Basketball to ball
+define a dimension point named basket
+assign the quality BasketballHoop to basket
+# Imagine that Basketball has a function named "shoot" that goes to a BasketballHoop
+make ball shoot basket
+```
+
+That looks like we do five things in a sequence. However, we can also see that
+some of them don't need to be sequential. For example, `ball` and `basket` could
+have been created in the same instant. Assigning them their qualities could then
+also have been done simultaneously, afterward. The creation of the basket
+doesn't _depend_ on the creation of the ball. Thus, when compiling that
+imaginary language, a compiler could create both `ball` and `basket` at once.
+
+A lot of optimization in a programming language is dependent upon the compiler's
+ability to determine which actions are dependent upon which other actions, and
+_how_ they are dependent. Here's an example that shows what we mean by "how they
+are dependent":
+
+```
+create a form named soccer_field {
+    position<left_goal> is a Goal
+    position<right_goal> is a Goal
+}
+create a dimension point named ball
+assign the quality SoccerBall to ball
+
+make ball kick with soccer_field.left_goal
+make ball kick with soccer_field.right_goal
+```
+
+Can we execute those two `kick` functions simultaneously? All of that depends on
+what happens inside of the `kick` function. Logically based on our understanding
+of the physical universe, we have to do those in sequence; we can't kick the
+same ball to two different goals at the same time. But in a computer program,
+the only way we could know that is by actually looking at what the `kick`
+function actually does.
+
+A programming language should make it possible for the compiler to know exactly
+which actions _must_ happen in sequence and which can be optimized or moved
+around.
