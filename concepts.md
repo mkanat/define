@@ -1221,3 +1221,163 @@ function actually does.
 A programming language should make it possible for the compiler to know exactly
 which actions _must_ happen in sequence and which can be optimized or moved
 around.
+
+## Similarity and Differences
+
+The principles we have described so far give us some very powerful mechanisms
+for determining if dimension points and forms are similar to each other.
+
+Most programming languages are very strict about this and fairly limited in how
+they understand similarity. For example, in a traditional language, you might
+say that there is the concept of an `Animal`, and then define that a `Dog` is an
+`Animal` and a `Cat` is an `Animal`. You could then have a function called
+`make_sound` that an `Animal` can do, and require that any `Animal` implements
+its own ability to make sound.
+
+That is a fairly limited similarity mechanism. It requires that a `Dog` be
+exactly an `Animal`. It requires that `Dog` have a function named exactly
+`make_sound`. It also will require that `make_sound` return the same type and
+take the same type of arguments for all implementations for all `Animal`
+subclasses.
+
+We have already defined more powerful similarity mechanisms in this document. We
+could look for anything that has any particular potential form, and say that all
+of those things can be used as arguments, trigger functions based on those
+potential forms, etc. The language that I'm familiar with that does the closest
+to this is Go, with its interfaces, but the mechanisms described above in this
+document are more powerful than Go's interfaces.
+
+So we have already gone well beyond what traditional programming languages can
+do. However, there is one additional concept that does not exist in any language
+today, as far as I am aware: the concept of spatial _distance_ between dimension
+points.
+
+## Distance
+
+Two things in the physical universe can be "near" (close in space) or "far"
+(distant in space). This is a universal comparison mechanism that can be applied
+to all objects in the physical universe. Programming languages have almost no
+way of expressing this concept. Computers have a way of representing it (numbers
+are close or far from each other) but there's never been a way to express this
+in pure symbols in a language.
+
+The closest concept to this that I am aware of in computing is the concept of
+vector embeddings, as used in machine learning. These are lists of numbers that
+represent some concept. For example, you might have a long list of numbers that
+represent the concept "Queen" and another long list of numbers that represent
+the concept "Woman." The numbers are designed such that if you do some special
+math with them, you can "subtract" the concept "Woman" from the concept "Queen"
+and get the exact numbers (or close to them) for the concept "Monarch."
+Embeddings will tell you that the concept "apple" is very similar to the concept
+"pear," similar (but not _as_ similar) to the concept "strawberry," and very
+different from the concept "blender." Doing math on the embeddings tells you the
+"distance" between all of those concepts.
+
+Now, you can accomplish a lot of differentiation purely by looking at what
+qualities a dimension point has. A red dimension point and a green dimension
+point are different, we know that. The hard part is telling _how_ different they
+are. A red dimension point and a pink dimension point are _similar_, but their
+qualities are not identical. Pink is more like red than it is like blue.
+
+The same issue appears with forms: you can accomplish a lot of differentiation
+by saying "only look at dimension points that are shaped in a circle." But what
+if you only want a _large_ circle or only a _small_ circle? Well, you could just
+apply a quality that says "large" or "small." For most of the computer programs
+we write today, that's actually fine. However, you have gotten away from having
+a universal comparison mechanism, and perhaps there is some utility in being
+able to truly model how universes actually work.
+
+### Inventing Distance
+
+In order to understand what distance is and how we might represent it in a
+programming language, we have to first imagine a universe with no space and no
+dimension points, and then build up the concept of distance from scratch. (We
+can file that under "things I never thought I would have to figure out in order
+to design a programming language," for sure.)
+
+First you have a viewpoint. You can just consider that's you, looking at this
+document. Then you have a single dimension point. We will call it A:
+
+```
+A
+```
+
+Then you have another one. We will call it B. All we know is that this one is
+different from the other one:
+
+```
+A B
+```
+
+Now we are going to make a third one, named C. Without distance, we now just
+know we have three points:
+
+```
+A B
+ C
+```
+
+(It's hard to represent there in text, but imagine they all are clumped together
+in a very tiny triangle---all equally distant from each other.)
+
+Now, without assigning any qualities to A, B, or C, we want to be able to say
+that A and B are more closely related than B and C. So we need some way to
+express that. _Now_ we need the concept of distance (and it requires at least
+three points to express it):
+
+```
+A-----1 meter-----B-----------2 meters----------C
+```
+
+Here we can now see that B and C are twice as far away from each other as A and
+B are. (We use "meters" there just to make this understandable to us, the
+readers, but it's really just "A and B's relationship represents the standard
+unit of distance, and we define all other distances based on how far apart A and
+B are.) We also can see that A and C are very different (very far away) from
+each other.
+
+Note that we could also imagine a point D between A and B and just say that that
+distance is less than the distance between A and B (and somehow describe _how
+much_ less):
+
+```
+A-1/3 meter-D----2/3 meter----B--------------2 meters-----------------C
+```
+
+I'm just making the point that distances can be shorter than the unit distance
+between A and B, too.
+
+That is the very simplest definition of distance: define a set of two dimension
+points, and then say whether other things are closer together or further apart
+than those two points, and by how much.
+
+Although we had to do math to express this, it is possible that this is actually
+the _basis_ of mathematics: the distance between dimension points. (Distance
+from A to B is 1, and then the distance from B to C has a degree of difference
+compared to A and B that we can think of as "2," and so forth. However,
+distances are only relevant compared to each other and can be infinitely smaller
+or larger than each other.)
+
+### Dimensions: Types of Comparisons
+
+Let's go back to our color spectrum. That looks like:
+
+```
+Red --- Orange --- Yellow --- Green --- Blue --- Indigo --- Violet
+```
+
+We can consider (for the sake of simplicity here) that each of those colors has
+a particular "distance" between them, when we think about how similar they are
+to each other, and it looks roughly like the drawing above.
+
+What about sizes? We might have a scale that looks like:
+
+```
+Tiny --- Small --- Medium --- Large --- Huge --- Gargantuan
+```
+
+Those two concepts (color and size) are not comparable to each other. One object
+might have both qualities: you might have a small yellow ball or a large green
+ball. But the concept of "tiny" and the concept of "red" can't be compared to
+each other. We can't even really say that "red is further from orange than tiny
+is from small."
