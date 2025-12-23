@@ -1310,7 +1310,7 @@ A B
 ```
 
 Now we are going to make a third one, named C. Without distance, we now just
-know we have three points:
+know we have three points, all totally different from each other:
 
 ```
 A B
@@ -1351,33 +1351,108 @@ That is the very simplest definition of distance: define a set of two dimension
 points, and then say whether other things are closer together or further apart
 than those two points, and by how much.
 
+If distance was our _only_ mechanism of determining similarity, we could now
+rank how similar each pair is, like this, from most similar to least:
+
+1. A and D
+2. D and B
+3. A and B
+4. B and C
+
+And so on.
+
 Although we had to do math to express this, it is possible that this is actually
-the _basis_ of mathematics: the distance between dimension points. (Distance
-from A to B is 1, and then the distance from B to C has a degree of difference
-compared to A and B that we can think of as "2," and so forth. However,
-distances are only relevant compared to each other and can be infinitely smaller
-or larger than each other.)
+the _basis_ of mathematics: comparing the distance between dimension points.
+(Distance from A to B is 1, and then the distance from B to C has a degree of
+difference compared to A and B that we can think of as "2," and so forth.
+However, distances are only relevant compared to each other and can be
+infinitely smaller or larger than each other.)
 
-### Dimensions: Types of Comparisons
+### Spectrums
 
-Let's go back to our color spectrum. That looks like:
-
-```
-Red --- Orange --- Yellow --- Green --- Blue --- Indigo --- Violet
-```
-
-We can consider (for the sake of simplicity here) that each of those colors has
-a particular "distance" between them, when we think about how similar they are
-to each other, and it looks roughly like the drawing above.
-
-What about sizes? We might have a scale that looks like:
+Very often, concepts exist along some sort of spectrum. Essentially, you define
+two end points of a scale, and then you have potentially infinite positions
+between those two points. For example, the colors black and white form a
+spectrum, where black is the total absence of light, and theoretically at the
+top you have total white, which is all the light there can possibly be:
 
 ```
-Tiny --- Small --- Medium --- Large --- Huge --- Gargantuan
+Black------------------------------------White
 ```
 
-Those two concepts (color and size) are not comparable to each other. One object
-might have both qualities: you might have a small yellow ball or a large green
-ball. But the concept of "tiny" and the concept of "red" can't be compared to
-each other. We can't even really say that "red is further from orange than tiny
-is from small."
+Right in the middle, you have a theoretical perfect gray, like this:
+
+```
+Black--------------------Gray--------------------White
+```
+
+But then there are infinite "shades of gray" that could theoretically exist all
+along that scale. You could pick out a point anywhere between Black and White
+and say "there's a shade of gray here."
+
+Spectrums are the primary tool we have for determining _how similar_ two
+concepts are. "Dark Gray" is more like Black than it is like White, for example.
+
+#### Total and Partial Spectrums
+
+You could have a _total spectrum_, which would be a spectrum that has two
+absolutes that represent complete opposites on either end, where there is no
+further concept that could exist that's further on either side. Black and White
+would be points like that. There's nothing blacker than absolute black, and
+there's nothing whiter than absolute white. These are the most versatile and
+useful spectrums when you want to compare how similar two things are to each
+other.
+
+You could also have a _partial spectrum_. For example, if we just had a spectrum
+that looked like:
+
+```
+Dark Gray---------Medium Gray---------Light Gray
+```
+
+There are still potentially infinite points on that spectrum, but there are
+things darker than dark gray, and there are things lighter than light gray. The
+danger of a partial spectrum is that you might have a concept that seems like
+you _ought_ to be able to compare it to something on the partial spectrum, but
+you can't. For example, we couldn't compare the color "off white" to "Light
+Gray" there, because "Light Gray" is the top of that spectrum and nothing exists
+beyond it. In general, it's best to avoid partial spectrums unless you don't
+know or can't figure out how to define the total spectrum.
+
+#### Spectrums as Syntax
+
+We can imagine a syntax in a programming language to define a spectrum:
+
+```
+define a quality named Black
+define a quality named White
+create a spectrum<brightness> that goes from Black to White
+```
+
+And then you could add things to it:
+
+```
+define a quality named Gray
+put Gray onto spectrum<brightness> between Black and White
+define a quality named OffWhite
+put OffWhite onto spectrum<brightness> between Gray and White, 10% away from White
+define a quality named AlmostWhite
+put AlmostWhite onto spectrum<brightness> between OffWhite and White, 10% away from White
+```
+
+Every distance specified is only relative to the two end points named. So the
+code above would get us a scale that looked something like:
+
+```
+Black----------------------------------------------Gray---------------------------------OffWhite-------AlmostWhite-White
+```
+
+We used numbers like "10%" above, but that's just a shorthand for indicating a
+position on the infinite scale between Gray and White, or another infinite scale
+between OffWhite and White.
+
+In a real computer, the number of possible positions would be limited, but not
+very limited. In most computers, we could easily represent 2^64 positions
+between each named concept on a scale, and then every time we add a new concept,
+there's another 2^64 new potential positions. That seems effectively infinite
+for most purposes.

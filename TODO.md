@@ -7,6 +7,9 @@ future.
 - Create an auto-formatter.
 - Need some form of namespacing. Maybe that's what a ViewPoint is.
 - Events system
+- Consider Lean's "with" syntax for clones?
+- Sequences can be more collapsed than we describe in concepts.
+-
 
 # Need some sort of registry and system to prevent naming conflicts.
 
