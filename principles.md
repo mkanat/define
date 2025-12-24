@@ -4,10 +4,10 @@ These are general rules we try to follow that help guide our decisions about
 language design. If something is instead an unbreakable rule that must always be
 true, it goes into [requirements.md] instead.
 
-## Define Should Read Intuively
+## Define Should Read intuitively
 
 Lines of code in define should feel something like English sentences. They don't
-need to actually be gramatical English sentences, but they should feel somewhat
+need to actually be grammatical English sentences, but they should feel somewhat
 intuitive to a reader who is not deeply familiar with programming.
 
 To be clear, define is a programming language and it does require expertise to
@@ -53,3 +53,42 @@ as a language, for a few reasons:
   future choices for how we modify the language.)
 - It makes intent clearer to readers.
 - It makes the language naturally interpretable by an AI coding assistant.
+
+## Define Can Write Bad Programs
+
+One of the goals of Define is to be able to represent any program with any sort
+of structure, so that you can incrementally translate existing programs into
+Define. That is, we can't specify things like "you must always name variables
+lowercase," because other programming languages don't have that constraint, and
+we need to be able to represent a program from those programming languages in
+Define.
+
+Define isn't just a mechanism to model universes, it's a mechanism to model _any
+other model_ of a universe. If you want to create a crazy, illogical universe in
+Define, you should be able to.
+
+We should strive to help the programmer write logical universes that are
+well-structured, but we should not _totally prevent_ them from creating crazy
+universes. We _should_ make it clear that the universe is crazy, though.
+
+For example, imagine that somebody wants to translate this snippet of Python
+into Define:
+
+```Python
+def do_crazy_stuff(foo, bar, baz):
+  qux = foo + bar
+  my_value = qux * baz
+  return my_value
+```
+
+That looks straightforward, but really it's sort of crazy because of the lack of
+types. That could take any value for any of those arguments, including `None`,
+and could return any value, including `None`. What `+` and `*` mean there would
+be different depending on what is inside of `foo`, `bar`, and `baz`.
+
+In Define, you can't do addition and multiplication on dimension points with no
+qualities. So either you would have to create a quality called something like
+`NumberOrString` (which would be sort of crazy, but still be way better than the
+code above), or you would have to define a very complex machine to execute that
+code. Or, you could choose to just make it saner while you are translating it,
+and specify that all those values have to be integers.
