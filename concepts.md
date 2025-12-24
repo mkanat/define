@@ -1554,6 +1554,28 @@ there's another 2^64 new potential positions between that point and the point on
 its left, plus 2^64 potential positions to its right. That seems effectively
 infinite for most purposes.
 
+When we wanted to check values, instead of asking if something was exactly
+OffWhite, we could specify something like:
+
+```
+position<ball> has a spectrum<color> between quality<Gray> and quality<AlmostWhite>
+```
+
+or perhaps:
+
+```
+position<ball> has a spectrum<color> within 10% of quality<OffWhite>
+```
+
+In a program, though, the syntax using named bounds is more understandable. It's
+sort of hard for a programmer to reason through "within 10% of off white." So
+probably you would require always defining left and right bounds on the spectrum
+before checking if a value was in range.
+
+And yes, we also need some way to indicate if we are including or excluding the
+named bounds. (Like, if I pass exactly `quality<Gray>` does it count for our
+earlier example?)
+
 ### Spectrums Exist in the Universe of Reflection
 
 You will notice that above we used a new **type of name** for spectrums. Why did
