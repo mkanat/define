@@ -648,6 +648,24 @@ them any other qualities.
 The point is simply that a programming language must have a syntax for defining
 forms.
 
+## Composition of Qualities
+
+Some qualities are actually a combination of a set of other qualities. For
+example, when we perceive the color of an object, we are actually perceiving a
+few different qualities of that object:
+
+- **Hue**: When light reflects off an object, it actually reflects lots of
+  different waves. We see one color from that, based on the average wavelength
+  of all the reflected light. We call this the "hue."
+- **Saturation**: The "purity" of the color. How similar are all the different
+  wavelengths that are being reflected off the object? If they are all red, it
+  looks like a very _pure_ red.
+- **Luminance**: The "brightness" of the color. Essentially, how powerful are
+  the light waves that are hitting your eye?
+
+So if we had a quality called `PerceivedColor` it would really be three
+different qualities all in one.
+
 ## Machines
 
 Let's get into a bit more detail about what a machine really is and how we would
@@ -1214,9 +1232,9 @@ produce the result the programmer intended.
 ### Dependencies
 
 As we start to see above, a lot of optimization in a programming language is
-dependent upon the compiler's ability to determine which actions are dependent
-upon which other actions, and _how_ they are dependent. Here's an example that
-shows what we mean by "how they are dependent":
+based on the compiler's ability to determine which actions are dependent upon
+which other actions, and _how_ they are dependent. Here's an example that shows
+what we mean by "how they are dependent":
 
 ```
 create a form named soccer_field {
@@ -1234,8 +1252,8 @@ Can we execute those two `kick` functions simultaneously? All of that depends on
 what happens inside of the `kick` function. Logically based on our understanding
 of the physical universe, we have to do those in sequence; we can't kick the
 same ball to two different goals at the same time. But in a computer program,
-the only way we could know that is by actually looking at what the `kick`
-function actually does.
+the only way we could know that is by looking at what the `kick` function
+actually does.
 
 A programming language should make it possible for the compiler to know exactly
 which actions _must_ happen in sequence and which can be optimized or moved
@@ -1386,7 +1404,7 @@ In order to understand what distance is and how we might represent it in a
 programming language, we have to first imagine a universe with no space and no
 dimension points, and then build up the concept of distance from scratch. (We
 can file that under "things I never thought I would have to figure out in order
-to design a programming language," for sure.)
+to design a programming language.")
 
 First you have a viewpoint. You can just consider that's you, looking at this
 document. Then you have a single dimension point. We will call it A:
@@ -1426,7 +1444,7 @@ Here we can now see that B and C are twice as far away from each other as A and
 B are. (We use "meters" there just to make this understandable to us, the
 readers, but it's really just "A and B's relationship represents the standard
 unit of distance, and we define all other distances based on how far apart A and
-B are.) We also can see that A and C are very different (very far away) from
+B are.") We also can see that A and C are very different (very far away) from
 each other.
 
 Note that we could also imagine a point D between A and B and just say that that
@@ -1460,7 +1478,8 @@ the _basis_ of mathematics: comparing the distance between dimension points.
 difference compared to A and B that we can think of as "2," and so forth.
 However, distances are only relevant compared to each other and can be
 infinitely smaller or larger than each other.) The concept of absolute
-quantities would be represented by numbers of dimension points.
+quantities would be represented by numbers of dimension points. So we have both
+finite math (dimension points) and infinite math (space).
 
 ### Spectrums
 
@@ -1558,13 +1577,13 @@ When we wanted to check values, instead of asking if something was exactly
 OffWhite, we could specify something like:
 
 ```
-position<ball> has a spectrum<color> between quality<Gray> and quality<AlmostWhite>
+position<ball> has a spectrum<brightness> between quality<Gray> and quality<AlmostWhite>
 ```
 
 or perhaps:
 
 ```
-position<ball> has a spectrum<color> within 10% of quality<OffWhite>
+position<ball> has a spectrum<brightness> within 10% of quality<OffWhite>
 ```
 
 In a program, though, the syntax using named bounds is more understandable. It's
