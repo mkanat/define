@@ -1173,7 +1173,19 @@ points, that doesn't really make sense if addition is a fundamental function of
 the computer. Just have a way of expressing that you're executing a fundamental
 function, so you can say "now the computer adds these numbers."
 
-## Optimization: Sequence and Dependencies
+## Optimization
+
+One of the ideas behind Define is that if we provide the compiler enough
+information about the intent of the program, the compiler can do most of our
+optimizations for us.
+
+The programmer should focus on writing their program logically in the way that
+makes sense to them, and the compiler should figure out how to optimize that to
+run best on the simulator (the computer).
+
+Let's look at some concepts that are important for that sort of optimization.
+
+### Sequences
 
 When we write programs, we tend to think of them as executing a series of steps
 in a sequence. For example, let's imagine a program that looks like:
@@ -1194,10 +1206,17 @@ also have been done simultaneously, afterward. The creation of the basket
 doesn't _depend_ on the creation of the ball. Thus, when compiling that
 imaginary language, a compiler could create both `ball` and `basket` at once.
 
-A lot of optimization in a programming language is dependent upon the compiler's
-ability to determine which actions are dependent upon which other actions, and
-_how_ they are dependent. Here's an example that shows what we mean by "how they
-are dependent":
+In fact, if what was above was our whole program, a compiler could essentially
+create the ball as having already shot into the basket. The compiler doesn't
+need to simulate exactly the _logic_ that the programmer wrote. It just needs to
+produce the result the programmer intended.
+
+### Dependencies
+
+As we start to see above, a lot of optimization in a programming language is
+dependent upon the compiler's ability to determine which actions are dependent
+upon which other actions, and _how_ they are dependent. Here's an example that
+shows what we mean by "how they are dependent":
 
 ```
 create a form named soccer_field {
@@ -1222,7 +1241,53 @@ A programming language should make it possible for the compiler to know exactly
 which actions _must_ happen in sequence and which can be optimized or moved
 around.
 
-## Similarity and Differences
+### Constraints
+
+A powerful way to both improve the quality of our programs and help the compiler
+optimize them is to express _constraints_ on how the program may function.
+
+For example, take this Python program:
+
+```Python
+def add(first, second):
+    return first + second
+```
+
+The variables `first` and `second` there could contain anything: integers,
+floating point numbers, strings, objects, whatever. A compiler has a pretty hard
+time optimizing that function. So we can make it a bit more specific:
+
+```Python
+def add(first: int, second: int) -> int:
+    return first + second
+```
+
+Now we know that the two values being passed in are always integers! That's much
+more constrained. However, in a theoretical programming language, we could go
+much farther:
+
+```
+define a quality named tiny_integer {
+    it is a Integer.
+    it is greater than 0 or equal to 0.
+    it is less than 7 or equal to 7.
+}
+```
+
+A `tiny_integer` fits inside a single byte. If we implemented our "add" function
+using `tiny_integer`, the compiler could optimize all uses of it much more,
+provided the computer had some way of efficiently dealing with single bytes. It
+also gives us a program that is easier to debug and more likely to be correct,
+as the compiler will tell us if we ever try to set a `tiny_integer` to a value
+that could be greater than 7 or less than 0.
+
+These constraints are most important at the boundary between the program and the
+physical universe. A programming language should make it possible and desirable
+to set constraints on the exact form of data that is received from the physical
+universe, as well as methods to cope with data that comes in that does not meet
+those constraints.
+
+## Similarities and Differences
 
 The principles we have described so far give us some very powerful mechanisms
 for determining if dimension points and forms are similar to each other.
