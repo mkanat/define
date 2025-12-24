@@ -1212,7 +1212,12 @@ quality PerceivedColor {
 }
 ```
 
-A language then needs mechanisms to deal with composition.
+A language then needs mechanisms to deal with composition. For example, what
+happens when a function triggers on one of those qualities? Do they all execute
+independently, or in some order, or does only one of them run? Is there some way
+for PerceivedColor to override the behavior of any of the qualities it's
+composed of, or do they all operate independently? How do I indicate if I want
+to set the Hue on a dimension point?
 
 ## Fundamental Functions
 
