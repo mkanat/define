@@ -1252,14 +1252,30 @@ do. However, there is one additional concept that does not exist in any language
 today, as far as I am aware: the concept of spatial _distance_ between dimension
 points.
 
-## Distance
+---
 
-_Warning: From this point forward, we are going quite far beyond what
-traditional programming languages handle. There may or may not be utility in
-implementing this in a programming language, today. However, describing it is
-necessary in order to fully define all the concepts required to simulate a
-universe, and it does solve some real problems in computing that are otherwise
-very hard to solve._
+> Above this point, we have laid out the concepts for a language we could call
+> "Define Exactly." It is based around exact positions in space that have exact
+> qualities.
+>
+> From this point forward, we are going quite far beyond what traditional
+> programming languages handle. There may or may not be utility in implementing
+> this in a programming language, today. However, describing it is necessary in
+> order to fully define all the concepts required to simulate a universe, and it
+> does solve some real problems in computing that are otherwise very hard to
+> solve.
+>
+> Real universes are often not exact, but "fuzzy." When we look at something and
+> call it "red," there are many wavelengths of light that would all be
+> considered "red." In fact, there might be an infinite number of those
+> wavelengths, all within some fuzzily-defined range that we would all agree
+> "look red to me." Programming languages have traditionally been quite bad at
+> expressing that concept.
+>
+> You may consider what is below an enhancement to Define Exactly called Define
+> Approximately.
+
+## Distance
 
 Two things in the physical universe can be "near" (close in space) or "far"
 (distant in space). This is a universal comparison mechanism that can be applied
