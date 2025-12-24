@@ -1287,6 +1287,11 @@ to set constraints on the exact form of data that is received from the physical
 universe, as well as methods to cope with data that comes in that does not meet
 those constraints.
 
+Most programs express these constraints as logic that can only be validated
+while the program is running. One of the goals of Define is to be able to
+express many of these constraints in a way that the compiler can know, while
+compiling, whether the program is actually correct.
+
 ## Similarities and Differences
 
 The principles we have described so far give us some very powerful mechanisms
