@@ -664,7 +664,45 @@ few different qualities of that object:
   the light waves that are hitting your eye?
 
 So if we had a quality called `PerceivedColor` it would really be three
-different qualities all in one.
+different qualities all in one. A programming language would need syntax to
+indicate this. Traditional programming languages would just make this into
+something like a form:
+
+```Python
+class Color:
+    hue : int
+    saturation : int
+    luminance : int
+```
+
+In the way that we think about universes, there are a few different ways we
+could think about composition. The first is that we could just say you always
+have to apply all there qualities separately to any dimension point that you
+want to have a color:
+
+```
+create a dimension point named ball
+assign the quality Hue to ball with value: Red
+assign the quality Saturation to ball with value: Pure
+assign the quality Luminance to ball with value: Bright
+```
+
+However, it's impossible for an object to have a Hue without a Saturation or
+Luminance. Like, those three things aren't separable. (Even if they have a
+Luminance of 0, they still _have_ the quality of luminance.) There must be some
+way to indicate that some qualities are composed of other qualities.
+
+A syntax could look like this:
+
+```
+quality PerceivedColor {
+    it is composed of {
+        Hue
+        Saturation
+        Luminance
+    }
+}
+```
 
 ## Machines
 
