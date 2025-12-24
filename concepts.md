@@ -1254,6 +1254,13 @@ points.
 
 ## Distance
 
+_Warning: From this point forward, we are going quite far beyond what
+traditional programming languages handle. There may or may not be utility in
+implementing this in a programming language, today. However, describing it is
+necessary in order to fully define all the concepts required to simulate a
+universe, and it does solve some real problems in computing that are otherwise
+very hard to solve._
+
 Two things in the physical universe can be "near" (close in space) or "far"
 (distant in space). This is a universal comparison mechanism that can be applied
 to all objects in the physical universe. Programming languages have almost no
@@ -1366,7 +1373,8 @@ the _basis_ of mathematics: comparing the distance between dimension points.
 (Distance from A to B is 1, and then the distance from B to C has a degree of
 difference compared to A and B that we can think of as "2," and so forth.
 However, distances are only relevant compared to each other and can be
-infinitely smaller or larger than each other.)
+infinitely smaller or larger than each other.) The concept of absolute
+quantities would be represented by numbers of dimension points.
 
 ### Spectrums
 
@@ -1392,6 +1400,8 @@ and say "there's a shade of gray here."
 
 Spectrums are the primary tool we have for determining _how similar_ two
 concepts are. "Dark Gray" is more like Black than it is like White, for example.
+"Off White" is very similar to white, because it's very close to White on that
+spectrum.
 
 #### Total and Partial Spectrums
 
@@ -1399,9 +1409,9 @@ You could have a _total spectrum_, which would be a spectrum that has two
 absolutes that represent complete opposites on either end, where there is no
 further concept that could exist that's further on either side. Black and White
 would be points like that. There's nothing blacker than absolute black, and
-there's nothing whiter than absolute white. These are the most versatile and
-useful spectrums when you want to compare how similar two things are to each
-other.
+there's nothing whiter than absolute white. Total spectrums are the most
+versatile and useful spectrums when you want to compare how similar two things
+are to each other.
 
 You could also have a _partial spectrum_. For example, if we just had a spectrum
 that looked like:
@@ -1454,5 +1464,129 @@ between OffWhite and White.
 In a real computer, the number of possible positions would be limited, but not
 very limited. In most computers, we could easily represent 2^64 positions
 between each named concept on a scale, and then every time we add a new concept,
-there's another 2^64 new potential positions. That seems effectively infinite
-for most purposes.
+there's another 2^64 new potential positions between that point and the point on
+its left, plus 2^64 potential positions to its right. That seems effectively
+infinite for most purposes.
+
+### Spectrums Exist in the Universe of Reflection
+
+You will notice that above we used a new **type of name** for spectrums. Why did
+we need a new type of name? Well, spectrums are used only for qualities, and
+qualities live only in the universe of reflection. Thus, spectrums are a _form_
+that also lives only in that universe. They aren't potential forms---they are
+defined forms, but they only exist in the universe of reflection.
+
+Even if one was going to take real objects (dimension points) and try to "rank"
+them, you'd have to have some quality or set of qualities to rank them by. If I
+just told you "rank pets," with no further instruction, you would simply invent
+a set of qualities that you were using to rank them by (probably "how much I
+like each pet").
+
+### Types of Comparisons
+
+Two spectrums cannot be compared to each other unless they overlap somehow.
+
+For a specific example, let's look at a partial spectrum that we call the "color
+spectrum" in the physical universe:
+
+```
+Red --- Orange --- Yellow --- Green --- Blue --- Indigo --- Violet
+```
+
+We can consider (for the sake of simplicity here) that each of those colors has
+a particular "distance" between them, when we think about how similar they are
+to each other, and it looks roughly like the drawing above.
+
+That spectrum overlaps with the electromagnetic spectrum. (That is, visible
+light colors are actually just a part of the electromagnetic spectrum.) So you
+can compare X-rays to the wavelength of light that represents "red," because
+really they are on the same larger spectrum.
+
+But what about something like sizes? We might have a spectrum of sizes that
+looks like:
+
+```
+Tiny --- Small --- Medium --- Large --- Huge --- Gargantuan
+```
+
+Color and size are not comparable to each other. I cannot tell you how similar
+"Red" and "Tiny" are. We can't even say that "red is further from orange than
+tiny is from small." They are not comparable. They are about as totally
+different as two concepts can be.
+
+### Dimensions
+
+While we cannot compare "color" to "size," we can consider that one real
+dimension point has both qualities: you might have a small yellow ball or a
+large blue ball. You could then sort of plot how similar or different two balls
+are on a graph:
+
+```
+            Gargantuan
+                |
+                |   B
+                |
+Red ------------------------ Violet
+                |
+                |
+           Y    |
+               Tiny
+```
+
+Where B is the large blue ball, and Y is the small yellow ball. That gives us an
+interesting idea of how similar the two balls are. As long as the vertical axis
+is always size and the horizontal axis is always color, we can compare all
+objects in existence in terms of color and size.
+
+If we had another quality, we could add another axis. And if we had a fourth
+quality, we could add a fourth axis. We can't demonstrate a four-dimensional
+space in the physical universe, but we can absolutely represent it
+mathematically. (Vector embeddings for machine learning systems often have
+thousands of dimensions.)
+
+This is hard to think about in terms of space, but it's actually pretty easy to
+think about intuitively. Imagine these objects:
+
+- A small brown furry cat.
+- A medium-sized brown hairy dog.
+- A huge gray hairless elephant.
+
+The dog and the cat there "feel" more similar to each other than they are to the
+elephant, yeah? That wasn't hard to think about, and that's four dimensions. In
+fact, when you thought about them, you probably thought instantaneously about
+their forms and then likely many more qualities than are listed above.
+
+#### This Might Be Wrong
+
+Most comparisons are done simply on a single spectrum, as described earlier. In
+fact, single-spectrum comparisons are the only ones we can state with certainty:
+this dimension point is more or less white than another one.
+
+I'm honestly not certain whether multi-dimensional comparisons have any real
+utility in a programming language, other than in specialized applications like
+vector embeddings. However, it is true that dimension points have multiple
+qualities, and there does seem to be some sort of instantaneous mechanism that a
+person's mind is using to determine the similarity of two objects. Maybe it's
+this, and thus maybe it will end up having some use in programming.
+
+### Associations
+
+Now, you might imagine another spectrum for mass, like:
+
+```
+0 grams----------------------------------------------Infinite grams
+```
+
+And then you can say, "well, people tend to associate weight and size, so maybe
+those two spectrums _can_ be compared to each other?" No, people only associate
+weight and size because they think of objects that were a certain size and had a
+certain weight. All comparisons between two spectrums occur only through
+objects.
+
+As nearly as I can determine, all logical comparisons are in fact
+one-dimensional, and only manifest in multiple dimensions when applied to a real
+dimension point that has multiple qualities.
+
+They only vaguest association they have is that they are both attributes that
+can be applied to a physical object (compared to something like "love" that is
+just a feeling that somebody has).
