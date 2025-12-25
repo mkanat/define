@@ -1172,9 +1172,13 @@ few different qualities of that object:
   the light waves that are hitting your eye?
 
 So if we had a quality called `PerceivedColor` it would really be three
-different qualities all in one. A programming language would need syntax to
-indicate this. Traditional programming languages would just make this into
-something like a form:
+different qualities all in one.
+
+### Syntax for Composition
+
+A programming language would need syntax to indicate that one quality is
+composed of other qualities. Traditional programming languages would just make
+this into something like a form:
 
 ```Python
 class Color:
@@ -1218,6 +1222,261 @@ independently, or in some order, or does only one of them run? Is there some way
 for PerceivedColor to override the behavior of any of the qualities it's
 composed of, or do they all operate independently? How do I indicate if I want
 to set the Hue on a dimension point?
+
+Let's talk about how we would handle various possibilities.
+
+### Independent Composition
+
+The simplest case is like the `PerceivedColor` case above. Hue, Saturation, and
+Luminance are three independent properties. I can change any one of them and it
+doesn't affect the others. I would at least need a syntax to indicate that I'm
+changing the Hue, though:
+
+```
+create a dimension point named ball
+assign the quality PerceivedColor to ball with the value Red
+change ball.Hue to Green
+```
+
+We could imagine that Luminance and Saturation both defined some function, like:
+
+```
+quality Saturation {
+    when (this dimension point enters form<dark_room>) {
+        set this dimension point's Saturation to 0.
+    }
+}
+
+quality Luminance {
+    when (this dimension point enters form<dark_room>) {
+        set this dimension point's Luminance to 0.
+    }
+}
+```
+
+Those would both just execute independently when `ball` "entered"
+`form<dark_room>` (whatever "enter" means in our programming language). This is
+the ideal case and the simplest. Ideally, machines are designed so that their
+functions can always execute independently.
+
+### Conflicting Composition
+
+Imagine a program that looks something like this:
+
+```
+quality IceCream {
+    when (this dimension point enters form<lava_pool>) {
+        destroy this dimension point
+    }
+}
+
+quality Bomb {
+    when (this dimension point enters form<lava_pool>) {
+        make this dimension point explode
+    }
+}
+
+quality IceCreamBomb {
+    composed of {
+        IceCream
+        Bomb
+    }
+}
+```
+
+When I put an `IceCreamBomb` in a `form<lava_pool>`, what happens, in what
+order? In most programming languages, the answer is "something confusing
+happens," and the advice from experienced programmers in those programming
+languages is "don't use this programming language's composition mechanisms."
+
+Some languages ask you to take a particular viewpoint of the object. For
+example, in C#, you might solve this problem like:
+
+```C#
+IceCreamBomb myBomb = new IceCreamBomb();
+// Make it explode.
+((Bomb) myBomb).intoLava();
+// Destroy it
+((IceCream) myBomb).intoLava();
+```
+
+Other languages just throw an error and say you can't have two functions with
+the same name in the things you are trying to compose together.
+
+Probably the best solution to this problem is to let the composer declare how
+the composed pieces should behave. In our example, we probably want to make the
+bomb explode and _then_ destroy itself. We would need some way to indicate this.
+This is the first time that we seem to actually need names for machine triggers
+that exist within a quality, so we can indicate what we're talking about when we
+say what should run when. (This would be a new **type of name**, something like
+`trigger<when_in_lava>`.)
+
+So we would need some syntax like:
+
+```
+quality IceCreamBomb {
+    composed of {
+        IceCream
+        Bomb
+        resolve conflict for trigger<when_in_lava> by running in order: Bomb, IceCream
+    }
+}
+```
+
+The important point here is that the composer says explicitly what's going to
+happen.
+
+### Complex Resolution
+
+One of the most difficult situations to resolve is: what if the right resolution
+order is for one of the composed functions to happen _inside_ of the other
+composed function? This gets us into a new subject: functional composition.
+
+## Functional Composition
+
+Imagine we have a dimension point that represents a camera with a flash, and
+they both respond to the photographer pressing a button on the camera. The
+sequence has to be: open the camera's shutter, display the flash, close the
+shutter. Here's an example of the problem, in imaginary syntax:
+
+```
+quality Flash {
+    trigger<on_button_press>: when (camera button is pressed) {
+        make light
+    }
+}
+
+quality Shutter {
+    trigger<on_button_press>: when (camera button is pressed) {
+        open shutter
+        wait 10 milliseconds
+        close shutter
+    }
+}
+
+quality Camera {
+    composed of {
+        Flash
+        Shutter
+    }
+}
+```
+
+The `Camera` object needs to somehow resolve what happens when the camera button
+is pressed so that everything happens in the right order. There are multiple
+potential solutions to this.
+
+### Decompose the Problematic Functions
+
+We could change the code of Shutter to look like:
+
+```
+quality Shutter {
+    trigger<on_button_press>: when (camera button is pressed) {
+        open shutter
+        start a timer in position<camera_timer> for 10 ms
+    }
+
+    when (position<camera_timer> finishes) {
+        close shutter
+    }
+}
+```
+
+Then we just have to say "run the Shutter's `trigger<on_button_press>` before
+the Flash `trigger<on_button_press>`." If you have access to the code of the
+qualities you're composing, this is often the simplest and best solution. Note
+that in order for this to work properly, the programming language would have to
+guarantee that in a `Camera`, the code of `Flash` runs directly after the code
+of `Shutter`, without any other trigger occurring.
+
+You could even move the shutter open and close functions into separate qualities
+so that you can reference the functions separately in all places in the code. In
+some cases, that's the simplest thing to do.
+
+### Change the Trigger
+
+The `Camera` quality could explicitly change when the `Flash` trigger executes:
+
+```
+quality Camera {
+    composed of {
+        Flash
+        Shutter
+    }
+
+    resolve conflict of trigger<on_button_press> {
+        redefine Flash's trigger<on_button_press>: when (shutter opens)
+    }
+}
+```
+
+That requires that `Camera` be able to reach into the internal concepts of
+`Shutter` to see that the shutter opened.
+
+### Entirely Replace the Trigger
+
+The `Camera` could decide to throw away the code that `Flash` and `Shutter` have
+implemented and just re-write all of it:
+
+```
+quality Camera {
+    composed of {
+        Flash
+        Shutter
+    }
+    resolve conflict of trigger<on_button_press> by full redefinition {
+        when (camera button is pressed) {
+            open shutter
+            make light
+            wait 10 milliseconds
+            close shutter
+        }
+    }
+}
+```
+
+This is the worst option. Why are we even composing those two qualities if we
+are just going to rewrite everything they do?
+
+### Make the Composed Pieces Handle Composition
+
+Some qualities might be designed entirely and only to be composed into other
+qualities. In our `Camera` example, we could rewrite the `Shutter` quality like
+this:
+
+```
+quality Shutter {
+    around when (camera button is pressed) {
+        open shutter
+        run original trigger
+        wait 10 milliseconds
+        close shutter
+    }
+}
+```
+
+You'll see two new things there: the word `around` and the statement
+`run original trigger`. What's happening here is that the Shutter quality does
+_nothing_ by itself. It only does something if _another_ quality defines a
+trigger on when the camera button is pressed. In this case, when `Flash`'s
+trigger fires, what will happen is that `Shutter`'s trigger will fire first, and
+essentially "wrap" Flash's trigger. Shutter's trigger can then modify anything
+about the environment, run Flash's trigger, and then do any sort of "cleanup" it
+wants to after Flash's trigger completes.
+
+If multiple qualities define an `around` trigger, you do need some way to say
+which order they will run in, but that's a much more powerful conflict
+resolution mechanism than just ordering normal functions, because you're instead
+ordering how functions will wrap each other (more like "which box contains which
+other box" instead of "which order do we put these boxes in on this conveyor
+belt?")
+
+This is my personal favorite form of composition. I have designed significant
+programs using this method and never discovered a concept I could not represent
+appropriately. Much credit to
+[Moose](https://metacpan.org/dist/Moose/view/lib/Moose/Manual/MethodModifiers.pod#Around-modifiers)
+for this concept.
 
 ## Fundamental Functions
 
