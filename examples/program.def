@@ -3,7 +3,7 @@ define the quality<examples/program> {
     # binary will do is create a dimension point and assign it the quality
     # that you indicate is the entry point.
     it defines a trigger {
-        this dimension point {
+        we see this dimension point {
             is assigned this quality.
         }
     } which then does {
@@ -14,6 +14,8 @@ define the quality<examples/program> {
         create a dimension point in position<result>.
         create a form<adder_args> {
             # TODO: We have to do this a lot, perhaps there should be a better syntax.
+            #
+            # TODO: At the very least, there should be a warning if you don't state an intention.
             it is intended to be potential_form<examples/abstract/math/adder::add>.
             create a view of position<adder> named view<self>.
             create a dimension point in position<first>.
