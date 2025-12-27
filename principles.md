@@ -54,6 +54,35 @@ as a language, for a few reasons:
 - It makes intent clearer to readers.
 - It makes the language naturally interpretable by an AI coding assistant.
 
+## Define is Explicit
+
+The language should not make choices for the programmer. The programmer should
+always express their intention.
+
+In some languages, when there is a choice of how to behave, the language will
+just silently pick an option. For example, in Python, you can have multiple
+inheritance, like this:
+
+```Python
+class SuperClassOne:
+  def cool_function(self):
+    print("I'm cool!")
+
+class SuperClassTwo:
+  def cool_function(self):
+    print("I am also cool!")
+
+class MyClass(SuperClassOne, SuperClassTwo):
+  def cool_function(self):
+    super().cool_function()
+```
+
+That will print `I'm cool!` followed by `I am also cool!`. If the superclasses
+also have superclasses themselves that define `cool_function`, the logic gets
+even more complex. Python just makes this decision for the programmer. In
+Define, if we encountered a situation like that, we would require the programmer
+to explicitly indicate what order the superclass functions should run in.
+
 ## Define Can Write Bad Programs
 
 One of the goals of Define is to be able to represent any program with any sort
