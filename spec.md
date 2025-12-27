@@ -5,38 +5,165 @@
 This specification defines the syntax and semantics needed to compile define
 programs.
 
-For broader context on the language's design philosophy, requirements, and
-principles, see [philosophy.md](philosophy.md),
-[requirements.md](requirements.md), and [principles.md](principles.md).
+The concepts behind this specification are described in
+[The Conceptual Basis of Define](concepts.md). It is expected that the reader
+has an understanding of the concepts described there.
+
+The language's design is guided also by our [Principles](principles.md) and
+[Requirements](requirements.md).
 
 ## General Rules
 
 ### Strictness
 
-define is intended to be a very strict language. Any syntax or behavior not
+Define is intended to be a very strict language. Any syntax or behavior not
 specified in this spec is an error.
 
-### Reserved Words
+The language has no "undefined behavior." If the compiler encounters a situation
+not described in this spec, it will provide an error and refuse to compile the
+program. In the case that there is a bug in the compiler and it does not behave
+according to the spec, future versions of Define may fix that bug even if it
+causes existing programs to fail to compile (that is, even if it breaks backward
+compatibility).
 
-All specific keywords and names listed in this spec are reserved only for the
-use they are given in this spec. For exmaple, if the spec says that something is
-named `Foo`, then that thing must always be named `Foo` and nothing else may use
-the name `Foo` in any program.
+## Names
 
-Any term listed in a syntax specification but not defined is considered to be a
-reserved word. Some reserved "words" have spaces in them, such as `has a`,
-`is a`, `creates a`, etc.
+All names of all things in define follow the same format: `type<name>` where
+`type` is one of the valid "types of names" and "name" is any set of "allowed
+name characters."
+
+### Valid Types of Names
+
+The valid types of names are:
+
+```
+quality
+position
+view
+form
+potential_form
+trigger
+```
+
+Any new type of name must be described in the [Concepts](concepts.md) before it
+is introduced to the language.
+
+### Allowed Name Characters
+
+There are two ways names are used: when defining something and when referencing
+something.
+
+By default, Define only allows ASCII letters, digits, the `_` character, and the
+`/` character in names when defining something. However, the compiler allows
+configuring what characters are allowed, in order to support describing existing
+programs (from other languages that may have other naming rules) in Define.
+
+Define allows `::` in names when referencing something, to indicate something
+that contains something else.
+
+If `<` or `>` are allowed name characters, they can be included by escaping them
+with `\`. The character `\` can be included in names (if allowed) by escaping it
+as `\\`.
+
+### Reserved Names
+
+Most programming languages have a concept of "reserved words," where the
+language specifies that certain words may not be used as variable names, class
+names, etc. Define, instead, reserves all words for its own use and only allows
+names to be specified with one of the allowed type prefixes.
+
+However, within these names, Define does reserve certain _prefixes_ for use by
+the compiler or the standard library. Programs other than the Define compiler or
+the Define standard library may not define anything with names that start with:
+
+```
+standard/
+define/
+external/
+extended/
+```
+
+### Name Conflicts
+
+Within a program, all names must be unique. Name conflicts of any kind are not
+allowed. The structure of Define names (as described in other parts of this
+spec) should make it impossible for there to be name conflicts. However, we also
+want to call it out here explicitly as a requirement.
+
+## Files and Directories
+
+### File Naming
+
+Files that contain Define code always have their names end in `.def`.
+
+### Project Root
+
+Define programs have a concept of the "project root," meaning the directory
+containing all the subdirectories and files for a particular Define program.
+
+The Define compiler must always be run from the project root, not from a
+subdirectory.
+
+### Paths Must Match Names
+
+The name of any thing in define must match the path and file name it is in, from
+the project root, without the `.def` on the end.
+
+For example, imagine you have a file named `color.def` in a directory structured
+like `foo/bar/baz`. Within this file you could have a quality named like:
+`quality<foo/bar/baz/color>`.
+
+The character `/` has a special meaning in names: it is used to describe the
+directory structure that a concept lives in, and may only be used that way. If
+for some reason it must be allowed in names, a special configuration value must
+be set for the compiler, and when that is set, the compiler will accept `\/` as
+a literal `/` in names.
+
+Control characters like `.` and `..` in path names have no special meaning. You
+cannot define names relative to anything other than the project root.
+
+#### Exception: Inner Definitions
+
+When a definition contains another definition, the name of the inner definition
+must not have a directory prefix at all. For example, in this case:
+
+```
+define the quality<foo/bar/baz/bicycle> {
+  define the potential_form<parts> {
+    ...
+  }
+}
+```
+
+The `potential_form<parts>` must not be named
+`potential_form<foo/bar/baz/bicycle/parts>` in the definition, but rather just
+`parts`. When referred to from inside the containing definition, it must be
+referred to as `potential_form<::parts>`. (This prevents naming conflicts with
+things that are defined directly in the project root---for example, if there was
+a potential_form in a file named `parts.def` in the project root.) When referred
+to from outside the containing definition, it must be referred to as
+`potential_form<foo/bar/baz/bicycle::parts>`.
+
+### Directory and File Names May Overlap
+
+It is permissible to have a file structure like:
+
+```
+foo/bar.def
+foo/bar/baz.def
+```
+
+In other words, you could have a `quality<foo/bar>` and also a
+`quality<foo/bar/baz>`.
 
 ## Declaration
 
-All named things (types, entities, properties, etc.) must be declared in a
-program before they can be referenced in any other statement.
+All named things must be defined in a program before they can be referenced in
+any other statement.
 
-## Scopes
+There are exceptions to this rule, which are explicitly noted in this spec.
 
-Within a universe, identifiers must be unique. `TODO: scopes`
-
-## Parsing
+## Parsing Define Files
 
 ### Character Set
 
@@ -48,23 +175,21 @@ following Unicode codepoints:
 - Decimal 10 (Line Feed)
 - Decimals 31 - 126 (traditional ASCII character set, minus control characters)
 
-Only literal strings and comments may contain other UTF-8 characters.
+Only literal strings and comments may contain other UTF-8 characters. Names may
+also contain other characters if the compiler configuration allows it.
 
 This simplifies parsing the language and avoids various security issues where
 special Unicode characters confuse the programmer into believing they are doing
 something safe when they are not.
 
-### Identifiers
-
-All names of anything and all reserved words in define may only consist of ASCII
-letters, numbers, and the underscore character.
-
 ### Comments
 
-A comment is a line of text starting with any number of spaces and then the
-character `#`. Comments must not have any effect on the behavior of a program.
-Do not use comments to implement any sort of metaprogramming language on top of
-define--define is already a metaprogramming language and should be flexible
+A comment is any part of a line after the character `#` (except when `#` is used
+in a literal string, or if `#` is allowed in names and it is inside of a name).
+Comments must not have any effect on the behavior of a program.
+
+Do not use comments to implement any sort of meta-programming language on top of
+Define---Define is already a meta-programming language and should be flexible
 enough to support anything you need.
 
 ### Newlines
@@ -74,21 +199,20 @@ do not accept `\r` (ASCII CR) anywhere in their text other than in literal
 strings and comments. For comments, the final character sequence at the end of a
 line must be `\n` and never `\r\n`.
 
-A space (Unicode decimal 32) may not appear before a newline except in literal
-strings.
-
-The last character of a define file must be a newline.
+The last character of a Define file must be a newline.
 
 ### Trailing Spaces
 
-Trailing spaces (Uniccode decinal 32) at the end of a line before the
-terminating newline are forbidden.
+Trailing spaces (Uniccode decimal 32) at the end of a line before the
+terminating newline are forbidden, except in literal strings.
 
 ### Spaces Between Tokens
 
 Except where explicitly stated otherwise, all syntax uses exactly one ASCII
 space (decimal 32) between tokens. Multiple spaces in a row are not allowed
 except where explicitly specified.
+
+`TODO: Fix below this line to be the new syntax`
 
 ## Universes
 
