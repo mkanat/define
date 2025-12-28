@@ -2,12 +2,38 @@
 
 All language proposals must contain the following.
 
-## The Problem You Are Trying to Solve
+## Top-Level Info
 
-Tell us what the problem is that you are trying to solve. We accept only
+The name of the author(s), the status of the document, the date it was
+originally proposed (when it was first merged into this repository and the first
+draft was completed), and the date it was finalized (when it was closed for
+further modification).
+
+The Status may be any of the following:
+
+- Draft: This proposal is still subject to rapid modification by its authors and
+  is not generally open for comment.
+- Open for Comments: This proposal is accepting comments and feedback.
+- In Review: This proposal is being reviewed by the person or group with the
+  authority to change the language spec.
+- In Implementation: Currently being implemented; may change somewhat if we
+  discover issues during implementation.
+- Finalized: Has been released for general use by programmers and will not be
+  changed. Future adjustments require a new proposal.
+
+## The Problems You Are Trying to Solve
+
+Tell us what the problems are that you are trying to solve. We accept only
 problems that have been actually experienced by somebody, not theoretical
 problems that might happen. You must include an example program that shows that
 problem.
+
+## The Proposed Solution
+
+Explain the solution. Specify the syntax.
+
+All the problems described should have the same solution. If different problems
+require different solutions, they should be in separate language proposals.
 
 ## A Real Program
 
