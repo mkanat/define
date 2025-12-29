@@ -50,7 +50,7 @@ import time
 
 class Clock:
     def get_time(self) -> float:
-        return time.time
+        return time.time()
 
 def main():
     my_clock = Clock()
