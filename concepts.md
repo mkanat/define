@@ -232,7 +232,7 @@ behavior of the program's universe (or worse, vice-versa, where they make logic
 in the program's universe change the fundamental structure of the program). This
 becomes very hard to reason about and tends to cause all sorts of trouble.
 
-### Types of Names
+## Types of Names
 
 Taking into account all of the above, we can see that we have at least two
 different "things" that can be named: dimension points and qualities. (There are
@@ -263,6 +263,72 @@ by people who are not already familiar with Define, as I am writing the document
 before the language even exists) but the language we actually design _should_
 have some way of keeping the names of different types of things inherently
 separate.
+
+## Universes: Making Names Unique
+
+If we conceive that a program is a universe, then a library is also its own
+little universe. That means there are many universes, which can interact in
+defined ways.
+
+From any individual program's perspective, it is its own universe, and then
+there are universes created by other view points. These would be other programs
+or even external libraries that the program uses as part of its own operations.
+
+The names in each universe are only relative to that universe. For example, a
+`dog` in one universe is not the same as a `dog` in another universe. Thus,
+programs would need some way to indicate what universe they are talking about
+when they refer to names. A potential syntax for this could be something like:
+
+```
+define the quality<@my_program/dog> {
+   # Lots of code here
+}
+```
+
+And then in some other program (perhaps a library):
+
+```
+define the quality<@some_library/dog> {
+    # Lots of different code here
+}
+```
+
+Alternately, this could be done with another **type of name**, like
+`universe<program>::quality<dog>`. The problem is, every single name might need
+some sort of universe attached to it. So it seems better to perhaps make it a
+part of the names.
+
+### Universe Conflicts
+
+Universes have to have some sort of name. There has to be something that
+prevents two Define programs from having the same name, if those two programs
+need to refer to each other (or if one program needs to be referred to in some
+common fashion by many other Define programs).
+
+Thus, there has to be some sort of system that prevents these conflicts. Java
+uses domain names, like `com.somecompany.package.name.ClassName`, though in
+reality packages are disambiguated through Maven Central, which is not
+universally enforced. Almost all languages have similar mechanisms: Python has
+PyPi, Ruby has RubyGems, Rust has Cargo, and so on. However, internally in
+companies, the companies have their own package management system, often
+different for every company, and potentially with name conflicts with the
+external repositories.
+
+So this creates different "multiverses," where the name of two _universes_ don't
+mean the same thing.
+
+This means that likely, define programs will need two concepts:
+
+1. The **multiverse** in which the program lives. Essentially this is some
+   reference to a system that can arbitrate universe names. Some sort of
+   namespacing system for universes, or some repository for universe names. You
+   can think of this as the name of the package repository, in other programming
+   languages.
+2. The **universe** name within that multiverse.
+
+Theoretically, name conflicts would still be possible between multiverses, but
+that is much less likely, especially if we establish some convention for
+multiverse names.
 
 ## Describing Qualities and Dimension Points
 
