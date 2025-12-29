@@ -35,6 +35,9 @@ Explain the solution. Specify the syntax.
 All the problems described should have the same solution. If different problems
 require different solutions, they should be in separate language proposals.
 
+If the solution involves a trade-off (not all the problems can be perfectly
+solved), acknowledge the trade-off here.
+
 ## A Real Program
 
 An actual program written using the proposal. It does not have to execute. Our
@@ -46,8 +49,12 @@ before your proposal and what it will look like after.
 ## Why This is the Right Solution
 
 Tell us why this is the right solution to the problem you've proposed. Remember
-the key points in our [philosophy](philosophy.md), as that will heavily
-determine if we agree with your reasoning or not.
+the key points in our [concepts](concepts.md) and [principles](principles.md),
+as that will heavily determine if we agree with your reasoning or not.
+
+In this section you may also want to list out all the alternative solutions that
+were considered and discarded, including alternative syntax, to explain why you
+didn't choose a different option.
 
 ## A Description of Forward Compatibility
 
