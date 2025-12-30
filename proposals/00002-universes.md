@@ -41,11 +41,15 @@ open-source library that your company released.
 
 ## Solution
 
+### Named Universes
+
 Introduce the concept of a named universe. Allow prefixing names with a universe
 name to disambiguate which thing you are talking about. For example, if our
 program was named `my_program` we could refer to the quality `/core/clock` as
 `quality<my_program:/core/clock>` and the same concept in a library as
 `quality<some_library:/core/clock>`.
+
+### Name Restrictions
 
 Universe names should be restricted to ASCII letters, digits, and `_`. In
 particular, the `:` character must not be allowed in universe names. We also
@@ -56,6 +60,8 @@ It may become necessary to allow other characters in universe names in order to
 represent programs in other languages, in which case Define may provide a
 compiler configuration to solve that problem.
 
+### Configuration File
+
 When compiling code from files on a filesystem, there must be a configuration
 file that contains the name of the universe and which can be located
 deterministically by the compiler to both verify that things are named correctly
@@ -63,7 +69,38 @@ and to know where the "root" of the current universe is on the disk. In
 non-filesystem contexts (such as compiling a string of code) this requirement
 may be waived.
 
-The language must reserve a universe name for the standard library.
+If this configuration file exists, then code in the referenced files must
+contain definitions that use the indicated universe name. That is, the
+configuration file creates an enforcement mechanism that the contents of files
+must match what the configuration claims.
+
+### Conflict Resolution
+
+In the case of two different codebases claiming the same universe name, the
+compiler must fail with an error indicating the conflict. Future language
+proposals may modify this behavior. However, failing with an error is the most
+forward-compatible solution, as conflicts may not exist in actual define
+programs.
+
+### Reserved Names
+
+The language must reserve a universe name for the standard library: `standard`.
+
+It should also reserve all small, common English words, as well as any word that
+sounds like a universe that might be part of Define itself. (For example, all
+top-level Define concepts, such as the word "universe," "multiverse," "type,"
+"name," etc. should be reserved, as well as things that sound like they would be
+part of the language in other languages: `std`, `stdlib`, etc.)
+
+Though universe names are case-sensitive, reserved names are case-insensitive.
+This means, for example, that `standard`, `Standard`, and `sTanDarD` are all
+reserved.
+
+Tools that are part of the Define language must refuse to download, create, or
+interact with universes that have reserved names other than as specified by the
+Define Language Specification.
+
+### Requiring Universe Names
 
 Whether universe names are _required_ (and when they are required) I am leaving
 for another proposal.
@@ -96,7 +133,7 @@ with them.
 ### URIs
 
 We could have named things like
-`universe://package/path/to/thing#nternal_member`. The advantage would be that
+`universe://package/path/to/thing#internal_member`. The advantage would be that
 there is lots of code around to parse URIs and they are a well-known standard.
 The disadvantage, however, is that they don't allow a lot of room for potential
 future expansion. You've got the scheme, the authority, the path, and the
@@ -106,6 +143,9 @@ Often when people want to add new components to a URI they just start adding
 query string variables, and that would be pretty awkward in a programming
 language syntax (not to mention a bit too unbounded for the type of strictness
 and specificity that we prefer in Define).
+
+There are also a lot of complexities to the official URI standard that can make
+them relatively complex to correctly parse.
 
 ### Node (NPM)
 
@@ -143,6 +183,48 @@ it's actually five more characters on every name. I might come back to this and
 decide that it's the right syntax, but the syntax I _have_ provided could be
 deterministically converted to this "type of name" syntax, so I can change my
 mind later.
+
+### A New Scope
+
+One could do a syntax that looks something like:
+
+```
+universe my_program {
+    define the quality</foo/bar> {
+        # code goes here
+    }
+}
+```
+
+However, all that would do is stop you from having to type `my_program` at the
+start of some names. You'd still have to prefix other names with the universe
+name.
+
+Also, it's likely that there will be many files where the only name that has a
+universe name on it is the top quality defined in the file, and then it's never
+used again. So the indentation seems unnecessary.
+
+### A Single Universe Statement
+
+One could do a syntax somewhat like Java's `package` syntax:
+
+```
+in the universe<my_program>.
+
+define the quality</foo/bar> {
+    # code goes here
+}
+```
+
+That's probably the best contender for an alternative or complementary syntax to
+the current proposal. It is a little awkward if you need to concatenate files
+together, but you can probably solve that by simply using the most recent
+universe statement.
+
+I'm not starting with it, because it slightly complicates the parser and
+compiler as well as making it harder to do search-and-replace refactorings, but
+we might decide to switch to this syntax later if we discover significant
+benefits compared to the current proposal.
 
 ## Forward Compatibility
 
