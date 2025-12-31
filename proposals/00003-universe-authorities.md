@@ -67,9 +67,12 @@ leave for another proposal.
 
 ### Allowed Characters
 
-By default, Define only allows ASCII letters, digits, `_`, `-`, `/`, and `.` in
-authority names. Other characters may be allowed by configuration, but `:` is
-never allowed.
+By default, Define only allows lowercase ASCII letters, digits, `_`, `-`, `/`,
+and `.` in authority names. Other characters may be allowed by configuration,
+but `:` is never allowed.
+
+Authorities may not end with a `/` or `.` (just to ensure we always have one
+canonical form).
 
 ### Reserved Authority Names
 
