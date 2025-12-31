@@ -1,4 +1,4 @@
-# Define Language Proposal 3: Universe Authorities
+# Define Language Proposal 3: Authorities
 
 - **Author:** Max Kanat-Alexander
 - **Status:** Draft
