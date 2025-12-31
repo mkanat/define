@@ -167,6 +167,23 @@ actually has a domain name, so then people start making up other words to start
 their package names with, giving you basically an uncontrolled set of potential
 name conflicts.
 
+### Hash the Code (Unison)
+
+There is a very cool programming language called
+[Unison](https://www.unison-lang.org/) where the way that pieces of code
+interact with each other is entirely through a database that tracks what name
+points to what _hash_ of code. That is, you write names in your code, but then
+the system that "runs" or "compiles" the code is actually a database that hashes
+the code itself and then knows what names point to which other hashes.
+
+Unison's system handles _almost_ every problem of dependency management that
+traditional programming languages encounter, and it might be worth considering
+incorporating similar concepts into Define in some way.
+
+However, even Unison needs to have names for packages when you want to refer to
+external libraries. I'm not aware of any system that makes human-readable naming
+go away or become irrelevant.
+
 ### A New Type of Name
 
 Probably the most Define-like way to solve the problem would be to create a new
