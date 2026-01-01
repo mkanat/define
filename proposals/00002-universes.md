@@ -53,12 +53,14 @@ program was named `my_program` we could refer to the quality `/core/clock` as
 
 Universe names should be restricted to ASCII letters, digits, and `_`. In
 particular, the `:` character must not be allowed in universe names. We also
-reserve the character `/` for potential future use, and thus universe names may
-not contain `/`.
+reserve the characters `/` and `@` for potential future use, and thus universe
+names may not contain those characters.
 
 It may become necessary to allow other characters in universe names in order to
 represent programs in other languages, in which case Define may provide a
-compiler configuration to solve that problem.
+compiler configuration to solve that problem. Before doing so, however, a more
+thorough evaluation of which characters should be reserved for future use must
+be performed.
 
 ### Configuration File
 
@@ -87,10 +89,13 @@ programs.
 The language must reserve a universe name for the standard library: `standard`.
 
 It should also reserve all small, common English words, as well as any word that
-sounds like a universe that might be part of Define itself. (For example, all
-top-level Define concepts, such as the word "universe," "multiverse," "type,"
-"name," etc. should be reserved, as well as things that sound like they would be
-part of the language in other languages: `std`, `stdlib`, etc.)
+sounds like a universe that might be part of Define itself or that are commonly
+used in examples of Define in documentation. (For example, all top-level Define
+concepts, such as the word "universe," "multiverse," "type," "name," "fqdn",
+etc. should be reserved, as well as things that sound like they would be part of
+the language in other languages: `std`, `stdlib`, etc.)
+
+The name `example` is reserved for use in examples inside of documentation.
 
 Though universe names are case-sensitive, reserved names are case-insensitive.
 This means, for example, that `standard`, `Standard`, and `sTanDarD` are all
