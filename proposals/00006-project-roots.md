@@ -70,6 +70,37 @@ syscalls to discover if files exist should also be avoided. (For example,
 crawling a directory tree and seeing if there is a special config file in just
 that directory.)
 
+### 4: Vendoring
+
+Imagine a programmer named Alice who writes a library called `math-utils`. In
+her code, she writes: `define the quality <core/adder>`.
+
+Now Bob builds an app. He wants to rely on Alice's library. For one reason or
+another, he needs to check Alice's code directly into his own repository,
+instead of relying on it as an actual library. This is called "vendoring." His
+file structure looks like:
+
+```
+/bobs-app
+  /src/main.def
+  /vendor
+     /math-utils   <-- Alice's Code lives here now
+        /core
+           /adder.def
+```
+
+So now how is Bob's app supposed to refer to Alice's `core/adder`? He could
+write a program to rewrite all of the references in Alice's `math-utils` to look
+like: `vendor/math-utils/core/adder`, sure. However, that is awkward and hard to
+maintain. It makes merging future changes from Alice very hard. Also, what if he
+wants to switch to the external third-party library in the future? Is he then
+going to have to switch all the references in _his_ program from
+`vendor/math-utils/core/adder` to just be `core/adder` again?
+
+Many programming languages just take the attitude "well, you shouldn't do that"
+about vendoring. However, the practical reality of programming is that sometimes
+people have to do this.
+
 ## Solution
 
 All Define codebases that exist on a filesystem have the concept of the "project
@@ -208,8 +239,7 @@ exist, where. Along with later proposals, it makes code loading deterministic
 without extensive ambiguity. It also gives us a single place to look for
 configuration for the project.
 
-Primarily, project roots are defined here because other solutions need them, and
-they are complex enough to deserve their own proposal.
+Sub-roots solve the vendoring problem.
 
 Other solutions would involve always discovering that the
 `.define/project/config.defcl` file exists, which would involve constant stat
