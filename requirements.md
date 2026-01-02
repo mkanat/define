@@ -32,3 +32,9 @@ in the code.
 
 Generally this means that all ambiguity is an error if no intention is
 specified. Name conflicts are not allowed.
+
+Define attempts to forbid even the _possibility_ of ambiguity. For example, its
+system of global and local names are attempt to prevent any _possible_ naming
+conflict where two logically separate things have the same name. Requiring that
+universes have a single project root is also an attempt to prevent the
+possibility of ambiguity.
