@@ -1,4 +1,4 @@
-# Define Language Proposal 5: Name Formats, Scoping, and File Layouts
+# Define Language Proposal 5: Global Names, Local Names, and Scopes
 
 - **Author:** Max Kanat-Alexander
 - **Status:** Draft
@@ -125,7 +125,7 @@ open and process the file `clock.py` to find that out, and the compiler (or the
 runtime, in Python's case) also has to keep track of the fact that both of those
 symbols (`clock.now` and `time.time`) actually refer to the exact same thing.
 
-### 3: Disambiguating "This File" from "Another File"
+### 3: Disambiguating Where A Variable Is From
 
 Imagine you have this Python file:
 
@@ -185,90 +185,10 @@ both have the domain name of your company attached to them. But they could be in
 your codebase, in another codebase inside of your company, or even in an
 open-source library that your company released.
 
-### 5: Vendoring
-
-Imagine a programmer named Alice who writes a library called `math-utils`. In
-her code, she writes: `define the quality <core/adder>`.
-
-Now Bob builds an app. He wants to rely on Alice's library. For one reason or
-another, he needs to check Alice's code directly into his own repository,
-instead of relying on it as an actual library. This is called "vendoring." His
-file structure looks like:
-
-```
-/bobs-app
-  /src/main.def
-  /vendor
-     /math-utils   <-- Alice's Code lives here now
-        /core
-           /adder.def
-```
-
-So now how is Bob's app supposed to refer to Alice's `core/adder`? He could
-write a program to rewrite all of the references in Alice's `math-utils` to look
-like: `vendor/math-utils/core/adder`, sure. However, that is awkward and hard to
-maintain. It makes merging future changes from Alice very hard. Also, what if he
-wants to switch to the external third-party library in the future? Is he then
-going to have to switch all the references in _his_ program from
-`vendor/math-utils/core/adder` to just be `core/adder` again?
-
-Many programming languages just take the attitude "well, you shouldn't do that"
-about vendoring. However, the practical reality of programming is that sometimes
-people have to do this.
-
-### 6: Non-File Contexts
-
-Programming languages must work even when the code is not written in a file on
-the disk. For example, they have to work when written in a text box on a web
-site, or in a REPL. That means the solution here cannot rely only on the
-filesystem.
-
-### 7: Concatenating Files
-
-In some contexts, programmers need to take code from a bunch of different files
-and combine it all into a single file. For example, today this is common when
-writing JavaScript, where there are build and performance reasons to do this so
-that the web browser gets everything at once.
-
-Most programming languages either fail at this completely, or make it very
-difficult. Ideally, a programming language would allow you to simply concatenate
-files without modifying them and the code would still work.
-
-### 8: Changing File Locations
-
-In many programming languages, if you move the location of a file on the disk,
-you have to change all the other code that refers to it. Sometimes, as with
-vendoring, this creates problems that are difficult to solve. For example, if
-there is an external requirement for files to be in a particular location that
-doesn't match where the language expects the file to be.
-
-For example, Java programs usually expect the class `com.yourcompany.SomeClass`
-to be in a file with a path like `com/yourcompany/SomeClass.java`. However, Java
-allows the class to be elsewhere, as long as it is still named
-`com.yourcompany.SomeClass` in its own definition.
-
-### 9: Filesystem Traversal Costs and Restrictions
-
-I have done a lot of profiling of build systems, and one of the surprisingly
-expensive parts of building software is the cost of filesystem accesses. Yes,
-many filesystems will cache access patterns to make it much faster. However, if
-you constantly have to do things like resolving the parent directory or the
-absolute path of a file in order to enforce some verification or discover where
-a module is, it can get fairly expensive in terms of time.
-
-Also, sometimes programs are compiled in environments where you cannot detect
-the absolute path or know the parent directory of the code you're looking at,
-due to security restrictions. Or the question "what is the parent directory?"
-has an ambiguous answer, due to symlinks.
-
-In general, any enforcement mechanism that requires knowing the absolute path of
-a file or traversing to the parent directory of the current directory should be
-avoided.
-
 ## Solution
 
-All of the problems above are intertwined and so require a single, combined
-solution. Below are the parts of the solution.
+The solution is to specify two types of names: global names and local names, and
+then describe how and when they must be used.
 
 ### Fully-Qualified Universe Names
 
@@ -290,81 +210,6 @@ A global name takes the format: `type<fqun:/path/to/name>`.
 A local name takes the format: `type<name>`.
 
 These are the only two allowed name formats in Define.
-
-### Project Root
-
-All Define codebases that exist on a filesystem have the concept of the "project
-root," which is the parent directory that is the super-directory of all the code
-in the project. This directory is the directory represented by the first `/` in
-a global name.
-
-For example, imagine I have this directory and file layout in my project:
-
-```
-my_project/
-    src/
-        foo.def
-        foo/
-            bar.def
-            utils/
-                uri.def
-        core/
-            router.def
-```
-
-In that layout, `my_project/src` is the project root.
-
-How we determine which directory is the project root will be left for another
-proposal.
-
-### Global Names Map to the Filesystem
-
-In a filesystem context (when we are compiling code on a filesystem), global
-names match the filesystem exactly, excluding the `.def` extension on files.
-Assuming that each `.def` file above defines a quality, the above example
-directory structure would contain the following qualities:
-
-```
-quality<fqun:/foo>
-quality<fqun:/foo/bar>
-quality<fqun:/foo/utils/uri>
-quality<fqun:/foo/core/router>
-```
-
-Where `fqun` is some valid fully-qualified universe name.
-
-### Top-Level Definitions Must Use Global Names
-
-Any thing that is defined at the top level of a file must be defined using its
-global name. So in the file `my_project/src/foo/utils/uri.def` above, the
-top-level definition must look like:
-
-```
-define the quality<fqun:/foo/utils/uri> {
-    # code goes here
-}
-```
-
-In a filesystem context, Define must enforce that the global name after the fqun
-matches the filesystem layout. I acknowledge that this fails to fully solve
-Problem 8 (Changing File Locations) and that a future solution to that problem
-may be needed.
-
-### Non-Filesystem Contexts
-
-In a development environment that is not on a filesystem at all (such as a REPL,
-a raw string being passed to the compiler, a textbox on a web page, etc.) the
-define compiler may relax the restriction that global names must match a
-filesystem path.
-
-### Concatenation
-
-The define compiler must allow configuration that specifies that certain files
-are concatenated and thus multiple top-level definitions may live in that file.
-In this case, it may relax the restriction that the definition name must match
-the file path.
-
-`TODO: This is a bit too much of an escape hatch.`
 
 ### Global Names Must Be Unique Within a Program
 
@@ -613,14 +458,96 @@ define the potential_form<foo> {
 That would make the meaning of `potential_form<foo>` ambiguous, and Define
 forbids ambiguity.
 
+Note that different types of names do not conflict. So for example, this is
+allowed:
+
+```
+define the quality<foo> {
+    it has the potential_form<foo> {
+        # more code here
+    }
+}
+```
+
 ## A Real Program
+
+There are extensive numbers of real programs in the Solution section above.
 
 ## Why This Is the Right Solution
 
+Problem 1 (Name Conflicts): This (in particular, the use of global names for
+everything that isn't local, combined with the local name conflict rule)
+completely solves name conflicts. Name conflicts are impossible.
+
+Problem 2 (Understanding Symbols Across Files): Because everything has exactly
+one name, you always know what is being referred to, even across files.
+
+Problem 3 (Disambiguating Where a Variable is From): You can always tell where a
+concept comes from, and you can always tell if it's not from inside of the
+current top-level definition.
+
+Problem 4 (Disambiguating Module Sources): The _format_ of a global name always
+tells you exactly what you're referring to, whether it's a part of your current
+program, the standard library, something "built-in" to Define, or an external
+library. In fact, it even tells you if the external library is from the standard
+open-source ecosystem or internal to your company.
+
+### Caused Problems
+
+I acknowledge that this does cause some problems.
+
+#### Moving Symbols Causes Refactoring
+
+If you move a symbol out from inside of a particular definition, you have to
+refactor everything that refers to it. For example, if you have this code:
+
+```
+define the quality<fqun:/foo/bar> {
+    define the potential_form<baz> {
+        # code goes here
+    }
+}
+```
+
+And you want to move `baz` into its own top-level definition, you have to change
+all the code that refers to it. Because one of Define's goals is deterministic
+refactoring, this shouldn't be hard to accomplish, but still can be annoying or
+difficult in large code ecosystems.
+
+We could potentially solve this by leaving behind some sort of "tombstone" that
+auto-redirects to the new definition, but we won't do that because it causes
+multiple of the other Problems from above, again. (It allows confusion about
+what symbol you're actually talking about when reading code that depends on your
+code.)
+
+#### Verbosity
+
+As with the rest of Define, having to use global names explicitly can become
+very verbose. In the future we may allow some form of aliasing certain global
+names so that you can refer to them in a shorter way. However, this would
+re-cause some of the problems above (in particular, it would potentially confuse
+programmers who see a local name and think it is a global name).
+
+#### Alternative Solutions
+
+Other programming languages solve this problem by confusing rules about name
+shadowing, where names implicitly override other names in certain scopes. This
+causes the Name Conflicts problem that we are explicitly trying to solve.
+
+The original syntax I imagined for referring to inner definitions looked more
+like: `trigger<fqun:/drawings/graph::graph::x_axis::draw>`. That is easier to
+type. Unfortunately that allows for ambiguity, because the name `x_axis` could
+be a `trigger`, it could be a `potential_form`, it could be anything. So that
+syntax simply can't be used in Define.
+
 ## Forward Compatibility
+
+Because there is no possible ambiguity in what a name refers to, all names can
+be deterministically refactored inside of a program. This means we could change
+the name format to any other format, in the future.
 
 ## Refactoring Existing Systems
 
-```
-
-```
+It would be impossible to deterministically refactor all existing systems
+without these restrictions, which is why this has to be part of the language
+from the start.
