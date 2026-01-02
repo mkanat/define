@@ -101,6 +101,12 @@ Many programming languages just take the attitude "well, you shouldn't do that"
 about vendoring. However, the practical reality of programming is that sometimes
 people have to do this.
 
+### 5: Non-Filesystem Contexts
+
+Programming languages must work even when the code is not written in a file in a
+filesystem. For example, they have to work when written in a text box on a web
+site, in a REPL, in a string passed in on stdin, etc.
+
 ## Solution
 
 All Define codebases that exist on a filesystem have the concept of the "project
@@ -210,17 +216,18 @@ When the compiler reads the configuration in `lib/math-utils`, the file
 
 ### Non-Filesystem Contexts
 
-I cannot presently imagine how to actually _invoke_ a compiler outside of a
-filesystem context, unless somebody does something wild like implement a
-compiler inside of a web page using wasm. As such, even when _code_ is in a
-non-filesystem context (such as being passed in as a string) we still look for
-the project root in the filesystem where the compiler is invoked. In the future,
-we may allow a command-line argument that specifies the project configuration,
-but for now that seems like an unnecessary violation of "there is one right
-way."
+When code is compiled via a non-filesystem context, such as being passed in as a
+string with no file name or being written in a REPL, the project root only
+becomes relevant when the compiler discovers it needs information about the
+project root (for example, to look for definitions that are not defined inside
+of the passed-in string).
 
-We haven't yet encountered this problem in any real situation, so aren't solving
-it yet.
+When compiling outside of a filesystem context, the compiler does not look for
+or require a project root until it needs one.
+
+The compiler _may_ take a command-line flag to indicate a project root that
+should be used during non-filesystem compilation, to allow for specifying needed
+configuration.
 
 ### Universes Have a Single Root
 
