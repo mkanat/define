@@ -175,13 +175,13 @@ you could have this directory structure:
 
 ```
 my_project/
-    .define/project/config.textpb
+    .define/project/config.defcl
     core/foo.def
-    lib/math-utils/.define/project/config.textpb
+    lib/math-utils/.define/project/config.defcl
     lib/math-utils/adder.def
 ```
 
-The file `my_project/.define/project/config.textpb` would indicate that the
+The file `my_project/.define/project/config.defcl` would indicate that the
 subdirectory `lib/math-utils` is a sub-root.
 
 However, unless `my_project/core/foo.def` actually _references_ `adder.def`
