@@ -185,6 +185,17 @@ both have the domain name of your company attached to them. But they could be in
 your codebase, in another codebase inside of your company, or even in an
 open-source library that your company released.
 
+### 5: Concatenating Files
+
+In some contexts, programmers need to take code from a bunch of different files
+and combine it all into a single file. For example, today this is common when
+writing JavaScript, where there are build and performance reasons to do this so
+that the web browser gets everything at once.
+
+Most programming languages either fail at this completely, or make it very
+difficult. Ideally, a programming language would allow you to simply concatenate
+files without modifying them and the code would still work.
+
 ## Solution
 
 The solution is to specify two types of names: global names and local names, and
@@ -493,6 +504,10 @@ tells you exactly what you're referring to, whether it's a part of your current
 program, the standard library, something "built-in" to Define, or an external
 library. In fact, it even tells you if the external library is from the standard
 open-source ecosystem or internal to your company.
+
+Problem 5 (Concatenating Files): Because local names can never exist in the
+global scope, and because global names can only be defined in the global scope,
+files can be concatenated together with no change to the code.
 
 ### Caused Problems
 
