@@ -293,6 +293,8 @@ The global scope may not define local names. It must only define global names.
 In the example above, `quality<fqun:/drawings/graph>` is defined in the global
 scope.
 
+Global names may only be defined in the global scope.
+
 #### Local Scopes
 
 Any scope created by another definition is a local scope. Every definition in
