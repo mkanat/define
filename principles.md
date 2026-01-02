@@ -4,7 +4,14 @@ These are general rules we try to follow that help guide our decisions about
 language design. If something is instead an unbreakable rule that must always be
 true, it goes into [requirements.md] instead.
 
-## Define Should Read intuitively
+## We Only Solve Problems That Exist
+
+Don't design solutions for problems you imagine might occur. Only design
+solutions for problems you have actually encountered in the physical universe.
+Otherwise, you risk designing the wrong solution for the imaginary problem that
+doesn't work well for the real problem when you encounter it.
+
+## Define Should Read Intuitively
 
 Lines of code in define should feel something like English sentences. They don't
 need to actually be grammatical English sentences, but they should feel somewhat
