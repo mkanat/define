@@ -5,10 +5,8 @@ I'm just going to note down thoughts here about stuff that we should do in the
 future.
 
 - Create an auto-formatter.
-- Need some form of namespacing. Maybe that's what a ViewPoint is.
 - Events system
 - Consider Lean's "with" syntax for clones?
-- Need some sort of registry and system to prevent naming conflicts.
 - Versioning?
 - Dependent properties.
 - Detect dead "exposes" statements.
