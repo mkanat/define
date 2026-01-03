@@ -9,8 +9,4 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "ruff.lint.enable": true,
-  "cSpell.words": [
-    "codepoints",
-    "Kanat"
-  ]
 }
