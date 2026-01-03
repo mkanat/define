@@ -2,7 +2,7 @@
 
 Max Kanat-Alexander, January 2016
 
-## Programming is Applied Epistemology (the study of how knowlege is known)
+## Programming is Applied Epistemology (the study of how knowledge is known)
 
 Most programming languages are made primarily by induction and minimally by
 deduction. In particular, they start with the way that a machine works, or its
