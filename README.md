@@ -37,4 +37,4 @@ sould be structured in the language.
 We aren't yet accepting external contributions, but I've started to collect some
 docs for the future when we are, as I think about them:
 
-- [How to Write a Language Proposal](language-proposals.md)
+- [How to Write a Language Proposal](proposals/00000-language-proposals.md)
