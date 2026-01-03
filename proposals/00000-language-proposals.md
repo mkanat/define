@@ -49,8 +49,9 @@ before your proposal and what it will look like after.
 ## Why This is the Right Solution
 
 Tell us why this is the right solution to the problem you've proposed. Remember
-the key points in our [concepts](concepts.md) and [principles](principles.md),
-as that will heavily determine if we agree with your reasoning or not.
+the key points in our [concepts](../spec/concepts.md) and
+[principles](../spec/principles.md), as that will heavily determine if we agree
+with your reasoning or not.
 
 In this section you may also want to list out all the alternative solutions that
 were considered and discarded, including alternative syntax, to explain why you

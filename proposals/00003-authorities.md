@@ -41,8 +41,8 @@ Amazon wants to publish an actual official SDK?
 ## Solution
 
 We need to make clear the source of each universe. Conceptually, this actually
-represents the view point from our [Concepts](../concepts.md). However, we will
-use the term "authority" for it, as it makes it clearer that this is the
+represents the view point from our [Concepts](../spec/concepts.md). However, we
+will use the term "authority" for it, as it makes it clearer that this is the
 authority that published the package.
 
 Universes will need an additional component when specified, so names will look

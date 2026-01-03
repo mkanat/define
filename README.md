@@ -9,17 +9,17 @@ The language is currently in early prototyping stages.
 
 ### Language Design
 
-- [The Conceptual Basis of Define](concepts.md): The highest-level concepts that
-  guide the design of Define as a language.
-- [Principles for Define](principles.md): A set of guiding principles for how we
-  design the language, at a lower level than the Concepts, but not a description
-  of a specific implementation.
-- [Requirements for Define](requirements.md): Similar to the Principles, but
-  indicates things that must always be true about Define as a language or
+- [The Conceptual Basis of Define](spec/concepts.md): The highest-level concepts
+  that guide the design of Define as a language.
+- [Principles for Define](spec/principles.md): A set of guiding principles for
+  how we design the language, at a lower level than the Concepts, but not a
+  description of a specific implementation.
+- [Requirements for Define](spec/requirements.md): Similar to the Principles,
+  but indicates things that must always be true about Define as a language or
   programs written in it.
-- [The Define Language Specification](spec.md): The detailed spec, ideally with
-  sufficient information to implement a compiler for the language. Describes an
-  actual programming language.
+- [The Define Language Specification](spec/spec.md): The detailed spec, ideally
+  with sufficient information to implement a compiler for the language.
+  Describes an actual programming language.
 
 ### Philosophy
 

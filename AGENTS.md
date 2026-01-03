@@ -1,7 +1,7 @@
 # Cursor Rules for Define Project
 
 We are working together to make a programming language based on epistemology.
-See [spec.md] for the language specification.
+See [spec/spec.md] for the language specification.
 
 ## Python Execution
 
