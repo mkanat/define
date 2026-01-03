@@ -25,3 +25,10 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
+
+      - id: validate-proposals
+        name: validate proposals
+        entry: uv run python scripts/validate_proposals.py
+        language: system
+        types: [markdown]
+        files: ^proposals/\d{5}-.*\.md$

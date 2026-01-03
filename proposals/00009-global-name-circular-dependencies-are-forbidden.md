@@ -1,4 +1,4 @@
-Define Language Proposal 9: Global Name Circular Dependencies are Forbidden
+# Define Language Proposal 9: Global Name Circular Dependencies are Forbidden
 
 - **Author:** Max Kanat-Alexander
 - **Status:** Draft

@@ -124,6 +124,13 @@ would cause a bunch of other problems that we described in
 encountered a need for it yet. Even if we did allow aliasing, we still wouldn't
 resolve names until they were actually used.
 
+## Forward Compatibility
+
+Loading files happens deterministically with no ambiguity. As such, we should be
+able to change our minds about how loading works, in the future. If we need to
+add imports or some other mechanism like aliasing in the future, we could
+refactor the existing system to that with total reliability.
+
 ## Refactoring Existing Systems
 
 No previous mechanism of importing exists before this. There is nothing to

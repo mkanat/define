@@ -1,4 +1,4 @@
-Define Language Proposal 2: Universes
+# Define Language Proposal 2: Universes
 
 - **Author:** Max Kanat-Alexander
 - **Status:** Draft

@@ -1,4 +1,4 @@
-# Define Language Proposal 7: Global Names Must Match the Filesystem
+# Define Language Proposal 7: Global Names Match Filesystem Layouts
 
 - **Author:** Max Kanat-Alexander
 - **Status:** Draft
@@ -130,7 +130,7 @@ concatenation to happen in non-filesystem contexts. (I am wary of allowing
 concatenation on the disk, as that could then persist in source control and
 conflict with future valid files, creating potential ambiguity.)
 
-## Why This Is the Right Solution
+## Why This is the Right Solution
 
 This gives all Define tools confidence about where to find a definition.
 

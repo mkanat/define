@@ -7,7 +7,7 @@
 
 ## Problems
 
-## 1: Evolution of a Language
+### 1: Evolution of a Language
 
 Programming languages tend to have the concept of "reserved words" that cannot
 be the names of variables. Then, when they want to change the syntax in the
@@ -40,7 +40,7 @@ def fetch_url(url, async=True):
 # because 'async' is now a command, not a name.
 ```
 
-## 2: Different Types of Names
+### 2: Different Types of Names
 
 Every language has different sorts of things that require names. For example,
 take this Python program:
@@ -137,7 +137,7 @@ define the quality<adder> {
 Note that both the potential form and the trigger may both be named "add,"
 because the type disambiguates them.
 
-## Why This Is the Right Solution
+## Why This is the Right Solution
 
 This guarantees our ability to evolve the language in the future.
 

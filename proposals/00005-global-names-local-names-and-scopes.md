@@ -486,7 +486,7 @@ define the quality<foo> {
 
 There are extensive numbers of real programs in the Solution section above.
 
-## Why This Is the Right Solution
+## Why This is the Right Solution
 
 Problem 1 (Name Conflicts): This (in particular, the use of global names for
 everything that isn't local, combined with the local name conflict rule)

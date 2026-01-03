@@ -1,4 +1,4 @@
-Define Language Proposal 4: Multiverses
+# Define Language Proposal 4: Multiverses
 
 - **Author:** Max Kanat-Alexander
 - **Status:** Draft
