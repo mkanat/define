@@ -128,3 +128,12 @@ qualities. So either you would have to create a quality called something like
 code above), or you would have to define a very complex machine to execute that
 code. Or, you could choose to just make it saner while you are translating it,
 and specify that all those values have to be integers.
+
+## Provide Clear Errors
+
+One of the most important qualities of any developer tool is that it provides
+extremely clear, actionable error messages. Define should strive to always
+provide errors that tell the developer exactly what is wrong, with sufficient
+information that they can fix it. If we know or suspect what the fix is, we
+should say it. If there is longer documentation about the error somewhere, we
+should link to it.
