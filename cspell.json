@@ -1,0 +1,17 @@
+{
+    "version": "0.2",
+    "words": [
+        "codepoints",
+        "defcl",
+        "Disambiguator",
+        "fqun",
+        "Kanat",
+        "omniverse",
+        "Onmiverse",
+        "refactorable"
+    ],
+    "flagWords": [
+        "fqdn"
+    ],
+    "ignorePaths": ["cspell.json"]
+}
