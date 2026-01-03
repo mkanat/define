@@ -54,16 +54,31 @@ There are two ways names are used: when defining something and when referencing
 something.
 
 By default, Define only allows ASCII letters, digits, the `_` character, and the
-`/` character in names when defining something. However, the compiler allows
-configuring what characters are allowed, in order to support describing existing
-programs (from other languages that may have other naming rules) in Define.
+`/` character in names when defining something. (Note that `/` has a special
+meaning defined later in this document.)
 
 Define allows `::` in names when referencing something, to indicate something
 that contains something else.
 
-If `<` or `>` are allowed name characters, they can be included by escaping them
-with `\`. The character `\` can be included in names (if allowed) by escaping it
-as `\\`.
+### Naming Configuration
+
+The compiler allows configuring that additional characters are allowed in names,
+in order to support describing existing programs (from other languages that may
+have other naming rules) in Define.
+
+If the compiler configuration allows characters that would cause names to
+violate [Unicode Standard Annex #31](https://www.unicode.org/reports/tr31/)
+(specifically the definitions of `ID_Start` and `ID_Continue`) an additional
+compiler configuration flag must be specified indicating that the user is aware
+that they have allowed unsafe letters in names.
+
+Unicode codepoints below decimal 31 (ASCII control characters) are never allowed
+in names (they cannot be specified in the compiler configuration as being
+allowed).
+
+If certain characters are allowed, they must be escaped in order to appear in
+names, by prefixing them with `\`. Characters that require escaping are: `\`,
+`>`, `<`, `@`, and `:`.
 
 ### Reserved Names
 
@@ -77,10 +92,10 @@ the compiler or the standard library. Programs other than the Define compiler or
 the Define standard library may not define anything with names that start with:
 
 ```
-standard/
-define/
-external/
-extended/
+/standard/
+/define/
+/external/
+/extended/
 ```
 
 ### Name Conflicts
@@ -203,8 +218,8 @@ The last character of a Define file must be a newline.
 
 ### Trailing Spaces
 
-Trailing spaces (Uniccode decimal 32) at the end of a line before the
-terminating newline are forbidden, except in literal strings.
+Trailing spaces (Unicode decimal 32) at the end of a line before the terminating
+newline are forbidden, except in literal strings.
 
 ### Spaces Between Tokens
 
