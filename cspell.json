@@ -4,11 +4,13 @@
         "codepoints",
         "defcl",
         "Disambiguator",
+        "ebnf",
         "fqun",
         "Kanat",
         "omniverse",
         "Onmiverse",
-        "refactorable"
+        "refactorable",
+        "textproto"
     ],
     "flagWords": [
         "fqdn"
