@@ -90,6 +90,9 @@ underscores only.
 FIELD_NAME = lowercase_letter, { lowercase_letter | dec | "_" } ;
 ```
 
+Field names must start with a lowercase letter. They cannot start with a digit
+or underscore.
+
 Examples of valid field names:
 
 - `universe_name`
@@ -101,6 +104,8 @@ Examples of invalid field names:
 - `UniverseName` (contains uppercase)
 - `universe-name` (contains hyphen)
 - `universe.name` (contains period)
+- `_universe_name` (starts with underscore)
+- `123field` (starts with digit)
 
 ### Boolean Literals
 
@@ -168,13 +173,27 @@ Invalid numeric literals:
 DCL only allows double-quoted strings. Single-quoted strings are not allowed.
 
 ```ebnf
-STRING = '"', { char - ( '"' | newline | "\" ) | escape_sequence }, '"' ;
+STRING = '"', { escape | char - '"' - newline - "\" }, '"' ;
+
+escape = "\a"                        (* ASCII #7  (bell)                 *)
+       | "\b"                        (* ASCII #8  (backspace)            *)
+       | "\f"                        (* ASCII #12 (form feed)            *)
+       | "\n"                        (* ASCII #10 (line feed)            *)
+       | "\r"                        (* ASCII #13 (carriage return)      *)
+       | "\t"                        (* ASCII #9  (horizontal tab)       *)
+       | "\v"                        (* ASCII #11 (vertical tab)         *)
+       | "\?"                        (* ASCII #63 (question mark)        *)
+       | "\\"                        (* ASCII #92 (backslash)            *)
+       | "\'"                        (* ASCII #39 (apostrophe)           *)
+       | '\"'                        (* ASCII #34 (quote)                *)
+       | "\", oct, [ oct, [ oct ] ]  (* octal escaped byte value         *)
+       | "\x", hex, [ hex ]          (* hexadecimal escaped byte value   *)
+       | "\u", hex, hex, hex, hex    (* Unicode code point up to 0xffff  *)
+       | "\U000",
+         hex, hex, hex, hex, hex     (* Unicode code point up to 0xfffff *)
+       | "\U0010",
+         hex, hex, hex, hex ;        (* Unicode code point between 0x100000 and 0x10ffff *)
 ```
-
-escape_sequence = "\\", ( '"' | "\\" | "n" | "t" | "r" | "x", hex, hex | "u",
-hex, hex, hex, hex ) ;
-
-````
 
 Valid string literals:
 
@@ -194,7 +213,9 @@ A DCL file consists of one or more top-level messages. Each top-level message
 has a field name followed by a colon and a message value.
 
 ```ebnf
-file = { WHITESPACE }, FIELD_NAME, ":", message_value, { WHITESPACE } ;
+file = { WHITESPACE }, top_level_message, { WHITESPACE, top_level_message }, { WHITESPACE } ;
+
+top_level_message = FIELD_NAME, ":", message_value ;
 ```
 
 Note that `message_value` is defined below.
@@ -224,7 +245,7 @@ In DCL, field names must be followed by a colon. The syntax for fields is:
 
 ```ebnf
 field = FIELD_NAME, ":", [ WHITESPACE ], value ;
-````
+```
 
 Note that `value` is defined below.
 
@@ -293,10 +314,13 @@ Message fields in DCL must always use curly braces `{}`, never angle brackets
 `<>`.
 
 ```ebnf
-message_value = "{", [ field_list ], "}" ;
+message_value = "{", [ WHITESPACE ], [ field_list ], [ WHITESPACE ], "}" ;
 
 field_list = field, { WHITESPACE, field } ;
 ```
+
+Empty message values `{}` are allowed. Whitespace (spaces and newlines) is
+allowed before and after the field list within the braces.
 
 Valid:
 
@@ -321,7 +345,7 @@ applies to both repeated message values and repeated scalar literals (strings,
 numbers, booleans, enums).
 
 ```ebnf
-repeated_value = "[", [ value_list ], "]" ;
+repeated_value = "[", [ WHITESPACE ], [ value_list ], [ WHITESPACE ], "]" ;
 
 value_list = value, { ",", [ WHITESPACE ], value } ;
 ```
