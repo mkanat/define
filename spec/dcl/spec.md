@@ -107,34 +107,6 @@ Examples of invalid field names:
 - `_universe_name` (starts with underscore)
 - `123field` (starts with digit)
 
-### Boolean Literals
-
-Boolean values in DCL accept only the strings `"true"` and `"false"`,
-case-sensitive. Integer representations (0, 1) and other string representations
-are not allowed.
-
-```ebnf
-BOOLEAN = "true" | "false" ;
-```
-
-Valid:
-
-```
-enabled: true
-disabled: false
-```
-
-Invalid:
-
-```
-enabled: True
-enabled: TRUE
-enabled: 1
-enabled: 0
-enabled: t
-enabled: f
-```
-
 ### Numeric Literals
 
 DCL has strict rules for numeric literals:
@@ -263,14 +235,13 @@ universe_name "example"
 
 ### Values
 
-A value in DCL can be a string literal, numeric literal, boolean literal, enum
-value, message value, or repeated value:
+A value in DCL can be a string literal, numeric literal enum value, message
+value, or repeated value:
 
 ```ebnf
 value = STRING
      | INTEGER
      | FLOAT
-     | BOOLEAN
      | enum_value
      | message_value
      | repeated_value ;
@@ -342,7 +313,7 @@ project: <
 
 Repeated fields must always use the list syntax with square brackets `[]`. This
 applies to both repeated message values and repeated scalar literals (strings,
-numbers, booleans, enums).
+numbers, enums).
 
 ```ebnf
 repeated_value = "[", [ WHITESPACE ], [ value_list ], [ WHITESPACE ], "]" ;
@@ -397,6 +368,9 @@ message may only contain message fields.
 
 The following field types are not allowed in DCL:
 
+- `bool` (DCL instead provides a standard enum `Dcl::Boolean` which has the
+  values `UNSPECIFIED`, `TRUE`, and `FALSE`, though schemas are encouraged to
+  define their own enums with more appropriate names)
 - `bytes`
 - `Any` (`google.protobuf.Any`)
 - Extension annotations (using `[package.field]` syntax) are not allowed
@@ -440,8 +414,6 @@ For DCL schemas, the
 mandatory, with the following modifications:
 
 - Old enum names may never be removed.
-- You may not change a field's type from bool to any other type, or from any
-  other type to bool.
 - The name required for the 0 value on enums is `UNSPECIFIED`.
 - The validator should look at field names and attempt to enforce the rule about
   using well-known types based on the field name.
@@ -490,15 +462,11 @@ project: {
     universe_name: "mv:example.com:my_project"
     author: "Max Developer"
     dependencies: [
-        {
-            universe: "mv:alice.com:math_utils"
-        },
-        {
-            universe: "mv:bob.com:networking"
-        }
+        { universe: "mv:alice.com:math_utils" },
+        { universe: "mv:bob.com:networking" }
     ]
     settings: {
-        debug_mode: false
+        debug_mode: FALSE
         log_level: 3
         timeout_seconds: 30.5
     }
