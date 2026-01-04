@@ -84,20 +84,23 @@ of the line is treated as a comment.
 ### Field Names
 
 Field names in DCL are restricted to lowercase ASCII letters, digits, and
-underscores only.
+underscores only. Field names must conform to Proto Edition 2024 naming style
+requirements:
+
+1. Field names must start with a lowercase letter (cannot start with a digit or
+   underscore)
+2. Field names cannot end with an underscore
+3. Any underscore must be followed by a letter (not a digit or another
+   underscore)
 
 ```ebnf
-FIELD_NAME = lowercase_letter, { lowercase_letter | dec | "_" } ;
+FIELD_NAME = lowercase_letter, { lowercase_letter | dec | ( "_", lowercase_letter ) } ;
 ```
-
-Field names must start with a lowercase letter. They cannot start with a digit
-or underscore.
 
 Examples of valid field names:
 
 - `universe_name`
 - `project_id`
-- `config_value_1`
 
 Examples of invalid field names:
 
@@ -105,7 +108,10 @@ Examples of invalid field names:
 - `universe-name` (contains hyphen)
 - `universe.name` (contains period)
 - `_universe_name` (starts with underscore)
+- `universe_name_` (ends with underscore)
 - `123field` (starts with digit)
+- `config_value_1` (underscore followed by digit)
+- `config__value` (double underscore)
 
 ### Numeric Literals
 
@@ -376,10 +382,10 @@ The following field types are not allowed in DCL:
 - Extension annotations (using `[package.field]` syntax) are not allowed
 - Proto2 `group` fields are not allowed
 
-### Proto3 Syntax
+### Edition Requirement
 
-All schema files must use Proto3 syntax. The `syntax = "proto3";` declaration
-must appear at the top of every `.proto` file.
+All schema files must use edition 2024 or later. The `edition = "2024";`
+declaration must appear at the top of every `.proto` file.
 
 ### Enums Must Be Defined Inside of Messages
 
@@ -481,7 +487,7 @@ above DCL file requires two schema files.
 Root schema file (defines the top-level structure):
 
 ```proto
-syntax = "proto3";
+edition = "2024";
 
 message ProjectConfigFile {
     Project project = 1;
@@ -491,7 +497,7 @@ message ProjectConfigFile {
 Project schema file (defines the `Project` message):
 
 ```proto
-syntax = "proto3";
+edition = "2024";
 
 message Project {
     string universe_name = 1;
