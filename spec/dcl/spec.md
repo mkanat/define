@@ -1,5 +1,7 @@
 # The Define Configuration Language Specification
 
+Version: 0 (Subject to unpredictable breaking changes)
+
 ## Introduction
 
 The Define Configuration Language (DCL) is a strict subset of the
