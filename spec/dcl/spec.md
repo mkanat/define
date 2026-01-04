@@ -481,38 +481,54 @@ project: {
 
 ### Example of Valid Schema Files
 
-Because top-level fields must be message fields, defining the schema for the
-above DCL file requires two schema files.
+Defining the schema for the above DCL file requires multiple schema files.
 
 Root schema file (defines the top-level structure):
 
 ```proto
 edition = "2024";
 
+import "project.proto"
+
 message ProjectConfigFile {
     Project project = 1;
 }
 ```
 
-Project schema file (defines the `Project` message):
+`project.proto`:
 
 ```proto
 edition = "2024";
+
+import "dependency.proto";
+import "settings.proto";
 
 message Project {
     string universe_name = 1;
     string author = 2;
     repeated Dependency dependencies = 3;
     Settings settings = 4;
+}
+```
 
-    message Dependency {
-        string universe = 1;
-    }
+`dependency.proto`
 
-    message Settings {
-        Dcl::Boolean debug_mode = 1;
-        int32 log_level = 2;
-        float timeout_seconds = 3;
-    }
+```proto
+edition = "2024";
+
+message Dependency {
+    string universe = 1;
+}
+```
+
+`settings.proto`:
+
+```proto
+edition = "2024";
+
+message Settings {
+    Dcl::Boolean debug_mode = 1;
+    int32 log_level = 2;
+    float timeout_seconds = 3;
 }
 ```
