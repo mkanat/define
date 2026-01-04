@@ -393,61 +393,6 @@ restrictions on that schema.
 Literal values at the top level of a DCL file are not allowed. The top-level
 message may only contain message fields.
 
-### Required Fields
-
-The schema must not contain any `required` fields. All fields in the schema must
-be `optional` or `repeated`.
-
-Valid (`.proto` file):
-
-```proto
-message Project {
-  optional string universe_name = 1;
-  repeated string tags = 2;
-}
-```
-
-Invalid (`.proto` file):
-
-```proto
-message Project {
-  required string universe_name = 1;  // required fields are not allowed
-}
-```
-
-### Enum Values
-
-All enum types in the schema must define a value named `UNKNOWN` with numeric
-value `0`. This value represents an unknown or unset enum state.
-
-Valid (`.proto` file):
-
-```proto
-enum Status {
-  UNKNOWN = 0;
-  ACTIVE = 1;
-  INACTIVE = 2;
-}
-```
-
-Invalid (`.proto` file):
-
-```proto
-enum Status {
-  ACTIVE = 1;      // missing UNKNOWN = 0
-  INACTIVE = 2;
-}
-```
-
-Invalid (`.proto` file):
-
-```proto
-enum Status {
-  UNKNOWN = 1;    // UNKNOWN must have value 0
-  ACTIVE = 2;
-}
-```
-
 ### Prohibited Field Types
 
 The following field types are not allowed in DCL:
@@ -456,6 +401,79 @@ The following field types are not allowed in DCL:
 - `Any` (`google.protobuf.Any`)
 - Extension annotations (using `[package.field]` syntax) are not allowed
 - Proto2 `group` fields are not allowed
+
+### Proto3 Syntax
+
+All schema files must use Proto3 syntax. The `syntax = "proto3";` declaration
+must appear at the top of every `.proto` file.
+
+### Enums Must Be Defined Inside of Messages
+
+For historical reasons based on the C++ implementation of protocol buffers,
+proto enums defined outside of messages must have their values prefixed like
+this:
+
+```proto
+enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_ACTIVE = 1;
+    STATUS_INACTIVE = 2;
+}
+```
+
+However, enums defined inside of messages can use simpler names:
+
+```proto
+message User {
+    enum Status {
+        UNSPECIFIED = 0;
+        ACTIVE = 1;
+        INACTIVE = 2;
+    }
+}
+```
+
+### Proto Best Practices
+
+For DCL schemas, the
+[Proto Best Practices](https://protobuf.dev/best-practices/dos-donts/) are
+mandatory, with the following modifications:
+
+- Old enum names may never be removed.
+- You may not change a field's type from bool to any other type, or from any
+  other type to bool.
+- The name required for the 0 value on enums is `UNSPECIFIED`.
+- The validator should look at field names and attempt to enforce the rule about
+  using well-known types based on the field name.
+- Don't move between repeated and scalar on a field at all (in either direction)
+- The point about keywords should strive to protect keywords in all common
+  programming languages, so that tools can be built in all languages to parse
+  DCL.
+
+Also, although DCL is a strictly-specified text format, do not use the Define
+Configuration Language for interchange between systems, do not send it across
+the wire, do not use it as a permanent storage format in a database, etc. This
+is a point already made in the Best Practices, but it is clarified that it does
+apply to DCL.
+
+Other systems are free to use DCL for their own configuration needs, but it is
+not intended to be a wire format, an API format, etc.
+
+### Time Fields
+
+In the [Proto Best Practices](https://protobuf.dev/best-practices/dos-donts/),
+there are many different types of well-known types for various forms of time.
+These must be named in the following fashion:
+
+- `duration` fields must end in `_duration`
+- `timestamp` fields must end in `_timestamp`
+- `interval` fields must end in `_interval`
+- `date` fields must end in `_date`
+- `month` fields must end in `_month`
+- `dayofweek` fields must end in `_weekday`
+- `timeofday` fields must end in `_clocktime`
+
+Fields ending with those suffixes must also always have those well-known types.
 
 ## Parser Behavior
 
