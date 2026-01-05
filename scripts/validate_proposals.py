@@ -23,6 +23,7 @@ REQUIRED_METADATA = [
 ]
 
 PROPOSAL_TITLE_PREFIX = "Define Language Proposal"
+DCL_PROPOSAL_TITLE_PREFIX = "Define Configuration Language Proposal"
 
 FILENAME_PATTERN = re.compile(r"^(\d{5})-[a-z0-9]+(?:-[a-z0-9]+)*\.md$")
 
@@ -58,7 +59,6 @@ def validate_filename(filename: str) -> FilenameValidationResult:
         )
 
     proposal_number = match.group(1)
-    # Extract kebab-case part (everything after number and hyphen, before .md)
     kebab = filename.removeprefix(f"{proposal_number}-").removesuffix(".md")
     return FilenameValidationResult(
         is_valid=True, proposal_number=int(proposal_number), kebab=kebab
@@ -66,7 +66,7 @@ def validate_filename(filename: str) -> FilenameValidationResult:
 
 
 def validate_title(
-    content: str, filename_result: FilenameValidationResult
+    content: str, filename_result: FilenameValidationResult, filepath: Path
 ) -> ValidationResult:
     """Validate that title matches the expected format and filename."""
     lines = content.split("\n")
@@ -78,17 +78,21 @@ def validate_title(
         )
 
     proposal_number = filename_result.proposal_number
-    # Title should match: "# Define Language Proposal N: Title"
-    pattern = rf"^# {re.escape(PROPOSAL_TITLE_PREFIX)} {proposal_number}: (.+)$"
+
+    is_dcl_proposal = "dcl" in filepath.parts
+    expected_prefix = (
+        DCL_PROPOSAL_TITLE_PREFIX if is_dcl_proposal else PROPOSAL_TITLE_PREFIX
+    )
+
+    pattern = rf"^# {re.escape(expected_prefix)} {proposal_number}: (.+)$"
     match = re.match(pattern, title_line)
     if not match:
         return ValidationResult(
             is_valid=False,
-            error_message=f"Title must start with '# {PROPOSAL_TITLE_PREFIX} {proposal_number}:' (found: {title_line[:60]}...)",
+            error_message=f"Title must start with '# {expected_prefix} {proposal_number}:' (found: {title_line[:60]}...)",
         )
 
     title_text = match.group(1)
-    # Convert title text to kebab-case: lowercase, remove punctuation, replace spaces with hyphens
     title_kebab = re.sub(r"[^a-z0-9\s-]", "", title_text.lower())
     title_kebab = title_kebab.replace(" ", "-")
 
@@ -119,7 +123,6 @@ def validate_metadata(content: str) -> ValidationResult:
         if stripped.startswith("- **"):
             metadata_lines.append(stripped)
 
-    # Check if metadata section is missing entirely
     if not metadata_lines:
         return ValidationResult(
             is_valid=False,
@@ -128,7 +131,6 @@ def validate_metadata(content: str) -> ValidationResult:
 
     metadata_text = "\n".join(metadata_lines)
 
-    # Check for each required metadata field
     for field in REQUIRED_METADATA:
         pattern = rf"^- \*\*{re.escape(field)}:\*\*"
         if not re.search(pattern, metadata_text, re.MULTILINE):
@@ -144,20 +146,16 @@ def validate_headers(content: str) -> ValidationResult:
     """Validate that exactly the required headers are present."""
     lines = content.split("\n")
 
-    # Build set of all valid header names (flattening tuples for variants)
     valid_headers = set()
     required_header_specs = []
     for required in REQUIRED_HEADERS:
         if isinstance(required, tuple):
-            # Multiple acceptable variants
             valid_headers.update(required)
             required_header_specs.append(required)
         else:
-            # Single required header
             valid_headers.add(required)
             required_header_specs.append((required,))
 
-    # Find all second-level headers
     found_headers = []
     for line in lines:
         stripped = line.strip()
@@ -165,7 +163,6 @@ def validate_headers(content: str) -> ValidationResult:
             header_text = stripped.removeprefix("## ").strip()
             found_headers.append(header_text)
 
-    # Check all found headers are valid
     found_header_set = set(found_headers)
     invalid_headers = found_header_set - valid_headers
     if invalid_headers:
@@ -175,7 +172,6 @@ def validate_headers(content: str) -> ValidationResult:
             error_message=f"Invalid headers found: {invalid_list}",
         )
 
-    # Check all required headers are present
     for required_spec in required_header_specs:
         found = any(header in found_header_set for header in required_spec)
         if not found:
@@ -204,30 +200,25 @@ def validate_proposal_file(filepath: Path) -> list[str]:
     if filename.startswith("00000-"):
         return errors
 
-    # Validate filename
     filename_result = validate_filename(filename)
     if not filename_result.is_valid:
         errors.append(filename_result.error_message)
         return errors  # Can't continue validation if filename is wrong
 
-    # Read file content
     try:
         content = filepath.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as e:
         errors.append(f"Error reading file: {e}")
         return errors
 
-    # Validate title
-    title_result = validate_title(content, filename_result)
+    title_result = validate_title(content, filename_result, filepath)
     if not title_result.is_valid:
         errors.append(title_result.error_message)
 
-    # Validate metadata
     metadata_result = validate_metadata(content)
     if not metadata_result.is_valid:
         errors.append(metadata_result.error_message)
 
-    # Validate headers
     headers_result = validate_headers(content)
     if not headers_result.is_valid:
         errors.append(headers_result.error_message)

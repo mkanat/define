@@ -140,8 +140,8 @@ Define Language Proposals may create new configuration directories.
 ### File Contents
 
 Most files that contain configuration values inside of configuration directories
-are expected to have the extension `.defcl` and be written in the Define
-Configuration Language, which is described in a later proposal.
+are expected to have the extension `.defcl` and be written in the
+[Define Configuration Language](../spec/dcl/spec.md).
 
 ### Format of the `x` Directory
 
@@ -154,7 +154,7 @@ configuration, it would place it into the directory
 
 Third party configurations may contain anything they want to contain. However,
 if they contain configuration values, they are strongly encouraged to write them
-in the Define Configuration Language.
+in the[Define Configuration Language](../spec/dcl/spec.md).
 
 When Define tooling removes a universe from being a dependency of a codebase, it
 may delete that universe's configuration files from the project root of the
@@ -177,11 +177,11 @@ Configuration Language. However, we could imagine the contents of `config.defcl`
 might look something like:
 
 ```bash
-project {
-    universe "mv:example.com:my_project"
-    author "Max Developer"
-    dependencies {
-        universe { multiverse "mv" authority "alice.com" universe "math_utils" }
+project: {
+    universe: "mv:example.com:my_project"
+    author: "Max Developer"
+    dependencies: {
+        universe: { multiverse "mv" authority "alice.com" universe "math_utils" }
     }
 }
 ```
