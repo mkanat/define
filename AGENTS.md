@@ -28,6 +28,11 @@ See [spec/spec.md] for the language specification.
   `from compiler import ast` and then reference `ast.ASTNode` in the code.
 - Never import or use `typing.TYPE_CHECKING`.
 
+## Comments
+
+- Only add comments that explain why code was written. Never add comments saying
+  what code does.
+
 ## Docstrings
 
 - Avoid docstrings on test methods.
