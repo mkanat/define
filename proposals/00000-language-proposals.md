@@ -67,6 +67,19 @@ are no counterexamples---that after we implement your proposal, it would be
 impossible for a program to exist that we cannot refactor deterministically into
 a different syntax.
 
+The best ways to demonstrate forward compatibility are:
+
+1. **Zero Ambiguity**: It should always be deterministically possible to
+   disambiguate the exact intention of a piece of syntax compared to all other
+   syntax that exists in Define. For example, it should never be ambiguous in
+   code what a name means.
+2. **Infinite Possibility**: Show how the design allows for an infinite (or
+   effectively infinite) number of future possibilities if we want to change our
+   mind about how things work. For example,
+   [DLP 10](00010-configuration-directory.md) reserves all top-level directory
+   names for use in Define itself so that we can change our mind about what goes
+   into that directory, and there can't be any possible name conflicts there.
+
 ## Refactoring Existing Systems
 
 Include an example showing how we will deterministically refactor all existing
