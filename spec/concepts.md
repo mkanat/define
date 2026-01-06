@@ -714,6 +714,115 @@ them any other qualities.
 The point is simply that a programming language must have a syntax for defining
 forms.
 
+## Types of Forms
+
+There are, fundamentally, only three types of forms that can logically exist.
+
+### Bags
+
+A bag is a collection of dimension points with no defined relationships. You
+just have a quantity of dimension points, and that's all you know.
+
+Most programming languages actually don't let you express this as an intention,
+that you just want a bag, but it's actually a very common need. "I have a list
+of numbers and I don't care what order they go in as long as we do something to
+all of them," for example.
+
+It is worthwhile for a programming language to allow a developer to explicitly
+indicate they intend to create a bag, so the compiler can optimize it as it sees
+fit.
+
+### Graphs
+
+A graph is a bag of dimension points that are connected to each other. You don't
+know or care what shape the dimension points make, you just know that point A is
+connected to point B, or point C is connected to points D and E.
+
+There are certain special forms of graphs that are very common. The most common
+is a _sequence_: A set of dimension points that have an ordering. A comes before
+B and C comes after B, and so on. Programs traditionally model these as arrays
+or linked lists.
+
+Programming languages often create convenient syntax for specifying sequences
+and other specialized graphs, but fail to provide graphs as a basic concept
+(even though they are the underlying concept for most data structures).
+
+### Shapes
+
+A shape is a set of dimension points with defined relationships to each other in
+space. In a graph, if the points move, you don't care---they still have the same
+connections. In a shape, if the points move, you have a different shape.
+
+This is what people traditionally think of as an "object" or "form" in the
+physical universe.
+
+In a programming language, shapes are represented by structs or similar pieces
+of syntax. Basically, a set of names for certain positions in space that are all
+defined together, which gives them a relationship to each other ("we are all in
+this struct together").
+
+For the sake of simplicity, almost every example of a form in this document
+tends to use a shape, because they are the simplest to write out and understand
+in syntax.
+
+### Combinations
+
+Forms can contain other forms. A car is made up of a body, seats, wheels, etc.
+Bags can contain graphs, shapes, and other bags. Graphs can contain bags,
+shapes, and other graphs. Shapes can contain bags, graphs, and other shapes.
+
+This is how you get the advanced forms of data and data structures that most
+programs depend on. For example, you could implement a dictionary as a bag of
+graphs (a set of key/value pairs) or more complex combinations.
+
+### Constraints
+
+Programs can place constraints on forms. You can have "a bag of green balls" and
+know that every ball inside is green even though you haven't looked at each
+ball. You can:
+
+1. Say what qualities are allowed in a form. ("May only contain green balls.")
+2. Enforce relationships between points in the form. (This covers almost
+   unlimited potential constraints, such as "all dimension points in the form
+   must match some constraint," "there can be no duplicates," "X can never have
+   the same value as Y", and so forth.)
+3. Control the quantity of dimension points (minimum, maximum, exact), including
+   statements of the other constraints on those quantities. (For example, "at
+   least two dimension points in this form must be a `string`).
+4. Control changes to the form:
+   - Addition/Change/Removal of dimension points
+   - Addition/Change/Removal of constraints.
+   - Addition/Change/Removal of connections in a graph.
+   - Addition/Change/Removal of positions in a shape.
+5. Define access controls (who can do what with what points).
+
+And you can combine all of these into complex logical requirements. Constraints
+can be quite advanced.
+
+### Syntax
+
+Programming languages need syntax to be able to express bags, graphs, and
+shapes. There needs to be syntax both to define the forms and to refer to
+dimension points within them. There also has to be syntax to express constraints
+on the forms.
+
+For example, one could imagine a bag being created like:
+
+```
+create a form named balls that is a bag {
+    it may only contain dimension points with the quality Ball.
+    it has a dimension point with the quality Ball {
+        color: "green"
+    }
+    it has a dimension point with the quality Ball {
+        color: "red"
+    }
+}
+```
+
+That is an extremely simple example; implementing the concept of Types of Forms
+would take a lot more syntax than that.
+
 ## Machines
 
 Let's get into a bit more detail about what a machine really is and how we would
