@@ -7,7 +7,7 @@
 
 ## Problems
 
-### Problem 1: Bool → Enum Migration
+### 1: Bool → Enum Migration
 
 It's very easy to start off thinking that some configuration value is binary and
 so only has two states, and only discover later that you need more than one
@@ -49,7 +49,7 @@ message Settings {
 One of the biggest problems with that, is that now it's actually `UNSPECIFIED`
 that reads as false (because it's 0) in most programming languages, not `FALSE`.
 
-### Problem 2: `bool` Cannot Represent "Unset"
+### 2: `bool` Cannot Represent "Unset"
 
 Many configurations need to differentiate between `false` and "not set." With a
 bool there is no way to do this reliably. Yes, protos have the `has_` methods,
