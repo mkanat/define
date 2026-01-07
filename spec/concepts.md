@@ -347,13 +347,13 @@ Here's a description of a negative integer in an imaginary programming language:
 
 ```bash
 quality NegativeInteger {
-  it starts with Minus.
+  it starts with Hyphen.
   it then has many Digit.
 }
 ```
 
 We see three names in that code: `NegativeInteger` (the name of the quality),
-`Minus` (presumably a name for the character `-`), and `Digit` (a quality
+`Hyphen` (presumably a name for the character `-`), and `Digit` (a quality
 representing a single number from 0 to 9).
 
 Everything else is part of the syntax:
