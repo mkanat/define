@@ -14,7 +14,7 @@ def test_run_check_success():
     check = _make_check("Test Check", ["echo", "hello"])
     result = run_ci_checks.run_check(check)
     assert result.check == check
-    assert result.exit_code == 0
+    assert result.exit_code == run_ci_checks.SUCCESS_EXIT_CODE
     assert "hello" in result.output
 
 
@@ -22,13 +22,13 @@ def test_run_check_failure():
     check = _make_check("Test Check", ["false"])
     result = run_ci_checks.run_check(check)
     assert result.check == check
-    assert result.exit_code != 0
+    assert result.exit_code == run_ci_checks.ERROR_EXIT_CODE
 
 
 def test_run_check_timeout():
     check = _make_check("Test Check", ["sleep", "2"])
     result = run_ci_checks.run_check(check, timeout=0.01)
-    assert result.exit_code == 124
+    assert result.exit_code == run_ci_checks.TIMEOUT_EXIT_CODE
     assert "timed out" in result.output.lower()
 
 
@@ -44,7 +44,7 @@ def test_run_checks_success():
         repo="test/repo",
         sha="abc123",
     )
-    assert result == 0
+    assert result == run_ci_checks.SUCCESS_EXIT_CODE
 
 
 def test_run_checks_with_failures():
@@ -59,7 +59,7 @@ def test_run_checks_with_failures():
         repo="test/repo",
         sha="abc123",
     )
-    assert result == 1
+    assert result == run_ci_checks.ERROR_EXIT_CODE
 
 
 def test_run_check_expands_glob_patterns():
