@@ -36,6 +36,7 @@ jobs:
         if: always()
         uses: dorny/test-reporter@v2
         with:
-          name: Pytest Tests
+          name: Pytest
           path: pytest-results.xml
           reporter: python-xunit
+          use-actions-summary: false
