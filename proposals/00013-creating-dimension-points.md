@@ -56,7 +56,7 @@ Many of the examples written before this proposal do exactly that, for the sake
 of simplicity. However, that removes the possibility of defining empty
 positions.
 
-##### Creation at Definition
+#### Creation at Definition
 
 We could have a syntax like:
 
