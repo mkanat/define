@@ -36,6 +36,9 @@ extend-select = [
 ]
 
 [tool.ruff.lint.extend-per-file-ignores]
+"**/*.py" = [
+    "S603", # Allow subprocess calls without a shell.
+]
 "**/*_test.py" = [
     "S101", # Allow assert statements.
     "D100", # Don't require docstrings on test modules.
@@ -50,5 +53,6 @@ dev = [
     "pre-commit",
     "pyright[nodejs]",
     "pytest",
+    "requests",
     "ruff",
 ]
