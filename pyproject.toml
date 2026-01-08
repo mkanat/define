@@ -48,11 +48,14 @@ extend-select = [
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
 
+[tool.pytest.ini_options]
+junit_logging = "all"
+
 [dependency-groups]
 dev = [
     "pre-commit",
     "pyright[nodejs]",
-    "pytest",
+    "pytest>=6",
     "requests",
     "ruff",
 ]

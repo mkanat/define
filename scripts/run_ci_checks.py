@@ -59,7 +59,7 @@ CHECKS = [
     ),
     Check(
         name="Pytest",
-        command=["uv", "run", "pytest"],
+        command=["uv", "run", "pytest", "--junit-xml=pytest-results.xml"],
     ),
     Check(
         name="Proposal Validation",
