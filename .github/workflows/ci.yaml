@@ -10,6 +10,8 @@ jobs:
   run-ci:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
+      actions: read
       checks: write
     steps:
       - uses: actions/checkout@v4
@@ -37,7 +39,3 @@ jobs:
           name: Pytest Tests
           path: pytest-results.xml
           reporter: python-xunit
-          list-suites: all
-          list-tests: all
-          max-annotations: 50
-          only-summary: false
