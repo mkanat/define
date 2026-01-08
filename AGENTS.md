@@ -38,7 +38,6 @@ See [spec/spec.md] for the language specification.
 
 ## Docstrings
 
-- Avoid docstrings on test methods.
 - Avoid putting "Returns" clauses in docstrings on simple accessors where the
   return value is obvious from the function signature.
 
@@ -50,3 +49,6 @@ See [spec/spec.md] for the language specification.
 ## Tests
 
 - Avoid adding debug messages to assert calls.
+- Do not write docstrings in tests.
+- When using `unittest.mock`, always use `patch.object` with `autospec=True`
+  instead of `patch`.

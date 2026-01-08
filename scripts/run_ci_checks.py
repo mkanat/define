@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 CHECK_TIMEOUT_SECONDS = 600
 TIMEOUT_EXIT_CODE = 124
 ERROR_EXIT_CODE = 1
+REPORTING_ERROR_EXIT_CODE = 2
 SUCCESS_EXIT_CODE = 0
 GITHUB_API_TEXT_LIMIT = 65000
 API_REQUEST_TIMEOUT_SECONDS = 10
@@ -115,10 +116,13 @@ def create_check_run(
     token: str,
     repo: str,
     sha: str,
-) -> None:
-    """Create a check run via GitHub Checks API."""
+) -> bool:
+    """Create a check run via GitHub Checks API.
+
+    Returns True if successful, False otherwise.
+    """
     if not check.report_to_github:
-        return
+        return True
 
     if len(output_text) > GITHUB_API_TEXT_LIMIT:
         logger.warning(
@@ -151,8 +155,10 @@ def create_check_run(
             url, headers=headers, json=payload, timeout=API_REQUEST_TIMEOUT_SECONDS
         )
         response.raise_for_status()
+        return True
     except requests.RequestException:
         logger.exception("Failed to create check run for %s", check.name)
+        return False
 
 
 def run_checks(
@@ -184,9 +190,10 @@ def run_checks(
                 logger.info("Output from %s:\n%s", result.check.name, result.output)
 
     logger.info("Reporting results to GitHub...")
+    reporting_failures = []
     for result in results:
         conclusion = "success" if result.exit_code == SUCCESS_EXIT_CODE else "failure"
-        create_check_run(
+        succeeded = create_check_run(
             result.check,
             conclusion,
             result.output,
@@ -194,10 +201,18 @@ def run_checks(
             repo,
             sha,
         )
+        if not succeeded:
+            reporting_failures.append(result.check.name)
 
     failed_checks = [
         result.check.name for result in results if result.exit_code != SUCCESS_EXIT_CODE
     ]
+    if reporting_failures:
+        logger.error(
+            "Failed to report checks to GitHub: %s", ", ".join(reporting_failures)
+        )
+        return REPORTING_ERROR_EXIT_CODE
+
     if failed_checks:
         logger.error("Failed checks: %s", ", ".join(failed_checks))
         return ERROR_EXIT_CODE

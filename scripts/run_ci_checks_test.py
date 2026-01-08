@@ -1,6 +1,11 @@
 """Tests for run_ci_checks.py."""
 
+from unittest.mock import patch
+
+import requests
+import run_ci_checks
 from run_ci_checks import (
+    REPORTING_ERROR_EXIT_CODE,
     Check,
     run_check,
     run_checks,
@@ -81,3 +86,20 @@ def test_run_check_expands_glob_patterns():
         for line in output_lines
     )
     assert "proposals/00001-types-of-names.md" in output_lines
+
+
+def test_run_checks_with_reporting_failure():
+    """Test run_checks function when reporting to GitHub fails."""
+    test_checks = [
+        Check("Success Check", ["echo", "success"], report_to_github=True),
+    ]
+
+    with patch.object(run_ci_checks.requests, "post", autospec=True) as mock_post:
+        mock_post.side_effect = requests.RequestException("API failure")
+        result = run_checks(
+            test_checks,
+            token="test-token",  # noqa: S106 - not a real password
+            repo="test/repo",
+            sha="abc123",
+        )
+        assert result == REPORTING_ERROR_EXIT_CODE
