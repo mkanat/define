@@ -38,3 +38,30 @@ system of global and local names are attempt to prevent any _possible_ naming
 conflict where two logically separate things have the same name. Requiring that
 universes have a single project root is also an attempt to prevent the
 possibility of ambiguity.
+
+## Statements Do Not Start With Names
+
+We do not create syntax in define that looks like:
+
+`type<name> takes some action`
+
+It's much harder to parse that successfully than if we start the statement with
+keywords and put the name inside of the statement.
+
+For example, it makes it much harder for developers to do dumb parsing of files.
+For example, imagine you want to write a regular expression to successfully find
+all dimension point creations. It's much harder for programmers to get it right
+if the name starts the line. The regex `/^(\w+<\w+>) now has a dimension point/`
+is much harder than `/^create a dimension point in (.+)\./`. Also, the first
+regex is what developers would probably write and it would actually be wrong,
+because names can be configured to have more characters allowed than `\w`.
+
+It's also the only way we can both be consistent _and_ create intuitive
+sentences. We want there to be one right way in Define, and so if names are
+going to start lines, I would want them to _always_ start lines. However, in
+most situations, starting lines with the name forces developers to write a bunch
+of passive statements like `quality<foo> is defined as`, when really the
+programmer is taking decisive action by providing statements of intent.
+
+Finally (and this isn't the most important point, but it's still true) it
+requires more lookahead from the parser.
