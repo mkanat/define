@@ -36,7 +36,7 @@ jobs:
         with:
           name: Pytest Tests
           path: pytest-results.xml
-          reporter: pytest
+          reporter: python-xunit
           list-suites: all
           list-tests: all
           max-annotations: 50
