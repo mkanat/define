@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Run CI checks in parallel and report results via GitHub Checks API."""
 
+import glob
 import logging
 import os
 import subprocess
@@ -75,9 +76,17 @@ CHECKS = [
 
 def run_check(check: Check, timeout: float = CHECK_TIMEOUT_SECONDS) -> CheckResult:
     """Run a single check and return its result."""
+    expanded_command = []
+    for arg in check.command:
+        expanded = glob.glob(arg)
+        if expanded:
+            expanded_command.extend(sorted(expanded))
+        else:
+            expanded_command.append(arg)
+
     try:
         result = subprocess.run(
-            check.command,
+            expanded_command,
             capture_output=True,
             text=True,
             timeout=timeout,

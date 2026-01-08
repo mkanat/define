@@ -64,3 +64,20 @@ def test_run_checks_with_failures():
         report_to_github=False,
     )
     assert result == 1
+
+
+def test_run_check_expands_glob_patterns():
+    """Test that glob patterns in command arguments are expanded."""
+    check = Check(
+        name="Glob Expansion Test",
+        command=["ls", "proposals/0000*.md"],
+    )
+    result = run_check(check)
+    assert result.exit_code == 0
+    output_lines = result.output.strip().split("\n")
+    assert len(output_lines) > 1
+    assert all(
+        line.startswith("proposals/0000") and line.endswith(".md")
+        for line in output_lines
+    )
+    assert "proposals/00001-types-of-names.md" in output_lines
