@@ -27,6 +27,9 @@ See [spec/spec.md] for the language specification.
 - Prefer importing modules instead of classes:. Example:
   `from compiler import ast` and then reference `ast.ASTNode` in the code.
 - Never import or use `typing.TYPE_CHECKING`.
+- Never do dynamic imports. (Never write an import statement inside of a
+  function.)
+- Never do conditional imports.
 
 ## Comments
 
@@ -38,6 +41,11 @@ See [spec/spec.md] for the language specification.
 - Avoid docstrings on test methods.
 - Avoid putting "Returns" clauses in docstrings on simple accessors where the
   return value is obvious from the function signature.
+
+## Code Style
+
+- Prefer positive booleans. For example: `enable_feature=False` rather than
+  `disable_feature=True`.
 
 ## Tests
 
