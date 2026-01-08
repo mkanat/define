@@ -28,6 +28,7 @@ class Check:
 
     name: str
     command: list[str]
+    report_to_github: bool = True
 
 
 @dataclass
@@ -60,6 +61,7 @@ CHECKS = [
     Check(
         name="Pytest",
         command=["uv", "run", "pytest", "--junit-xml=pytest-results.xml"],
+        report_to_github=False,
     ),
     Check(
         name="Proposal Validation",
@@ -113,10 +115,11 @@ def create_check_run(
     token: str,
     repo: str,
     sha: str,
-    *,  # Forces report_to_bool to be keyword named for clarity.
-    report_to_github: bool = True,
 ) -> None:
     """Create a check run via GitHub Checks API."""
+    if not check.report_to_github:
+        return
+
     if len(output_text) > GITHUB_API_TEXT_LIMIT:
         logger.warning(
             "Output for %s exceeds GitHub API limit (%d > %d), truncating",
@@ -143,14 +146,6 @@ def create_check_run(
         },
     }
 
-    if not report_to_github:
-        logger.info(
-            "DRY RUN: Would create check run for %s with conclusion %s",
-            check.name,
-            conclusion,
-        )
-        return
-
     try:
         response = requests.post(
             url, headers=headers, json=payload, timeout=API_REQUEST_TIMEOUT_SECONDS
@@ -162,21 +157,11 @@ def create_check_run(
 
 def run_checks(
     checks: list[Check],
-    token: str | None,
-    repo: str | None,
-    sha: str | None,
-    *,  # Forces report_to_github to be keyword-named for clarity.
-    report_to_github: bool = True,
+    token: str,
+    repo: str,
+    sha: str,
 ) -> int:
     """Run all checks in parallel and report results."""
-    if not report_to_github:
-        logger.info(
-            "DRY RUN mode enabled - checks will run but no GitHub API calls will be made"
-        )
-        token = token or "dry-run-token"
-        repo = repo or "test/repo"
-        sha = sha or "dry-run-sha"
-
     if not token or not repo or not sha:
         logger.error(
             "Missing required environment variables (GITHUB_TOKEN, GITHUB_REPOSITORY, GITHUB_SHA)"
@@ -185,7 +170,6 @@ def run_checks(
 
     logger.info("Running %d checks in parallel...", len(checks))
 
-    # Run all checks in parallel
     results: list[CheckResult] = []
     with ThreadPoolExecutor(max_workers=len(checks)) as executor:
         future_to_check = {executor.submit(run_check, check): check for check in checks}
@@ -199,7 +183,6 @@ def run_checks(
             if result.output:
                 logger.info("Output from %s:\n%s", result.check.name, result.output)
 
-    # Report results via GitHub Checks API
     logger.info("Reporting results to GitHub...")
     for result in results:
         conclusion = "success" if result.exit_code == SUCCESS_EXIT_CODE else "failure"
@@ -210,10 +193,8 @@ def run_checks(
             token,
             repo,
             sha,
-            report_to_github=report_to_github,
         )
 
-    # Determine overall exit code
     failed_checks = [
         result.check.name for result in results if result.exit_code != SUCCESS_EXIT_CODE
     ]
@@ -227,9 +208,9 @@ def run_checks(
 
 def main() -> int:
     """Collect environment variables and run checks."""
-    token = os.environ.get("GITHUB_TOKEN")
-    repo = os.environ.get("GITHUB_REPOSITORY")
-    sha = os.environ.get("GITHUB_SHA")
+    token = os.environ.get("GITHUB_TOKEN", "")
+    repo = os.environ.get("GITHUB_REPOSITORY", "")
+    sha = os.environ.get("GITHUB_SHA", "")
     return run_checks(CHECKS, token, repo, sha)
 
 
