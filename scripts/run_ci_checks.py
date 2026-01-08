@@ -196,6 +196,8 @@ def run_checks(
             logger.info(
                 "%s %s (exit code: %d)", status, result.check.name, result.exit_code
             )
+            if result.output:
+                logger.info("Output from %s:\n%s", result.check.name, result.output)
 
     # Report results via GitHub Checks API
     logger.info("Reporting results to GitHub...")
