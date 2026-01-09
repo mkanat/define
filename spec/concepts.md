@@ -714,6 +714,48 @@ them any other qualities.
 The point is simply that a programming language must have a syntax for defining
 forms.
 
+### Forms Can Overlap
+
+There is an interesting point about forms that is easy to miss. Let's look at
+this form:
+
+```
+a       b
+
+
+    c
+```
+
+Most simply, that looks like a single form: a triangle made by points `a`, `b`,
+and `c`. However, we could also consider that `a` and `b` are in a form by
+themselves (a line). The same for the pairs `(b, c)` and `(c, a)`.
+
+The instant you create the triangle, those other forms also exist. We might not
+think about them, we might not need a name for them, and we might have no use
+for them, but they are there.
+
+Programming languages need some way to account for all of this. There have to be
+ways to make new forms that include all (or some) of the points of an existing
+form (plus possibly new points). Those dimension points don't _move_ when placed
+into forms. We just consider they have some form, now.
+
+If you have a form like `front_seat {section, row, number}` then you also have
+un-named forms made out of section/row, row/number, and number/section.
+
+In fact, merely by defining positions, forms exist. So even if we just had
+`position<section>`, `position<row>`, and `position<number>`, there would be
+four un-named forms in existence.
+
+### Uniqueness of Forms
+
+There is an important rule about forms:
+
+**Any form that has the same dimension points is the same form.**
+
+That means that programming languages must treat any form that contains the same
+set of dimension points as being identical objects. In fact, languages should
+likely forbid the creation of two separate forms that contain identical points.
+
 ## Types of Forms
 
 There are, fundamentally, only three types of forms that can logically exist.
@@ -767,9 +809,15 @@ in syntax.
 
 ### Combinations
 
-Forms can contain other forms. A car is made up of a body, seats, wheels, etc.
-Bags can contain graphs, shapes, and other bags. Graphs can contain bags,
-shapes, and other graphs. Shapes can contain bags, graphs, and other shapes.
+As mentioned above, forms can contain other forms. A car is made up of a body,
+seats, wheels, etc. Bags can contain graphs, shapes, and other bags. Graphs can
+contain bags, shapes, and other graphs. Shapes can contain bags, graphs, and
+other shapes.
+
+This is particularly important for graphs, because you could have a graph where
+the relationship is "these three points in this form have a relationship to
+these five points in a different form." But it's still relevant for bags and
+shapes, too.
 
 This is how you get the advanced forms of data and data structures that most
 programs depend on. For example, you could implement a dictionary as a bag of
