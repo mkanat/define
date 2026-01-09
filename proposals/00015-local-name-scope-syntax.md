@@ -21,6 +21,12 @@ that can create a local name scope (meaning: any definition where it is possible
 to define new things inside of that definition, like a quality that can define
 triggers, for example) will create one within those curly braces.
 
+The curly brace that starts a scope must be on the same line as the statement
+that creates the scope, exactly one space away from the statement. The ending
+curly brace must be on a line that contains only that curly brace and
+whitespace, aligned with the start of the statement that opened the scope. This
+enables easier parsing even with unofficial parsers (like grep or a regex).
+
 For example:
 
 ```
