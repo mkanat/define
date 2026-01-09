@@ -1837,6 +1837,10 @@ while the program is running. One of the goals of Define is to be able to
 express many of these constraints in a way that the compiler can know, while
 compiling, whether the program is actually correct.
 
+Note that these constraints sound very similar to the potential conditions for a
+machine trigger, and in fact, constraints and trigger conditions would likely
+use the same syntax.
+
 ## Similarities and Differences
 
 The principles we have described so far give us some very powerful mechanisms
