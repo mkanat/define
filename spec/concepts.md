@@ -1839,7 +1839,7 @@ compiling, whether the program is actually correct.
 
 Note that these constraints sound very similar to the potential conditions for a
 machine trigger, and in fact, constraints and trigger conditions would likely
-use the same syntax.
+re-use some of the same syntax.
 
 ## Similarities and Differences
 
