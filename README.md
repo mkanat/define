@@ -33,7 +33,7 @@ the language.
 ### Writing Define
 
 Define has a basic [Style Guide](style.md) describing rules around how code
-sould be structured in the language.
+should be structured in the language.
 
 ### Contributing
 
