@@ -65,3 +65,15 @@ programmer is taking decisive action by providing statements of intent.
 
 Finally (and this isn't the most important point, but it's still true) it
 requires more lookahead from the parser.
+
+### Constraints May Not Reference Themselves
+
+No constraint at any time may ever reference _itself_. For example,
+`constraint<foo>` may not contain statements about `constraint<foo>`.
+
+Almost every failure in history of logical systems comes about from forms of
+logic that allow things to refer to themselves. For example, Russell's Paradox
+("consider the set of all sets that do not contain themselves") comes about
+because in set theory, sets could refer to themselves. The Godel Incompleteness
+Theorem comes about by allowing logical statements to refer to themselves. We
+have ample evidence in history that this is a bad idea. Don't allow it.
