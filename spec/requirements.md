@@ -66,7 +66,15 @@ programmer is taking decisive action by providing statements of intent.
 Finally (and this isn't the most important point, but it's still true) it
 requires more lookahead from the parser.
 
-### Constraints May Not Reference Themselves
+## Constraints Must Be Statically Provable
+
+The compiler must be able to know whether a constraint holds, while compiling.
+This is one of the earliest goals of Define, from the
+[philosophy](../philosophy.md). There are many statements you could attempt to
+make in a constraint syntax that would not be statically provable. We need to
+make those situations impossible.
+
+## Constraints May Not Reference Themselves
 
 No constraint at any time may ever reference _itself_. For example,
 `constraint<foo>` may not contain statements about `constraint<foo>`. Nor may it
