@@ -69,7 +69,9 @@ requires more lookahead from the parser.
 ### Constraints May Not Reference Themselves
 
 No constraint at any time may ever reference _itself_. For example,
-`constraint<foo>` may not contain statements about `constraint<foo>`.
+`constraint<foo>` may not contain statements about `constraint<foo>`. Nor may it
+do so via a causal loop (such as `foo` refers to `bar` and `bar` refers to
+`foo`).
 
 Almost every failure in history of logical systems comes about from forms of
 logic that allow things to refer to themselves. For example, Russell's Paradox
