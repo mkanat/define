@@ -17,6 +17,9 @@ The language is currently in early prototyping stages.
 - [Requirements for Define](spec/requirements.md): Similar to the Principles,
   but indicates things that must always be true about Define as a language or
   programs written in it.
+- [Define Language Proposals](proposals/): Every single aspect of the language
+  has an extremely detailed document explaining the entire reasoning behind it.
+  These proposals are the building blocks of the Define specification.
 - [The Define Language Specification](spec/spec.md): The detailed spec, ideally
   with sufficient information to implement a compiler for the language.
   Describes an actual programming language.
