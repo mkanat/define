@@ -343,7 +343,19 @@ dependencies: [
 Valid (repeated literals):
 
 ```
-tags: [ "tag1", "tag2", "tag3" ]
+tags: ["tag1", "tag2", "tag3"]
+```
+
+Valid (single literal in a repeated field):
+
+```
+tags: ["tag1"]
+```
+
+Invalid (single scalar in a repeated field with no brackets):
+
+```
+tags: "tag1"
 ```
 
 Invalid (repeated message fields without brackets):
