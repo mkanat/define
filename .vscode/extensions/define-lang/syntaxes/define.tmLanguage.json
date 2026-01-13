@@ -7,14 +7,114 @@
       "match": "#.*$"
     },
     {
-      "comment": "Keywords",
+      "comment": "Multi-word definition keywords",
       "name": "keyword.control.define",
-      "match": "\\b(universe|viewpoint|defines|it|is a|can|by doing|with|knows|has a|is exposed to|return|that)\\b"
+      "match": "\\bdefine\\s+the\\s+(quality|trigger|position)\\b"
+    },
+    {
+      "comment": "Trigger declaration",
+      "name": "keyword.control.trigger",
+      "match": "\\bit\\s+triggers\\s+when\\b"
+    },
+    {
+      "comment": "Trigger action block",
+      "name": "keyword.control.action",
+      "match": "\\band\\s+it\\s+does\\b"
+    },
+    {
+      "comment": "Position constraint",
+      "name": "keyword.control.constraint",
+      "match": "\\bit\\s+may\\s+only\\s+contain\\s+dimension\\s+points\\s+where\\b"
+    },
+    {
+      "comment": "Quality check",
+      "name": "keyword.control.check",
+      "match": "\\bit\\s+has\\s+the\\s+quality\\b"
+    },
+    {
+      "comment": "Create dimension point",
+      "name": "keyword.other.create",
+      "match": "\\bcreate\\s+a\\s+dimension\\s+point\\s+in\\b"
+    },
+    {
+      "comment": "Assign quality",
+      "name": "keyword.other.assign",
+      "match": "\\bassign\\s+the\\s+quality\\b"
+    },
+    {
+      "comment": "To the dimension point",
+      "name": "keyword.other.to-point",
+      "match": "\\bto\\s+the\\s+dimension\\s+point\\s+in\\b"
+    },
+    {
+      "comment": "Set value",
+      "name": "keyword.other.set",
+      "match": "\\bset\\s+the\\s+value\\s+in\\b"
+    },
+    {
+      "comment": "Move dimension point",
+      "name": "keyword.other.move",
+      "match": "\\bmove\\s+the\\s+dimension\\s+point\\s+in\\b"
+    },
+    {
+      "comment": "This quality is assigned",
+      "name": "keyword.other.assigned",
+      "match": "\\bthis\\s+quality\\s+is\\s+assigned\\b"
+    },
+    {
+      "comment": "The position/value reference",
+      "name": "keyword.other.reference",
+      "match": "\\bthe\\s+(position|value)\\b"
+    },
+    {
+      "comment": "Is empty check",
+      "name": "keyword.other.empty",
+      "match": "\\bis\\s+empty\\b"
+    },
+    {
+      "comment": "To keyword (for set value to)",
+      "name": "keyword.other.to",
+      "match": "\\bto\\b"
+    },
+    {
+      "comment": "Logical operators",
+      "name": "keyword.operator.logical",
+      "match": "\\b(AND|OR|NOT)\\b"
+    },
+    {
+      "comment": "Quality identifier with angle brackets",
+      "name": "entity.name.type.quality",
+      "match": "quality<[^>]+>"
+    },
+    {
+      "comment": "Trigger identifier with angle brackets",
+      "name": "entity.name.function.trigger",
+      "match": "trigger<[^>]+>"
+    },
+    {
+      "comment": "Position identifier with angle brackets",
+      "name": "variable.other.position",
+      "match": "position<[^>]+>"
+    },
+    {
+      "comment": "Path separator",
+      "name": "punctuation.accessor",
+      "match": "::"
+    },
+    {
+      "comment": "Numbers",
+      "name": "constant.numeric",
+      "match": "\\b\\d+\\b"
     },
     {
       "comment": "Curly Braces",
       "name": "punctuation.section.block",
       "match": "\\{|\\}"
+    },
+    {
+      "comment": "Statement terminator",
+      "name": "punctuation.terminator",
+      "match": "\\."
     }
   ]
 }

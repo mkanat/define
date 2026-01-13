@@ -84,8 +84,6 @@ define the quality<define-lang.org:bank:/account> {
             OR
             the value in position<balance> is equal to the value in position<amount>.
         } and it does {
-            # TODO: Below is not atomic with the run dp.
-
             # This feels like something the compiler should be able to optimize away.
             if {
                 trigger<withdraw>::position<amount> is empty.
@@ -93,7 +91,7 @@ define the quality<define-lang.org:bank:/account> {
                 create a dimension point in trigger<withdraw>::position<amount>.
                 assign the quality<define-lang.org:bank:/nonzero> to trigger<withdraw>::position<amount>.
             }
-            set the value of trigger<withdraw>::position<amount> to position<amount>.
+            set the value in trigger<withdraw>::position<amount> to position<amount>.
             create a dimension point in trigger<withdraw>::position<run>.
 
             it triggers when {
@@ -107,7 +105,7 @@ define the quality<define-lang.org:bank:/account> {
                     create a dimension point in trigger<to>::position<amount>.
                     assign the quality<define-lang.org:bank:/nonzero> to trigger<to>::position<amount>.
                 }
-                set the value of trigger<deposit>::position<amount> to position<amount>.
+                set the value in trigger<deposit>::position<amount> to position<amount>.
                 create a dimension point in trigger<deposit>::position<run>.
 
                 it triggers when {
