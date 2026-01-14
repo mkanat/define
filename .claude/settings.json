@@ -1,0 +1,25 @@
+{
+    "permissions": {
+      "deny": [
+        "Bash(pip:*)",
+        "Bash(pip3:*)",
+        "Bash(pipx:*)",
+        "Bash(python -m pip:*)",
+        "Bash(uv run pip:*)"
+      ],
+      "allow": [
+        "Bash(echo:*)",
+        "Bash(ls:*)",
+        "Bash(git status:*)",
+        "Bash(git log:*)",
+        "Bash(uv add:*)",
+        "Bash(uv sync:*)",
+        "Bash(uv help:*)",
+        "Bash(uv lock:*)",
+        "Bash(uv --help:*)",
+        "Bash(source .venv/bin/activate)",
+        "Bash(pytest:*)",
+        "Bash(uv run pytest:*)"
+      ]
+    }
+  }
