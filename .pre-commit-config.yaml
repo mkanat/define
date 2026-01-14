@@ -24,7 +24,6 @@ repos:
         entry: uv run pyright
         language: system
         types: [python]
-        pass_filenames: false
 
       - id: validate-proposals
         name: validate proposals
@@ -32,3 +31,10 @@ repos:
         language: system
         types: [markdown]
         files: ^proposals/(.*/)?\d{5}-.*\.md$
+
+      - id: check-cursor-permissions
+        name: check cursor permissions
+        entry: uv run python scripts/sync_cursor_permissions.py --check
+        language: system
+        files: ^\.claude/settings\.json$|^\.cursor/cli\.json$
+        pass_filenames: false

@@ -1,0 +1,26 @@
+{
+  "_comment": "This file is auto-generated from .claude/settings.json. Do not edit manually.",
+  "permissions": {
+    "allow": [
+      "Shell(echo)",
+      "Shell(ls)",
+      "Shell(git status)",
+      "Shell(git log)",
+      "Shell(uv add)",
+      "Shell(uv sync)",
+      "Shell(uv help)",
+      "Shell(uv lock)",
+      "Shell(uv --help)",
+      "Shell(source .venv/bin/activate)",
+      "Shell(pytest)",
+      "Shell(uv run pytest)"
+    ],
+    "deny": [
+      "Shell(pip)",
+      "Shell(pip3)",
+      "Shell(pipx)",
+      "Shell(python -m pip)",
+      "Shell(uv run pip)"
+    ]
+  }
+}

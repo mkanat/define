@@ -74,6 +74,16 @@ CHECKS = [
             "proposals/*.md",
         ],
     ),
+    Check(
+        name="Cursor Permissions",
+        command=[
+            "uv",
+            "run",
+            "python",
+            "scripts/sync_cursor_permissions.py",
+            "--check",
+        ],
+    ),
 ]
 
 
