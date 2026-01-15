@@ -10,6 +10,8 @@
       "allow": [
         "Bash(echo:*)",
         "Bash(ls:*)",
+        "Bash(grep :*)",
+        "Bash(rg :*)",
         "Bash(git status:*)",
         "Bash(git log:*)",
         "Bash(uv add:*)",

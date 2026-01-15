@@ -4,6 +4,8 @@
     "allow": [
       "Shell(echo)",
       "Shell(ls)",
+      "Shell(grep )",
+      "Shell(rg )",
       "Shell(git status)",
       "Shell(git log)",
       "Shell(uv add)",
