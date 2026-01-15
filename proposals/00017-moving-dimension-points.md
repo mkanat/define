@@ -30,6 +30,9 @@ The downside of this syntax is that these lines get very long when we have long
 position names. That's an acceptable trade-off as we don't care about verbosity
 in Define.
 
+Note that it is an error to attempt to move a dimension point into the position
+it is currently in (that doesn't make any sense).
+
 ## A Real Program
 
 See above. There isn't enough syntax yet defined to make an actual real program
