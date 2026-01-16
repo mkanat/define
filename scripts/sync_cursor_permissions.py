@@ -2,6 +2,7 @@
 """Sync permissions from .claude/settings.json to .cursor/cli.json."""
 
 import argparse
+import difflib
 import json
 import sys
 from pathlib import Path
@@ -98,11 +99,17 @@ def check_permissions(base_dir: Path) -> None:
         print(
             f"Error: {cursor_path} does not match expected config from .claude/settings.json"
         )
-        print("\nExpected:")
-        print(json.dumps(expected_config, indent=2))
-        print("\nActual:")
-        print(json.dumps(actual_config, indent=2))
-        print("\nTo fix, run: uv run scripts/sync_cursor_permissions.py")
+        actual_lines = json.dumps(actual_config, indent=2).splitlines(keepends=True)
+        expected_lines = json.dumps(expected_config, indent=2).splitlines(keepends=True)
+        diff = difflib.unified_diff(
+            actual_lines,
+            expected_lines,
+            fromfile=".cursor/cli.json (actual)",
+            tofile=".cursor/cli.json (expected)",
+        )
+        print()
+        print("".join(diff))
+        print("To fix, run: uv run scripts/sync_cursor_permissions.py")
         sys.exit(1)
 
 

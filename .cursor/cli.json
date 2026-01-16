@@ -6,6 +6,7 @@
       "Shell(ls)",
       "Shell(grep )",
       "Shell(rg )",
+      "Shell(wc )",
       "Shell(git status)",
       "Shell(git log)",
       "Shell(uv add)",
