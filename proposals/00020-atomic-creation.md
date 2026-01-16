@@ -47,6 +47,11 @@ That will look at the position definition and then go through the qualities
 listed in order and assign those qualities. However, the constraint on that
 position will not be checked until the end of the block.
 
+Conceptually, what is happening here is that a dimension point is being created
+in an anonymous position, and then being moved into the position that has the
+constraint. The compiler could (and perhaps should) implement this exactly that
+way.
+
 ### Optimization
 
 In reality, the compiler doesn't need to check the constraint after running this
