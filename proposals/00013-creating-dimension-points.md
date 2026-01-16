@@ -28,6 +28,9 @@ create a dimension point in position<foo>.
 At the moment, that syntax is real other than the `.` at the end of the
 statements, which would be decided by another proposal.
 
+It is an error to create a dimension point in a position already occupied by a
+dimension point.
+
 ## A Real Program
 
 See above. There isn't enough syntax yet defined to make an actual real program

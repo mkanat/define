@@ -33,6 +33,9 @@ in Define.
 Note that it is an error to attempt to move a dimension point into the position
 it is currently in (that doesn't make any sense).
 
+It is an error to move a dimension point into a position already occupied by a
+dimension point.
+
 ## A Real Program
 
 See above. There isn't enough syntax yet defined to make an actual real program
