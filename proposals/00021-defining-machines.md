@@ -48,6 +48,16 @@ then the Trigger Conditions Block, and then the Action Statements Block. The
 formatting of the block opening lines must be exactly as above (in terms of
 what's all on one line).
 
+### May Not Be Global
+
+Actions cannot be defined in the global name scope. Doing so does not match our
+[Concepts](../spec/concepts.md). _What_ would be taking the action, empty space?
+Empty space can't take actions.
+
+If you want to model a pure functional universe (a functional programming
+language) you would create qualities that do nothing but each define a single
+action, and then assign those qualities to dimension points.
+
 ### Local Name Scopes
 
 The Action Definition Block is a local name scope. In other words, the statement
