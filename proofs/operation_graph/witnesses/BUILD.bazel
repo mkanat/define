@@ -11,7 +11,9 @@ filegroup(
         ":comparison_simultaneity_independence_witness",
         ":comparison_simultaneity_witness",
         ":create_destroy_history",
+        ":destructor_order_choice",
         ":empty_rule_child_positions_independence_witness",
+        ":entry_retirement_witness",
         ":fill_dependency_removal_independence_witness",
         ":fill_dependency_removal_witness",
         ":fill_rule_most_recent_independence_witness",
@@ -25,6 +27,8 @@ filegroup(
         ":move_correction_witness",
         ":moved_child_entry_witness",
         ":non_vacuity_witness",
+        ":simultaneous_destruction_witness",
+        ":step_history_witness",
         ":vanished_child_name_witness",
         ":witness_support",
     ],
@@ -110,6 +114,32 @@ lean_axiom_test(
 )
 
 lean_library(
+    name = "destructor_order_choice",
+    srcs = ["destructor_order_choice.lean"],
+)
+
+lean_axiom_test(
+    name = "destructor_order_choice_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["destructor_order_choice"],
+    theorems = [
+        "Define.OperationGraph.DestructorOrderChoice.both_serial_orders_restore_original_particle",
+        "Define.OperationGraph.DestructorOrderChoice.common_precedence_is_respected_by_overlap",
+        "Define.OperationGraph.DestructorOrderChoice.graph_admitting_both_orders_admits_overlap",
+        "Define.OperationGraph.DestructorOrderChoice.no_graph_admits_both_orders_and_rejects_overlap",
+        "Define.OperationGraph.DestructorOrderChoice.overlapping_moves_are_not_enabled",
+        "Define.OperationGraph.DestructorOrderChoice.schedules_have_exactly_the_same_operations",
+        "Define.OperationGraph.DestructorOrderChoice.sources_and_destinations_differ",
+    ],
+    deps = [":destructor_order_choice"],
+)
+
+lean_library(
     name = "empty_rule_child_positions_independence_witness",
     srcs = ["empty_rule_child_positions_independence_witness.lean"],
     deps = [
@@ -138,6 +168,39 @@ lean_axiom_test(
         "Define.OperationGraph.IndependenceWitnesses.EmptyRuleChildPositions.weakened_rules_derive_graph",
     ],
     deps = [":empty_rule_child_positions_independence_witness"],
+)
+
+lean_library(
+    name = "entry_retirement_witness",
+    srcs = ["entry_retirement_witness.lean"],
+    deps = [
+        ":vanished_child_name_witness",
+        "//proofs/operation_graph/theorems:entry_calculation_correctness",
+    ],
+)
+
+lean_axiom_test(
+    name = "entry_retirement_witness_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["entry_retirement_witness"],
+    theorems = [
+        "Define.OperationGraph.EntryRetirementWitness.calculated_graph_is_minimal_DAG",
+        "Define.OperationGraph.EntryRetirementWitness.child_position_retires",
+        "Define.OperationGraph.EntryRetirementWitness.collection_iff",
+        "Define.OperationGraph.EntryRetirementWitness.comparison_iff",
+        "Define.OperationGraph.EntryRetirementWitness.comparison_removes_old_child_destruction",
+        "Define.OperationGraph.EntryRetirementWitness.dependency_iff_parent_create",
+        "Define.OperationGraph.EntryRetirementWitness.old_child_destruction_is_collected",
+        "Define.OperationGraph.EntryRetirementWitness.parent_create_is_collected",
+        "Define.OperationGraph.EntryRetirementWitness.recreated_parent_has_current_entry",
+        "Define.OperationGraph.EntryRetirementWitness.replacement_child_retains_previous_operation",
+    ],
+    deps = [":entry_retirement_witness"],
 )
 
 lean_library(
@@ -490,6 +553,74 @@ lean_axiom_test(
         "Define.OperationGraph.NonVacuity.exact_dependency",
     ],
     deps = [":non_vacuity_witness"],
+)
+
+lean_library(
+    name = "simultaneous_destruction_witness",
+    srcs = ["simultaneous_destruction_witness.lean"],
+    deps = ["//proofs/operation_graph/definitions:simultaneous_calculation"],
+)
+
+lean_axiom_test(
+    name = "simultaneous_destruction_witness_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["simultaneous_destruction_witness"],
+    theorems = [
+        "Define.OperationGraph.DestructorParentWitness.collection_iff",
+        "Define.OperationGraph.DestructorParentWitness.comparison_iff",
+        "Define.OperationGraph.DestructorParentWitness.parent_destroy_dependency_iff",
+        "Define.OperationGraph.SimultaneousDestructionWitness.child_dependency_iff",
+        "Define.OperationGraph.SimultaneousDestructionWitness.collected_operation_need_not_be_reachable",
+        "Define.OperationGraph.SimultaneousDestructionWitness.individual_dependency_iff",
+        "Define.OperationGraph.SimultaneousDestructionWitness.neither_destruction_orders_the_other",
+        "Define.OperationGraph.SimultaneousDestructionWitness.parent_dependency_iff",
+        "Define.OperationGraph.SimultaneousDestructionWitness.related_previous_does_not_imply_reachability",
+        "Define.OperationGraph.SimultaneousDestructionWitness.replacement_collection_iff",
+        "Define.OperationGraph.SimultaneousDestructionWitness.replacement_comparison_iff",
+        "Define.OperationGraph.SimultaneousDestructionWitness.replacement_destroy_dependency_iff",
+        "Define.OperationGraph.SimultaneousDestructionWitness.replacement_fill_candidate",
+        "Define.OperationGraph.SimultaneousDestructionWitness.replacement_fill_entry_iff",
+        "Define.OperationGraph.SimultaneousDestructionWitness.replacement_has_no_edge_to_old_child",
+    ],
+    deps = [":simultaneous_destruction_witness"],
+)
+
+lean_library(
+    name = "step_history_witness",
+    srcs = ["step_history_witness.lean"],
+    deps = [
+        ":witness_support",
+        "//proofs/operation_graph/definitions:simultaneous_destruction",
+        "//proofs/operation_graph/theorems:step_characterization",
+    ],
+)
+
+lean_axiom_test(
+    name = "step_history_witness_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["step_history_witness"],
+    theorems = [
+        "Define.OperationGraph.StepHistoryWitness.calculated_graph_is_minimal_DAG",
+        "Define.OperationGraph.StepHistoryWitness.destruction_dependency_iff",
+        "Define.OperationGraph.StepHistoryWitness.later_collection_iff",
+        "Define.OperationGraph.StepHistoryWitness.later_comparison_iff",
+        "Define.OperationGraph.StepHistoryWitness.later_destroy_dependency_iff",
+        "Define.OperationGraph.StepHistoryWitness.later_destroy_invalidates_parent_reference",
+        "Define.OperationGraph.StepHistoryWitness.occupancy_only_destruction_permutation",
+        "Define.OperationGraph.StepHistoryWitness.same_step_destructions_are_unordered",
+        "Define.OperationGraph.StepHistoryWitness.source_candidate_iff",
+    ],
+    deps = [":step_history_witness"],
 )
 
 lean_library(

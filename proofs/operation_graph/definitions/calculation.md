@@ -1,5 +1,11 @@
 # Particle Operation Dependency Graph Calculation
 
+The graph calculations in this document describe the former Fill, Empty, and
+Move Rules and their existing Lean models. They do not formalize the revised
+[requirement-based construction](../theorems/requirement-construction.md).
+Source-semantic arguments must still be distinguished from results about those
+former models.
+
 ## Purpose
 
 This document defines the Fill, Empty, and Move Rules for one arbitrary valid
@@ -9,6 +15,15 @@ dependency graph, one occurrence at a time.
 This component does not prove that the resulting graph is minimal or complete.
 It also does not assume either property. Those results require separate proofs
 about the graph defined here.
+
+The occurrence-by-occurrence construction in this document is the conditional
+serial `ValidResolvedHistory` construction. Its queryable-name trace is an
+input, not a derived fact about all Define executions. In particular, that trace
+must not be used to invent a current-definedness filter for Collection or to
+treat historical names as positions belonging to a moved particle. The separate
+[common-state calculation](../theorems/step-calculation-proof.md) selects
+previous operations directly and permits individual destructions to share an
+index.
 
 ## Required refinement to resolved histories
 
@@ -23,9 +38,9 @@ Membership in `Qᵢ` means only that a graph rule may ask for the most recent
 Particle Operation on that resolved name. It does not mean that the position is
 occupied.
 
-The source-to-history construction must derive `Qᵢ` from Position Definitions,
-Action Executions, resolved names retained for graph history, and Move name
-changes. In particular, it must prove:
+Applying this model to source would require deriving `Qᵢ` from Position
+Definitions, Action Executions, resolved names retained for graph history, and
+Move name changes. In particular, that application would need:
 
 1. every position operated on by `Oᵢ` has an applicable resolved name at index
    `i`;
@@ -39,10 +54,11 @@ changes. In particular, it must prove:
    name contributed by a later Action Execution is not retroactively treated as
    moved.
 
-The shared history interface and its paired Lean structure record `Qᵢ`. The
-remaining formalization boundary is the source-to-history proof that derives
-this recorded trace from resolved Define source and proves that it contains
-exactly the names described here.
+The shared history interface and its paired Lean structure record `Qᵢ`; they do
+not derive it from source. This limits the claims of the former resolved-name
+model. The requirement-based proof instead keeps actual references and positions
+identified by their defining particles, as described in the
+[ordinary correspondence](../theorems/ordinary-requirements-proof.md).
 
 ## Most-recent-operation entries
 
@@ -65,13 +81,13 @@ The entry changes after an operation as follows.
 After `Create(p)` or `Destroy(p)`, the entry for `p` is that operation. Every
 other entry is unchanged.
 
-Cascading Destruction and Automatic Destruction contribute ordinary Destroy
-Particle Statement occurrences. Each contributed Destroy therefore updates the
-entry for its own position at its own occurrence index. Destroying a parent
-particle does not erase the bookkeeping entries for its child-position names. If
-a later particle makes one of those names applicable again, the old entry may be
-collected; the Comparison then accounts for the intervening operation on a
-related position.
+Each individual destruction updates its own position's entry. Simultaneous
+Transitive Destruction and Automatic Destruction may contribute several such
+operations; their calculations must use the spec's meaning of previous, not an
+order chosen by enumerating the destructions. The serial recursion here does not
+establish that construction. Destroying a parent particle does not erase entries
+for its child-position names; Comparison accounts for intervening operations on
+related positions.
 
 ### Move
 
@@ -147,15 +163,24 @@ For any finite candidate set `C`, define
 Compare(C) = {
   A in C
   | there is no B in C such that
-      A < B and positions(A) contains a position related to
-      a position in positions(B)
+      (A < B and some operated positions of A and B are related)
+      or
+      (A and B are Destroys with identical recency and
+       B's position is a strict transitive parent of A's position)
 }.
 ```
 
-Every member of the original `C` participates in the test. A candidate removed
-because of one more-recent candidate can still remove a still-older candidate.
-This is why the definition tests all pairs from `C` simultaneously instead of
-repeatedly testing only the survivors.
+Every member of the original `C` participates in determining exclusions,
+including members that are themselves excluded. This defines the result, not a
+pairwise implementation algorithm. Identical recency does not become an order
+between Destroys: the second condition selects dependencies of a later operation
+without adding an edge between the equally recent candidates.
+
+The serial model has distinct indices for distinct operations, so its second
+condition is never satisfied. The common-state calculation must apply both
+conditions. The Lean `AfterComparison` definition includes both conditions;
+`afterComparison_iff_of_distinct_recency` proves the reduction for the serial
+model rather than assuming it for simultaneous destructions.
 
 ### Move Correction
 

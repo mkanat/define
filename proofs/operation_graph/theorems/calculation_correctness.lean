@@ -18,7 +18,7 @@ principal graph theorems consume those interfaces in later modules.
 namespace Define.OperationGraph
 
 structure ResolvedDefineGraph extends RuleGraph where
-  occupancy : ExactOccupancyExecution isOperation
+  occupancy : ValidOccupancyTrace isOperation
   sourceCandidateAt :
     ParticleOperation → ParticleOperation → Position → Prop
   source_candidate_iff :
@@ -58,10 +58,10 @@ structure ResolvedDefineGraph extends RuleGraph where
         Related position emptyPosition →
         OperatesOn previousOperation position →
         MoreRecent operation previousOperation →
-        ∃ candidate,
-          sourceCandidateAt operation candidate position ∧
-            (candidate = previousOperation ∨
-              MoreRecent candidate previousOperation)
+        ∃ candidate candidatePosition,
+          sourceCandidateAt operation candidate candidatePosition ∧
+            ParentOrSame candidatePosition position ∧
+            previousOperation.operationOrder ≤ candidate.operationOrder
   fill_candidate_operated_position :
     ∀ operation candidate,
       (calculation operation).IsFillCandidate candidate →
@@ -82,9 +82,11 @@ structure ResolvedDefineGraph extends RuleGraph where
 A resolved graph together with the Fill Rule counterpart of
 `latest_source_candidate`: whenever a previous operation exists on the filled
 position or one of its parent positions, the selected Fill Dependency is at
-least as recent.
+least as recent. Completeness also requires the serial aggregate occupancy
+execution, which is not supplied by a simultaneous common-state trace.
 -/
 structure CompleteResolvedDefineGraph extends ResolvedDefineGraph where
+  execution : ExactOccupancyExecution isOperation
   latest_fill_candidate :
     ∀ operation fillPosition operatedPosition previousOperation,
       isOperation operation →
@@ -400,6 +402,22 @@ theorem calculationFor_inCollection_operations
   · rcases calculationFor_fill_candidate_facts history fill_candidate with
       ⟨_, _, _, _, _, _, operation_member, candidate_member⟩
     exact ⟨operation_member, candidate_member⟩
+
+theorem calculationFor_afterComparison_iff
+    {isOperation : ParticleOperation → Prop}
+    (history : ValidResolvedHistory isOperation) (operation candidate : ParticleOperation) :
+    (calculationFor history operation).AfterComparison candidate ↔
+      (calculationFor history operation).InCollection candidate ∧
+        ∀ newerCandidate, (calculationFor history operation).InCollection newerCandidate →
+          MoreRecent newerCandidate candidate → OperationsRelated newerCandidate candidate → False := by
+  apply RuleCalculation.afterComparison_iff_of_distinct_recency
+  intro first second first_collected second_collected same_order
+  have first_at := history.member_operation_at first
+    (calculationFor_inCollection_operations history first_collected).2
+  have second_at := history.member_operation_at second
+    (calculationFor_inCollection_operations history second_collected).2
+  rw [same_order] at first_at
+  exact Option.some.inj (first_at.symm.trans second_at)
 
 theorem calculationFor_dependency_is_previous
     {isOperation : ParticleOperation → Prop}
@@ -810,7 +828,7 @@ noncomputable def calculatedResolvedDefineGraph
     {isOperation : ParticleOperation → Prop}
     (history : ValidResolvedHistory isOperation) : ResolvedDefineGraph where
   toRuleGraph := calculatedRuleGraph history
-  occupancy := history.toExactOccupancyExecution
+  occupancy := history.toValidOccupancyTrace
   sourceCandidateAt := IsSourceCandidateAt history
   source_candidate_iff := fun _operation _candidate => Iff.rfl
   source_candidate_empty_position := by
@@ -838,10 +856,14 @@ noncomputable def calculatedResolvedDefineGraph
     intro operation emptyPosition position previousOperation operation_member
       previous_member empty_position position_related previous_operates
       operation_after_previous
-    exact
-      calculationFor_latest_source_candidate history operation previousOperation
+    rcases calculationFor_latest_source_candidate history operation previousOperation
         emptyPosition position operation_member previous_member empty_position
-        position_related previous_operates operation_after_previous
+        position_related previous_operates operation_after_previous with
+      ⟨candidate, candidate_at_position, candidate_recency⟩
+    refine ⟨candidate, position, candidate_at_position, List.prefix_rfl, ?_⟩
+    rcases candidate_recency with rfl | newer
+    · exact Nat.le_refl _
+    · exact Nat.le_of_lt newer
   fill_candidate_operated_position := by
     intro operation candidate fill_candidate
     rcases calculationFor_fill_candidate_facts history fill_candidate with
@@ -865,6 +887,7 @@ noncomputable def calculatedCompleteResolvedDefineGraph
     {isOperation : ParticleOperation → Prop}
     (history : ValidResolvedHistory isOperation) : CompleteResolvedDefineGraph where
   toResolvedDefineGraph := calculatedResolvedDefineGraph history
+  execution := history.toExactOccupancyExecution
   latest_fill_candidate := by
     intro operation fillPosition operatedPosition previousOperation
       operation_member previous_member fill_position previous_operates

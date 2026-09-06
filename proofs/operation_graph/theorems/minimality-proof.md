@@ -1,5 +1,10 @@
 # Particle Operation Dependency Graph Minimality
 
+The graph calculations in this document describe the former Fill, Empty, and
+Move Rules and their existing Lean models. They do not formalize the revised
+[requirement-based construction](requirement-construction.md). Source-semantic
+arguments must still be distinguished from results about those former models.
+
 ## Claim
 
 For every valid resolved Particle Operation history, the graph calculated by the
@@ -30,11 +35,26 @@ proves the following facts for every valid resolved history:
 2. an entry selected at position `p` operates on `p` or a parent position of
    `p`;
 3. a non-Move entry selected at `p` operates on `p` itself;
-4. a name operated on by a previous operation remains queryable, and the entry
-   at that name is that operation or a more recent one;
+4. a previous operation at `p` has a representative entry at `p` or a parent
+   position, and that entry's occurrence index is at least the previous
+   operation's index;
 5. every direct dependency is exactly a candidate retained by the applicable
    rule stages; and
-6. Create, Destroy, and Move have their exact occupancy transitions.
+6. an emptied position is occupied before its operation, strict child positions
+   are empty after a non-Move's logical step, and every newly occupied position
+   has a responsible operation at that step.
+
+Item 6 is `ValidOccupancyTrace`, not the stronger `ExactOccupancyExecution`
+required by completeness. `ResolvedStepHistory` derives it at common-state
+boundaries for simultaneous destruction. The construction in Calculation
+Correctness still derives the full candidate and dependency interface only for
+the serial history model. The
+[entry-history construction](../definitions/entry-history-proof.md) additionally
+derives these facts without a current-definedness filter or position-retirement
+assumptions. The [common-state calculation](step-calculation-proof.md) now
+constructs the same minimality interface for `StepPositionHistory`, with a
+shared index for each identical-recency group of destructions. Deriving every
+destructor's resolved operations from source remains a separate obligation.
 
 None of those facts assumes acyclicity, transitive minimality, completeness, or
 the desired reachability relation.
@@ -95,9 +115,10 @@ all of the following:
 
 #### Proof
 
-Calculation correctness supplies the entry `B` at `z`. It is `Z` or is more
-recent than `Z`, so it is more recent than `Y`. The Empty Collection contains
-`B` because `z` is related to `s`.
+Calculation correctness supplies an entry `B` at `z` or a parent name with an
+index at least as large as `Z`'s. Since `Z` is strictly more recent than `Y`,
+`B` is strictly more recent than `Y`. Its selected name remains related to `s`,
+so the Empty Collection contains `B`.
 
 The position operated on by `B` is `z` or a parent position of `z`, and is
 therefore related to `y`. Because `Y` is not a Move, it operates on `y` itself.
@@ -119,12 +140,14 @@ position of `s`. Then there is an intervening operation `K` such that:
 #### Proof
 
 Because `Y` is a Create or Destroy on the strict parent position `y`, the exact
-non-Move occupancy transition leaves `s` empty immediately after `Y`. The source
-`s` is occupied immediately before `O`. Among the finitely many transitions
-between those two occurrence indices, choose the first at which `s` becomes
-occupied. The valid-history transition theorem supplies an operation `K` at that
-transition whose operated position is related to `s`. Since `y` is a parent
-position of `s`, that operated position is also related to `y`. ∎
+non-Move occupancy transition leaves `s` empty after `Y`'s completed logical
+step. This is a common-state boundary, not an intermediate state between
+individual destructions. The source `s` is occupied immediately before `O`.
+Among the finitely many transitions between those two occurrence indices, choose
+the first at which `s` becomes occupied. The valid-history transition theorem
+supplies an operation `K` at that transition whose operated position is related
+to `s`. Since `y` is a parent position of `s`, that operated position is also
+related to `y`. ∎
 
 This lemma is only an occupancy statement. It does not assert any dependency
 path to or from `K`.
@@ -167,6 +190,31 @@ claim that every related previous pair is reachable.
 
 ## Each operation kind produces an antichain
 
+### Effect of excluding equally recent child Destroys
+
+The argument above still applies with the specification's identical-recency
+exclusion. Every surviving candidate satisfies the original strict-recency
+exclusion condition, and every edge still targets an earlier collected
+operation. The later-related-operation exclusion lemma therefore remains true
+for the newly calculated graph. The additional exclusion does not change the
+candidate provenance or occupancy facts used by that lemma.
+
+This is not an argument that deleting edges from an existing minimal graph
+preserves the entire rule calculation. Move Correction must use the candidates
+remaining after both Comparison exclusions, and all later calculations use the
+resulting graph. The proof below applies to those recalculated dependencies.
+
+Equal recency alone cannot give a dependency path between candidates: every edge
+on such a path would strictly decrease recency. Thus excluding a child Destroy
+does not represent a path from the retained parent Destroy to that child
+Destroy. No such reachability premise is used here.
+
+The Lean minimality theorem applies to both Comparison exclusions. It uses the
+strict-recency condition satisfied by each survivor, without assuming that the
+identical-recency condition preserves reachability to excluded candidates.
+
+### Operation cases
+
 Fix distinct final dependencies `X` and `Y` of one operation and suppose
 `X > Y`.
 
@@ -205,10 +253,10 @@ These cases are exhaustive, so a Move's dependencies also form an antichain.
 
 ## Coverage of resolved operation forms
 
-The valid resolved history contains every concrete Particle Operation
-occurrence. An automatic Destroy Particle Statement and a Destroy Particle
-Statement contributed by a destructor or Destruction Contract are therefore
-ordinary Destroy occurrences and use the Destroy case above.
+The theorem handles each individual destruction using its Destroy case once the
+occurrence, Collection, and occupancy premises have been derived. Automatic
+Destruction and Destruction Contracts do not themselves discharge those premises
+or introduce additional graph vertices.
 
 An entry for a moved particle's transitive child name may be the Move on a
 parent position of that name. The operated-position provenance used throughout
@@ -220,9 +268,9 @@ Move.
 Action Requirements, Action Guarantees, and requirements or guarantees on
 implied positions contribute resolved names and concrete occurrences before this
 theorem begins; they are not graph vertices. Their resulting Create, Destroy,
-and Move occurrences are covered by the same three cases. The Action Parent
-position constrains which resolved names an occurrence may operate on, but the
-antichain proof needs only the resulting position relationships.
+and Move occurrences are covered by the same three cases. The antichain proof
+uses the resulting position relationships, not an assumed spatial relationship
+to the Action Parent position.
 
 ## Minimality theorem
 
@@ -238,9 +286,9 @@ by definition. No final occurrence or finite complete vertex set is required.
 
 ## Scope
 
-This theorem begins with a valid resolved history. The separate
-source-to-history proof must still establish that resolving valid Define source
-produces that history. Compiler conformance must separately establish that the
-implemented operation graph equals the calculated graph, including modular
-Action Parent resolution. Neither obligation is assumed by the antichain
-argument above.
+This theorem begins with a valid resolved history; it is not a source-semantics
+theorem for the current requirement-based construction. That construction is
+treated in the [requirement construction proof](requirement-construction.md).
+Compiler conformance must separately establish that the implemented operation
+graph equals the calculated graph, including modular Action Parent resolution.
+Neither obligation is assumed by the antichain argument above.

@@ -2,10 +2,12 @@
 
 ## Purpose
 
-This document defines the mathematical objects shared by the operation graph
-proofs. It deliberately does not define the Fill, Empty, or Move Rules. Those
-rules must be applied to this model and proved correct; they may not be
-assumptions of the model.
+The conceptual definitions apply throughout the operation graph proofs. The
+resolved-name mathematical model later in this document describes the former
+Fill, Empty, and Move calculation. The revised
+[requirement construction](../theorems/requirement-construction.md) preserves
+actual references and relative occupancy instead. Neither model may assume its
+graph's correctness as a premise.
 
 The relevant specification sections are:
 
@@ -15,23 +17,130 @@ The relevant specification sections are:
 - [Action Contracts](../../../define/spec/spec.md#action-contracts); and
 - [Deterministic Automatic Concurrency](../../../define/spec/spec.md#deterministic-automatic-concurrency).
 
+## Conceptual meaning of particles, positions, and operations
+
+The mathematical representations below must preserve the following conceptual
+meaning. This is the interpretation of the specification used by these proofs,
+not an additional set of dependency rules.
+
+A particle is a concrete thing that exists in the program's universe. It has
+qualities, which can include defining positions and actions.
+
+A position is a location in space that may be empty or occupied by one particle.
+A particle can define other positions relative to itself, and those positions
+may be occupied by other particles.
+
+Replacing a particle does not by itself make its positions different spatial
+locations. If a particle at `p` defines the position quality `/c`, and a
+replacement particle at `p` defines that same quality, its `p::/c` is the same
+spatial position. However, the specification's Simultaneous Transitive
+Destruction rules distinguish the original particles from replacements. Once the
+original parent's individual destruction empties `p`, its old child no longer
+occupies the replacement's `p::/c`. Unfinished destruction work continues to act
+on the original particles and positions, not on replacements. A model must
+therefore distinguish occupancy available to subsequent operations from
+particles and positions retained for unfinished destruction work.
+
+The Particle Operations have these conceptual effects:
+
+- **Create:** bring a new particle into existence in an empty position,
+  assigning the required qualities.
+- **Move:** move an existing particle from an occupied source to an empty
+  destination, leaving the source empty. The particle retains its identity and
+  qualities. The positions it defines move with it, along with the particles
+  occupying those positions, transitively. Their spatial relationships to the
+  moved particle remain unchanged; their spatial relationships to the rest of
+  the universe change. Empty positions defined by the particle move too.
+- **Destroy:** represent the selected particle vacating its position, not the
+  end of its existence or completion of its destructors. The vacancies in a
+  simultaneous destruction are selected from one common preceding state. A
+  later-executing Destroy does not select a replacement particle. The original
+  particles remain available to destructors as though in their positions
+  immediately before destruction, including movements performed by those
+  destructors. Actual destruction must respect the last interactions specified
+  by Destruction Ordering During Destructors; it is not another interpretation
+  of the vacancy vertex.
+
+Position names and references describe these spatial relationships; they are not
+the relationships themselves. When a particle moves from `a` to `b`, the change
+from a child reference `a::c` to `b::c` represents movement, not merely a
+different spelling for an unchanged location. Preserving a particle's identity
+does not make it independently addressable at any position. In particular, a
+written Destroy Particle Statement at `b::c` cannot execute while `b` is empty.
+An additional child Destroy selected by simultaneous destruction has no newly
+written `b::c` reference: it selects the original position defined by its parent
+particle, which can itself move. These two kinds of occurrence must not be
+identified merely because a displayed graph gives them the same full name.
+
+### Correspondence required of every proof model
+
+The [operation-requirement derivation](operation-requirements.md) distinguishes
+the requirements of actual position references from particle identity and
+existence requirements. In particular, preserving a direct implied-position
+reference does not require preserving the defining particle's spatial location
+in the serial reference execution.
+
+These checks apply to existing English arguments and Lean formalizations as well
+as new ones:
+
+- Distinguish a particle's identity, its position, positions it defines, and the
+  names used to describe those positions. State which of these each mathematical
+  object represents.
+- Represent a Move's transitive spatial effect, not just its source and
+  destination occupancy or a renaming of an otherwise unchanged state. A model
+  that records only occupied positions may omit empty positions only where that
+  omission does not affect the property being proved.
+- A reordered execution must execute the same Particle Operations with their
+  required positions and occupancy. Do not silently retarget an operation or add
+  an independent binding to a particle's identity to make a schedule work. For
+  pending destruction work, use the specification's explicit preservation of the
+  original particles and positions; do not look up replacements through their
+  reused names. This exception does not waive a written reference's requirements
+  at a Move destination. An implicit child selection, like a direct implied
+  reference, does not acquire that written reference from its displayed name.
+- Distinguish a completed simultaneous destruction from each individual
+  destruction. A result about permuting only the selected Destroys does not
+  establish that those Destroys may also be reordered across Creates or Moves.
+- Distinguish a Destroy's vacancy from the end of the original particle's
+  existence. A destructor's last-use requirement constrains the latter; it does
+  not by itself impose an edge to or from the vacancy vertex. Destructors that
+  interact with the same original particle share its changing state, not
+  independent copies of the state before destruction.
+- Separate graph facts from execution facts. Acyclicity, transitive minimality,
+  and reachability characterization do not by themselves establish that the
+  allowed executions preserve these concepts or provide maximum safe
+  concurrency.
+
+A representation is an abstraction of these concepts, not a replacement for
+them. Its correspondence must be established for the claimed result before a
+theorem about that representation is described as a theorem about Define.
+
 ## Scope
 
-The model describes occupancy and dependencies between resolved Particle
-Operation occurrences. A Particle Operation is a Create Particle Statement, a
-Move Particle Statement, or a Destroy Particle Statement.
+The specification defines a Particle Operation as a Create Particle Statement, a
+Move Particle Statement, or an individual particle destruction. A Destroy
+Particle Statement can therefore contribute several Particle Operations.
+
+The serial model defined below predates that distinction: its Destroy transition
+removes the target and its occupied transitive child positions in one step. This
+is an aggregate occupancy transition, not the effect of each individual
+destruction. Its completeness and scheduling theorems must not be applied to
+simultaneous individual destructions by giving them arbitrary distinct
+occurrence indices. See the
+[simultaneous destruction proof](../theorems/simultaneous-destruction-proof.md)
+for the individual transitions and their common-state interpretation.
 
 The model does not treat an action as one operation. If an Action Execution
 contributes five Particle Operations, those are five distinct occurrences. Two
 Action Executions of the same Action Definition also contribute distinct
 occurrences, even when they execute the same written statement.
 
-Automatic destruction behaves as though the compiler had written the
-corresponding Destroy Particle Statements. Particle Operations performed by a
-destructor are ordinary resolved occurrences. When a Destruction Contract causes
-another destructor to be verified at the recorded destruction, its Particle
-Operations are likewise resolved at that destruction. The Destruction Contract,
-Destruction Fact, and Child State are not themselves graph vertices.
+Automatic Destruction selects the applicable particles simultaneously at the end
+of an Action Statements Block. Particle Operations performed by a destructor are
+ordinary resolved occurrences. When a Destruction Contract causes another
+destructor to be verified at the recorded destruction, its Particle Operations
+are likewise resolved at that destruction. The Destruction Contract, Destruction
+Fact, and Child State are not themselves graph vertices.
 
 Action Requirements and Action Guarantees are also not graph vertices. They
 determine which source programs and Action Executions are valid and how a
@@ -53,9 +162,9 @@ components. Action names that occur between position names in Define syntax do
 not add another position component. Components distinguish separate positions,
 including different actions' interface positions and local positions belonging
 to separate Action Executions, while preserving shared positions across
-executions. Replacing a position's particle does not erase that position's
-operation history. Constructing these components from source remains part of the
-source-to-history obligations below.
+executions. Replacing a position's particle does not erase the most recent
+previous Particle Operation at that position name. Constructing these components
+from source remains part of the source-to-history obligations below.
 
 Write
 
@@ -78,8 +187,10 @@ is reflexive and symmetric, but not transitive: two different child positions of
 one parent position need not be related to each other.
 
 When `p ⪯ q`, write `q = p · r`, where `r` is the remaining sequence of
-position-name components. A Move from `p` to `t` changes the applicable name
-`p · r` to `t · r` for each transitive child position of the moved particle.
+position-name components. A Move from `p` to `t` moves each transitive child
+position of the moved particle. The change from `p · r` to `t · r` represents
+that spatial change. These sequences describe positions, not permanent particle
+identities that can be used without regard to movement.
 
 ## Resolved Particle Operation occurrences
 
@@ -104,10 +215,11 @@ positions(Move(s,t))  = {s,t}
 
 Occurrences remain distinct even if their kinds and positions are equal.
 
-Each occurrence also has an _Action Parent position_: the position of the
-particle to which that occurrence's Action Execution is assigned. Every position
-operated on by the occurrence is the Action Parent position or one of its
-transitive child positions.
+Each occurrence also records its _Action Parent position_: the position of the
+particle to which that occurrence's Action Execution is assigned. This is
+metadata for the resolution definitions; the proofs excluding the Action Parent
+Rule do not use it to constrain the occurrence's operated positions or supply
+spatial relationships that have not been derived from the specification.
 
 ## The previous-operation order
 
@@ -129,17 +241,20 @@ This is a _previous-operation order_, not a promise that a runtime executes all
 operations sequentially in this order. The dependency graph exists to permit
 other execution orders and concurrent execution.
 
-The specification defines this logical order through its rules taken together:
-Particle Operations in an Action Statements Block have their logical statement
-order; Action Requirements are satisfied before an action triggers; Action
-Guarantees become available after the callee's relevant final operation;
-constructors have an assignment order; Cascading Destruction and destructors
-have stated timing; Destruction Contracts record the order of destructions; and
-the concurrency rules state when a caller operation may proceed after a callee
-operation. The source-to-model proof must compose those existing clauses and
-show that each use of “previous” by a graph rule agrees with the resulting
-occurrence order. This is a lemma about the specification as written, not a new
-requirement for the specification.
+For the serial model, source correspondence would have to derive this logical
+order from the specification's rules taken together: Particle Operations in an
+Action Statements Block have their logical statement order; Action Requirements
+are satisfied before an action triggers; Action Guarantees become available
+after the callee's relevant final operation; constructors have an assignment
+order; destructors have stated timing; and the concurrency rules state when a
+caller operation may proceed after a callee operation. The source-to-model proof
+must compose those existing clauses and show that each use of “previous” by a
+graph rule agrees with the resulting occurrence order. This cannot be done by
+arbitrarily ordering simultaneous individual destructions. Only the Particle
+Operation Dependency Graph rules order those destructions, including
+dependencies resulting from a destructor's accesses to contracted positions. A
+Destruction Contract records a Destruction Fact and Child State; it does not
+impose an additional destruction order.
 
 Nothing here says that an execution terminates. A nonterminating execution has
 the infinite order `O₀, O₁, O₂, ...`. Quantifiers may likewise contribute an
@@ -177,15 +292,19 @@ position.
 
 ### Destroy
 
-`Destroy(p)` requires `p` to be occupied. Cascading Destruction empties `p` and
-all its transitive child positions. Its next state is
+The serial model's aggregate `Destroy(p)` requires `p` to be occupied. The
+completed Simultaneous Transitive Destruction empties `p` and all its transitive
+child positions. Its final state is
 
 ```text
 {q in S | not p ⪯ q}.
 ```
 
-This is the state change specified by Cascading Destruction whether the Destroy
-Particle Statement was written directly or introduced by Automatic Destruction.
+This is the completed state change, not an individual graph vertex's effect. An
+individual destruction at `q` removes only `q` from the selected occupancy; each
+other selected particle has its own destruction. Prefix closure is required at
+the common-state boundaries, not between arbitrarily scheduled individual
+destructions. Destructor operations must also respect their graph dependencies.
 
 ### Move
 
@@ -210,12 +329,15 @@ do not have `s` as a prefix are unchanged. In set notation, the next state is
   union {q in S | not s ⪯ q and not t ⪯ q}.
 ```
 
-This preserves the moved particle and its particles at transitive child
-positions while changing their applicable resolved names. The second condition
-on the unchanged set removes the old contents of the target subtree before the
-renamed positions are added. A valid pre-Move state already has no occupied
-position in that subtree, because the target is empty and the state is
-prefix-closed.
+This represents movement of the particle and the occupied positions it defines
+transitively, preserving their relative spatial relationships. It is not merely
+a renaming of stationary particles and positions. The second condition on the
+unchanged set removes the old occupied target-based names before the moved
+occupancy is added. A valid pre-Move state already has no such occupied
+positions, because the target is empty and the state is prefix-closed. The set
+records occupancy only; it does not separately represent particle identity or
+the movement of empty positions. Claims requiring those distinctions need a
+correspondence argument beyond this transition.
 
 Destination Position Constraints and particle qualities affect whether source
 code is valid, but they do not change this occupancy transition.
@@ -242,8 +364,6 @@ resolved history is _valid_ when:
 - the set of names that may be queried is prefix-closed;
 - every `Oᵢ` satisfies its occupancy preconditions in `Sᵢ`;
 - `Sᵢ₊₁` is exactly the state produced by the operation's effect;
-- every operated position is the Action Parent position or its transitive child
-  position; and
 - the history contains every Particle Operation occurrence contributed by its
   resolved Action Executions and destructions, exactly once.
 
@@ -288,10 +408,12 @@ some p in positions(O) and q in positions(A) satisfy p ~ q.
 `R` depends only on the resolved history's previous-operation order and operated
 positions. It does not depend on the Fill, Empty, or Move Rules.
 
-The eventual completeness theorem must prove that every `R` pair is reachable.
-The minimality theorem must independently prove that no direct edge calculated
-by the rules is redundant. Only the later characterization theorem may combine
-those results.
+The serial model's completeness theorem proves every `R` pair reachable. This is
+not the correct universal completeness claim for simultaneous individual
+destruction: arbitrary enumeration can create an `R` pair where the
+specification requires no path. The minimality theorem must independently prove
+that no direct edge calculated by the rules is redundant. Only the later
+characterization theorem may combine those results.
 
 Minimality and completeness proceed by induction on the natural index of the
 operation under consideration, so neither result needs the whole history to be

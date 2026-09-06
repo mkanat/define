@@ -22,8 +22,10 @@ terms.
 
 ## Building proofs
 
-Bazel downloads the Lean toolchain declared by `lean-toolchain`. To compile the
-proofs, run:
+Bazel downloads the Lean toolchain declared by `lean-toolchain` and the Lake
+dependencies pinned in `lake-manifest.json`. `lakefile.lean` declares mathlib;
+Bazel's Lake integration obtains the compiled modules needed by the proofs. To
+compile the proofs, run:
 
 ```console
 bazelisk build //proofs/...

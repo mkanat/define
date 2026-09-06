@@ -1,5 +1,11 @@
 # Valid Resolved Particle Operation Histories
 
+The graph calculations in this document describe the former Fill, Empty, and
+Move Rules and their existing Lean models. They do not formalize the revised
+[requirement-based construction](../theorems/requirement-construction.md).
+Source-semantic arguments must still be distinguished from results about those
+former models.
+
 ## Theorem statement
 
 Let
@@ -19,13 +25,37 @@ following hold:
 4. after a non-Move operates on `p`, every strict transitive child position of
    `p` is empty;
 5. every position that changes from empty to occupied at one step was filled by
-   that step's operation or was renamed from the Move's source; and
+   that step's operation or became occupied through the Move's transitive
+   spatial effect; and
 6. a Move preserves occupancy throughout the moved particle's transitive child
    positions under the source-to-target name change.
 
 These results use only Particle Operation preconditions and occupancy effects.
 They do not use dependency edges or any clause of the Fill, Empty, or Move
 Rules.
+
+The source-to-target name substitution represents movement of positions and
+their particles, as described in the
+[conceptual definitions](definitions.md#conceptual-meaning-of-particles-positions-and-operations).
+This occupancy-only model does not separately track particle identities or empty
+positions moving with a particle. Its theorems must not be used to infer
+properties that require those distinctions without proving the correspondence.
+
+In particular, the resolved position of each operation in this model does not
+record how its source reference obtains that position. It therefore cannot be
+used to prove that a direct implied-position operation must retain its serial
+reference execution's spatial location. The
+[operation-requirement derivation](operation-requirements.md) proves a
+constructor/Move exchange that this fixed-position scheduling interpretation
+does not represent.
+
+Here `ValidResolvedHistory` is the serial model with aggregate Destroy
+transitions. Its states are not the intermediate states between individual
+simultaneous destructions. `ResolvedStepHistory` instead derives parts 1, 2, 4,
+and 5 at common-state boundaries; the
+[simultaneous destruction proof](../theorems/simultaneous-destruction-proof.md)
+explains that distinction. Neither representation by itself resolves destructor
+accesses from Define source.
 
 A valid resolved history also records, at each index, the resolved position
 names whose most-recent Particle Operation may be queried. Every occupied or
@@ -45,13 +75,13 @@ The proof uses the following parts of the specification:
   fills its target, whose position reference must be empty.
 - A
   [Destroy Particle Statement](../../../define/spec/spec.md#destroying-particles)
-  requires an existing particle, and Cascading Destruction also destroys the
-  particles at transitive child positions.
+  requires an existing particle, and Simultaneous Transitive Destruction also
+  selects the particles at transitive child positions.
 - A [Move Particle Statement](../../../define/spec/spec.md#moving-particles)
   requires an occupied source and an empty target, preserves the moved particle,
   and may not move it to a position it defines.
-- Automatic Destruction behaves as though the compiler had written Destroy
-  Particle Statements at the end of the Action Statements Block.
+- Automatic Destruction simultaneously selects the applicable remaining local
+  particles at the end of the Action Statements Block.
 
 Requirements involving qualities and Position Constraint Blocks are part of
 source validity but are not needed for these occupancy conclusions.
@@ -116,8 +146,9 @@ strict transitive child position of `p` is occupied.
 
 ### Proof
 
-For a Destroy, Cascading Destruction removes `p` and every transitive child
-position of `p`.
+For the serial aggregate Destroy transition, the completed Simultaneous
+Transitive Destruction removes `p` and every transitive child position of `p`.
+This statement does not apply immediately after just one individual destruction.
 
 For a Create, `p` was empty immediately before the operation. Prefix closure
 then implies that no strict transitive child position of `p` was occupied:
@@ -248,33 +279,39 @@ relative to the caller occurrences. The source-to-history proof must compose
 these placements with the other sequencing rules and prove that graph-rule
 queries use the resulting meaning of “previous.”
 
-### Cascading and Automatic Destruction
+### Simultaneous Transitive Destruction and Automatic Destruction
 
-Cascading Destruction and Automatic Destruction behave as written sequences of
-Destroy Particle Statements. Each such statement must therefore contribute one
-resolved Destroy occurrence at the point specified by the destruction order. The
-Child State is the occupancy state immediately before the corresponding parent
-particle is destroyed.
+Both forms select particles simultaneously, and each selected particle has its
+own individual destruction. There is no prescribed parent-before-child or
+child-before-parent order. Identical-recency destructions use the common
+previous history; calculating one must not make it a previous operation of
+another. The Child State records occupancy immediately before destruction
+begins, not the state left by an arbitrary enumeration of individual
+destructions.
 
 ### Destruction Contracts and destructors
 
-A Destruction Contract records destructions in their execution order. A
-destructor verified through that contract behaves as an Action Execution at the
-recorded destruction. Its written and automatic Particle Operations must be
-resolved exactly as they would be for any other Action Execution, using the
-recorded Child State for its requirements.
+A Destruction Contract records Destruction Facts and Child States, not an
+additional execution order. A destructor behaves as an ordinary Action
+Execution. Its accesses to contracted positions contribute dependencies under
+the ordinary graph rules. Every dependency path strictly decreases recency, so
+these accesses cannot create a path between identical-recency destructions. Its
+written and automatic Particle Operations must be resolved using the ordinary
+rules, and its requirements are verified using the recorded Child State and the
+specification's contract rules.
 
-## Remaining source-to-history construction
+## Limits of the resolved-history model
 
 The occupancy induction is complete once a valid resolved history is supplied.
-The following claims still require a source-resolution argument before the
-proofs can conclude “for every valid Define program execution”:
+The resolved-history model alone does not establish the following claims about
+every valid Define program execution:
 
-1. every written, automatic, cascading, and destructor Particle Operation is
+1. every written Particle Operation, individual destruction from Simultaneous
+   Transitive Destruction or Automatic Destruction, and destructor operation is
    represented exactly once;
-2. the specification's caller, callee, constructor, destructor, and destruction
-   sequencing rules assign every occurrence a natural-number index and give
-   “previous” the meaning used by all three resolved graph rules;
+2. the resolved meaning of “previous” preserves simultaneous individual
+   destructions and dependency paths through destructor accesses, rather than
+   replacing them with the serial model's strict total occurrence order;
 3. the states at Action Requirement, Action Guarantee, and Destruction Contract
    boundaries agree with the resolved operation transitions; and
 4. prefix replacement distinguishes separate local positions of Action
@@ -284,7 +321,14 @@ proofs can conclude “for every valid Define program execution”:
    those supplied by Position Definitions, Action Executions, valid position
    references, and Move name changes.
 
-These are lemmas to derive from the specification's existing rules, not missing
-specification requirements. They are not consequences of graph minimality or
-completeness and must not be assumed by either proof. They belong in the
-universal source-to-history and calculation construction argument.
+These are not missing specification requirements or consequences of graph
+minimality. The serial model cannot represent simultaneous Destroys by replacing
+their identical recency with its strict total order. It is therefore not the
+source representation used for the requirement-based proof. The
+[reference-shape](../theorems/reference-shape-proof.md),
+[ordinary-requirements](../theorems/ordinary-requirements-proof.md), and
+[retained-state](../theorems/retained-state-proof.md) arguments supply that
+proof's source interpretation, while `particle_requirements.lean` and
+`retained_requirements.lean` check the corresponding component transitions. This
+does not turn the former resolved-history model into a source-language
+formalization.

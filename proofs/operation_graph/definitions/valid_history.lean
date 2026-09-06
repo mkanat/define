@@ -15,12 +15,11 @@ Operation may be queried at each index. It remains independent of every
 operation graph rule; deriving that name trace from resolved Define source is a
 separate formalization boundary.
 
-`ExactOccupancyExecution` is the smaller derived interface consumed by the
-minimality and completeness arguments through the universal
-calculation-correctness construction. Unlike `ValidResolvedHistory`, it exposes
-prefix closure at every index as a field. Every calculated graph obtains that
-interface from the derived prefix-closure theorem rather than assuming it in a
-public result.
+`ExactOccupancyExecution` is the serial aggregate execution interface required
+by the related-and-previous completeness argument. Minimality instead consumes
+`ValidOccupancyTrace`, which can also be derived at common-state destruction
+boundaries. Deriving either interface from a model does not establish that the
+model represents every valid Define execution.
 -/
 
 namespace Define.OperationGraph
@@ -114,11 +113,6 @@ structure ValidResolvedHistory (isOperation : ParticleOperation → Prop) where
       isOperation operation →
         operation.kind = .move source target →
         ¬ParentOrSame source target
-  operated_position_has_action_parent :
-    ∀ operation position,
-      isOperation operation →
-        OperatesOn operation position →
-        ParentOrSame operation.actionParent position
   operation_transition :
     ∀ operationOrder operation,
       operationAt operationOrder = some operation →

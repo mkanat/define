@@ -45,14 +45,46 @@ def RuleCalculation.InCollection (calculation : RuleCalculation)
     (candidate : ParticleOperation) : Prop :=
   calculation.sourceCandidate candidate ∨ calculation.IsFillCandidate candidate
 
+def SameRecencyParentDestroy (parentOperation childOperation : ParticleOperation) : Prop :=
+  parentOperation.operationOrder = childOperation.operationOrder ∧
+    match parentOperation.kind, childOperation.kind with
+    | .destroy parent, .destroy child => ParentOrSame parent child ∧ parent ≠ child
+    | _, _ => False
+
+theorem sameRecencyParentDestroy_irrefl (operation : ParticleOperation) :
+    ¬SameRecencyParentDestroy operation operation := by
+  cases kind : operation.kind <;> simp [SameRecencyParentDestroy, kind]
+
 def RuleCalculation.AfterComparison (calculation : RuleCalculation)
     (candidate : ParticleOperation) : Prop :=
   calculation.InCollection candidate ∧
-    ∀ newerCandidate,
+    (∀ newerCandidate,
       calculation.InCollection newerCandidate →
       MoreRecent newerCandidate candidate →
       OperationsRelated newerCandidate candidate →
-      False
+      False) ∧
+    ∀ otherCandidate, calculation.InCollection otherCandidate →
+      ¬SameRecencyParentDestroy otherCandidate candidate
+
+theorem RuleCalculation.afterComparison_iff_of_distinct_recency
+    (calculation : RuleCalculation)
+    (same_order_equal : ∀ first second,
+      calculation.InCollection first → calculation.InCollection second →
+      first.operationOrder = second.operationOrder → first = second)
+    (candidate : ParticleOperation) :
+    calculation.AfterComparison candidate ↔
+      calculation.InCollection candidate ∧
+        ∀ newerCandidate, calculation.InCollection newerCandidate →
+          MoreRecent newerCandidate candidate → OperationsRelated newerCandidate candidate → False := by
+  constructor
+  · intro retained
+    exact ⟨retained.1, retained.2.1⟩
+  · rintro ⟨collected, no_newer⟩
+    refine ⟨collected, no_newer, ?_⟩
+    intro other other_collected excludes
+    have equal := same_order_equal other candidate other_collected collected excludes.1
+    subst other
+    exact sameRecencyParentDestroy_irrefl candidate excludes
 
 def RuleCalculation.AfterMoveCorrection (calculation : RuleCalculation)
     (dependency : ParticleOperation → ParticleOperation → Prop)

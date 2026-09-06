@@ -14,6 +14,9 @@ in the precedence relation.
 
 The theorem is independent of Particle Operation occupancy semantics and does
 not require the precedence relation to be finite beyond the two schedule lists.
+The exact finite-poset correspondence and external citation are in
+`external-results.md`. The exchange proof remains here because the available
+library results do not supply its constrained sequence of swaps.
 -/
 
 namespace Define.OperationGraph
@@ -24,16 +27,9 @@ universe u
 A schedule respects a precedence relation when no occurrence appears before an
 occurrence that the relation requires it to follow.
 -/
-inductive RespectsPrecedence {Occurrence : Type u}
-    (precedence : Occurrence → Occurrence → Prop) : List Occurrence → Prop where
-  | nil : RespectsPrecedence precedence []
-  | cons {occurrence : Occurrence} {remaining : List Occurrence}
-      (occurrence_does_not_follow_remaining :
-        ∀ laterOccurrence,
-          laterOccurrence ∈ remaining →
-            ¬precedence occurrence laterOccurrence)
-      (remaining_respects : RespectsPrecedence precedence remaining) :
-      RespectsPrecedence precedence (occurrence :: remaining)
+abbrev RespectsPrecedence {Occurrence : Type u}
+    (precedence : Occurrence → Occurrence → Prop) : List Occurrence → Prop :=
+  List.Pairwise (fun earlier later => ¬precedence earlier later)
 
 /--
 A schedule that respects a relation also respects every subrelation of it.
@@ -46,20 +42,9 @@ theorem RespectsPrecedence.mono
     (weaker_is_subrelation :
       ∀ following previous,
         weaker following previous → precedence following previous) :
-    RespectsPrecedence weaker schedule := by
-  induction respects with
-  | nil => exact .nil
-  | cons occurrence_does_not_follow_remaining remaining_respects
-      induction_hypothesis =>
-      exact
-        .cons
-          (by
-            intro laterOccurrence later_member weaker_precedence
-            exact
-              occurrence_does_not_follow_remaining laterOccurrence
-                later_member
-                (weaker_is_subrelation _ _ weaker_precedence))
-          induction_hypothesis
+    RespectsPrecedence weaker schedule :=
+  respects.imp (fun unrelated related =>
+    unrelated (weaker_is_subrelation _ _ related))
 
 /--
 Related occurrences in a finite respecting schedule appear in the order
@@ -76,47 +61,19 @@ theorem RespectsPrecedence.index_lt
     (previous_at : schedule[previousOrder]? = some previous)
     (following_precedence_previous : precedence following previous) :
     previousOrder < followingOrder := by
-  induction schedule generalizing followingOrder previousOrder following
-    previous with
-  | nil => simp at following_at
-  | cons firstOccurrence remaining induction_hypothesis =>
-      cases respects with
-      | cons first_does_not_follow_remaining remaining_respects =>
-          cases followingOrder with
-          | zero =>
-              have first_is_following : firstOccurrence = following :=
-                Option.some.inj
-                  (by
-                    simpa only [List.getElem?_cons_zero] using following_at)
-              subst following
-              cases previousOrder with
-              | zero =>
-                  have first_is_previous : firstOccurrence = previous :=
-                    Option.some.inj
-                      (by
-                        simpa only [List.getElem?_cons_zero] using previous_at)
-                  subst previous
-                  exact
-                    False.elim
-                      (precedence_irreflexive firstOccurrence
-                        following_precedence_previous)
-              | succ previousOrder =>
-                  simp only [List.getElem?_cons_succ] at previous_at
-                  have previous_member : previous ∈ remaining :=
-                    List.mem_iff_getElem?.mpr ⟨previousOrder, previous_at⟩
-                  exact
-                    False.elim
-                      (first_does_not_follow_remaining previous previous_member
-                        following_precedence_previous)
-          | succ followingOrder =>
-              cases previousOrder with
-              | zero => omega
-              | succ previousOrder =>
-                  simp only [List.getElem?_cons_succ] at following_at previous_at
-                  have previous_before_following :=
-                    induction_hypothesis remaining_respects
-                      following_at previous_at following_precedence_previous
-                  omega
+  obtain ⟨following_bound, following_equal⟩ := List.getElem_of_getElem? following_at
+  obtain ⟨previous_bound, previous_equal⟩ := List.getElem_of_getElem? previous_at
+  have different : followingOrder ≠ previousOrder := by
+    intro equal
+    subst previousOrder
+    have same : following = previous := following_equal.symm.trans previous_equal
+    exact precedence_irreflexive following (same ▸ following_precedence_previous)
+  have not_before : ¬followingOrder < previousOrder := by
+    intro before
+    have unrelated := List.pairwise_iff_getElem.mp respects
+      followingOrder previousOrder following_bound previous_bound before
+    exact unrelated (following_equal ▸ previous_equal ▸ following_precedence_previous)
+  omega
 
 theorem RespectsPrecedence.snoc
     {Occurrence : Type u} {precedence : Occurrence → Occurrence → Prop}
@@ -126,51 +83,17 @@ theorem RespectsPrecedence.snoc
       ∀ earlierOccurrence,
         earlierOccurrence ∈ schedule →
           ¬precedence earlierOccurrence finalOccurrence) :
-    RespectsPrecedence precedence (schedule ++ [finalOccurrence]) := by
-  induction respects with
-  | nil =>
-      exact .cons (by simp) .nil
-  | cons occurrence_does_not_follow_remaining remaining_respects
-      induction_hypothesis =>
-      simp only [List.cons_append]
-      exact
-        .cons
-          (by
-            intro laterOccurrence later_member
-            simp only [List.mem_append, List.mem_singleton] at later_member
-            rcases later_member with remaining_member | later_is_final
-            · exact
-                occurrence_does_not_follow_remaining laterOccurrence
-                  remaining_member
-            · subst laterOccurrence
-              exact
-                earlier_does_not_follow_final _ (by simp))
-          (induction_hypothesis
-            (fun earlierOccurrence earlier_member =>
-              earlier_does_not_follow_final earlierOccurrence
-                (by simp [earlier_member])))
+    RespectsPrecedence precedence (schedule ++ [finalOccurrence]) :=
+  List.pairwise_append.mpr ⟨respects, List.pairwise_singleton _ _, by
+    simpa using earlier_does_not_follow_final⟩
 
 theorem RespectsPrecedence.sublist
     {Occurrence : Type u} {precedence : Occurrence → Occurrence → Prop}
     {shorterSchedule schedule : List Occurrence}
     (shorter_is_sublist : List.Sublist shorterSchedule schedule)
     (respects : RespectsPrecedence precedence schedule) :
-    RespectsPrecedence precedence shorterSchedule := by
-  induction shorter_is_sublist with
-  | slnil => exact .nil
-  | cons _ _ induction_hypothesis =>
-      cases respects with
-      | cons _ remaining_respects =>
-          exact induction_hypothesis remaining_respects
-  | cons_cons _ shorter_remaining_is_sublist induction_hypothesis =>
-      cases respects with
-      | cons occurrence_does_not_follow_remaining remaining_respects =>
-          exact
-            .cons
-              (fun laterOccurrence later_member =>
-                occurrence_does_not_follow_remaining laterOccurrence
-                  (shorter_remaining_is_sublist.subset later_member))
-              (induction_hypothesis remaining_respects)
+    RespectsPrecedence precedence shorterSchedule :=
+  List.Pairwise.sublist shorter_is_sublist respects
 
 /--
 The second part of a precedence-respecting appended schedule also respects the
@@ -181,14 +104,8 @@ theorem RespectsPrecedence.right_of_append
     {firstSchedule secondSchedule : List Occurrence}
     (respects :
       RespectsPrecedence precedence (firstSchedule ++ secondSchedule)) :
-    RespectsPrecedence precedence secondSchedule := by
-  induction firstSchedule with
-  | nil => simpa using respects
-  | cons firstOccurrence firstSchedule induction_hypothesis =>
-      simp only [List.cons_append] at respects
-      cases respects with
-      | cons _ remaining_respects =>
-          exact induction_hypothesis remaining_respects
+    RespectsPrecedence precedence secondSchedule :=
+  (List.pairwise_append.mp respects).2.1
 
 theorem RespectsPrecedence.append
     {Occurrence : Type u} {precedence : Occurrence → Occurrence → Prop}
@@ -201,28 +118,9 @@ theorem RespectsPrecedence.append
           ∀ secondOccurrence,
             secondOccurrence ∈ secondSchedule →
               ¬precedence firstOccurrence secondOccurrence) :
-    RespectsPrecedence precedence (firstSchedule ++ secondSchedule) := by
-  induction first_respects with
-  | nil => simpa
-  | cons occurrence_does_not_follow_remaining remaining_respects
-      induction_hypothesis =>
-      simp only [List.cons_append]
-      exact
-        .cons
-          (by
-            intro laterOccurrence later_member
-            simp only [List.mem_append] at later_member
-            rcases later_member with remaining_member | second_member
-            · exact
-                occurrence_does_not_follow_remaining laterOccurrence
-                  remaining_member
-            · exact
-                first_does_not_follow_second _ (by simp) laterOccurrence
-                  second_member)
-          (induction_hypothesis
-            (fun firstOccurrence first_member =>
-              first_does_not_follow_second firstOccurrence
-                (by simp [first_member])))
+    RespectsPrecedence precedence (firstSchedule ++ secondSchedule) :=
+  List.pairwise_append.mpr
+    ⟨first_respects, second_respects, first_does_not_follow_second⟩
 
 /--
 A duplicate-free subcollection of a finite list can be moved to the front while
@@ -565,5 +463,91 @@ theorem respecting_permutations_connected
                 induction_hypothesis remaining_permuted moved_nodup.tail
                   moved_remaining_respects desired_remaining_respects
               exact move_to_head.trans (remaining_exchanges.cons desiredOccurrence)
+
+/-- A cover pair can be adjacent in a respecting permutation of a finite schedule. -/
+theorem cover_pair_has_adjacent_respecting_permutation
+    {Occurrence : Type u} {precedence : Occurrence → Occurrence → Prop}
+    {schedule : List Occurrence} {following previous : Occurrence}
+    (distinct : schedule.Nodup)
+    (respects : RespectsPrecedence precedence schedule)
+    (irreflexive : ∀ occurrence, ¬precedence occurrence occurrence)
+    (transitive : ∀ {a b c}, precedence a b → precedence b c → precedence a c)
+    (related : precedence following previous)
+    (cover : ∀ middle, precedence following middle → ¬precedence middle previous)
+    (following_member : following ∈ schedule) (previous_member : previous ∈ schedule) :
+    ∃ preceding remaining,
+      schedule.Perm (preceding ++ previous :: following :: remaining) ∧
+      RespectsPrecedence precedence (preceding ++ previous :: following :: remaining) := by
+  classical
+  let preceding := schedule.filter (fun occurrence =>
+    decide (precedence following occurrence ∧ occurrence ≠ previous))
+  have preceding_iff {occurrence : Occurrence} :
+      occurrence ∈ preceding ↔ occurrence ∈ schedule ∧
+        precedence following occurrence ∧ occurrence ≠ previous := by
+    simp [preceding]
+  have preceding_sublist : preceding.Sublist schedule := List.filter_sublist
+  have different : previous ≠ following := by
+    intro equal
+    subst previous
+    exact irreflexive following related
+  have previous_absent : previous ∉ preceding := by
+    intro member
+    exact (preceding_iff.mp member).2.2 rfl
+  have following_absent : following ∉ preceding := by
+    intro member
+    exact irreflexive following (preceding_iff.mp member).2.1
+  have initial_distinct : (preceding ++ [previous, following]).Nodup := by
+    rw [List.nodup_append]
+    refine ⟨preceding_sublist.nodup distinct, by simp [different], ?_⟩
+    intro a a_member b b_member equal
+    subst b
+    have alternatives : a = previous ∨ a = following := by simpa using b_member
+    rcases alternatives with rfl | rfl
+    · exact previous_absent a_member
+    · exact following_absent a_member
+  have initial_subset : ∀ occurrence,
+      occurrence ∈ preceding ++ [previous, following] → occurrence ∈ schedule := by
+    intro occurrence member
+    have alternatives : occurrence ∈ preceding ∨
+        occurrence = previous ∨ occurrence = following := by simpa using member
+    rcases alternatives with member | rfl | rfl
+    · exact preceding_sublist.subset member
+    · exact previous_member
+    · exact following_member
+  have through_previous : RespectsPrecedence precedence (preceding ++ [previous]) := by
+    apply (respects.sublist preceding_sublist).snoc
+    intro occurrence member relation
+    exact cover occurrence (preceding_iff.mp member).2.1 relation
+  have initial_respects :
+      RespectsPrecedence precedence (preceding ++ [previous, following]) := by
+    have extended := through_previous.snoc (finalOccurrence := following) (by
+      intro occurrence member relation
+      have alternatives : occurrence ∈ preceding ∨ occurrence = previous := by
+        simpa using member
+      rcases alternatives with member | rfl
+      · exact irreflexive following
+          (transitive (preceding_iff.mp member).2.1 relation)
+      · exact irreflexive following (transitive related relation))
+    simpa [List.append_assoc] using extended
+  obtain ⟨remaining, remaining_sublist, permuted⟩ :=
+    exists_order_preserving_complement initial_distinct initial_subset
+  have disjoint := (List.nodup_append.mp (permuted.nodup distinct)).2.2
+  have complete := initial_respects.append (respects.sublist remaining_sublist) (by
+    intro a a_member b b_member relation
+    have following_before_b : precedence following b := by
+      have alternatives : a ∈ preceding ∨ a = previous ∨ a = following := by
+        simpa using a_member
+      rcases alternatives with member | rfl | rfl
+      · exact transitive (preceding_iff.mp member).2.1 relation
+      · exact transitive related relation
+      · exact relation
+    have b_initial : b ∈ preceding ++ [previous, following] := by
+      by_cases equal : b = previous
+      · simp [equal]
+      · exact List.mem_append_left _ (preceding_iff.mpr
+          ⟨remaining_sublist.subset b_member, following_before_b, equal⟩)
+    exact disjoint b b_initial b b_member rfl)
+  exact ⟨preceding, remaining, by simpa [List.append_assoc] using permuted,
+    by simpa [List.append_assoc] using complete⟩
 
 end Define.OperationGraph

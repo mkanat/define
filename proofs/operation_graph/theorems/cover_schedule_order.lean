@@ -40,7 +40,7 @@ theorem calculated_coverPair_is_relatedPrevious
   | direct related_previous => exact related_previous
   | @step _ intermediate _ first_relation remaining_path =>
       exfalso
-      apply cover_pair.2 intermediate
+      apply cover_pair.2 (c := intermediate)
       · exact
           (calculatedDependency_reaches_iff_reaches_relatedPrevious history).mpr
             (.direct first_relation)
@@ -167,7 +167,7 @@ theorem calculated_coverPair_has_adjacent_respecting_historyPrefix
     apply other_predecessors_respect.snoc
     intro otherOperation other_member other_reaches_previous
     exact
-      cover_pair.2 otherOperation
+      cover_pair.2 (c := otherOperation)
         (other_predecessor_iff.mp other_member).2.1
         other_reaches_previous
   have adjacent_prefix_respects :
@@ -214,8 +214,7 @@ theorem calculated_coverPair_has_adjacent_respecting_historyPrefix
             remainingOperation ∈ remaining →
               ¬Reaches (CalculatedDependency history) prefixOperation
                 remainingOperation := by
-    intro prefixOperation prefix_member remainingOperation remaining_member
-    intro prefix_reaches_remaining
+    intro prefixOperation prefix_member remainingOperation remaining_member prefix_reaches_remaining
     have following_reaches_remaining :
         Reaches (CalculatedDependency history) following remainingOperation := by
       have prefix_member_parts :

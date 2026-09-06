@@ -602,10 +602,6 @@ def history : ValidResolvedHistory isOperation where
       · simp [itemPosition] at item_is_empty
       · simp [itemPosition] at item_is_holder
       · simp [itemPosition] at item_is_deposit
-  operated_position_has_action_parent := by
-    intro operation position operation_member operates_on_position
-    rcases operation_member with rfl | rfl | rfl | rfl | rfl | rfl <;>
-      exact List.nil_prefix
   operation_transition := occupancy.operation_transition
   no_operation_transition := occupancy.no_operation_transition
 
@@ -837,6 +833,7 @@ theorem create_second_not_related_create_holder :
 
 theorem first_move_item_after_comparison :
     (calculationFor history moveItemToPay).AfterComparison createItem := by
+  rw [calculationFor_afterComparison_iff]
   refine ⟨Or.inl ⟨itemPosition, first_move_source_candidate⟩, ?_⟩
   intro newerCandidate newer_in_collection newer_than_item newer_related
   have newer_before_move :=
@@ -853,6 +850,7 @@ theorem first_move_item_after_comparison :
 
 theorem first_move_holder_after_comparison :
     (calculationFor history moveItemToPay).AfterComparison createHolder := by
+  rw [calculationFor_afterComparison_iff]
   refine ⟨Or.inr first_move_fill_candidate, ?_⟩
   intro newerCandidate newer_in_collection newer_than_holder newer_related
   have newer_before_move :=
@@ -1036,6 +1034,7 @@ theorem first_move_not_in_second_move_collection :
 theorem second_move_item_after_comparison :
     (calculationFor history moveSecondToDeposit).AfterComparison
       createSecondItem := by
+  rw [calculationFor_afterComparison_iff]
   refine ⟨Or.inl ⟨itemPosition, second_move_source_candidate⟩, ?_⟩
   intro newerCandidate newer_in_collection newer_than_second_item newer_related
   have newer_before_move :=
@@ -1053,6 +1052,7 @@ theorem second_move_item_after_comparison :
 theorem second_move_holder_after_comparison :
     (calculationFor history moveSecondToDeposit).AfterComparison
       createHolder := by
+  rw [calculationFor_afterComparison_iff]
   refine ⟨Or.inr second_move_fill_candidate, ?_⟩
   intro newerCandidate newer_in_collection newer_than_holder newer_related
   have newer_before_move :=

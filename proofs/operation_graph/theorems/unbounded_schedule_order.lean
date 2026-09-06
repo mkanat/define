@@ -125,6 +125,29 @@ theorem occurrencesBefore_are_members
   rw [← occurrence_at]
   exact schedule.occurrence_is_member occurrenceOrder
 
+theorem exists_prefix_containing
+    {Occurrence : Type u} {isOccurrence : Occurrence → Prop}
+    (schedule : UnboundedSchedule isOccurrence) (occurrences : List Occurrence)
+    (all_members : ∀ occurrence, occurrence ∈ occurrences → isOccurrence occurrence) :
+    ∃ count, ∀ occurrence, occurrence ∈ occurrences → occurrence ∈ schedule.occurrencesBefore count := by
+  induction occurrences with
+  | nil => exact ⟨0, by simp⟩
+  | cons first remaining induction_hypothesis =>
+      rcases schedule.contains_every_occurrence first (all_members first List.mem_cons_self) with
+        ⟨first_order, first_at⟩
+      rcases induction_hypothesis (fun occurrence member =>
+          all_members occurrence (List.mem_cons_of_mem first member)) with ⟨count, contains_remaining⟩
+      refine ⟨max (first_order + 1) count, ?_⟩
+      intro occurrence member
+      rcases List.mem_cons.mp member with equal | in_remaining
+      · subst occurrence
+        exact schedule.mem_occurrencesBefore_iff.mpr
+          ⟨first_order, Nat.lt_of_lt_of_le (Nat.lt_succ_self first_order) (Nat.le_max_left _ _), first_at⟩
+      · rcases schedule.mem_occurrencesBefore_iff.mp (contains_remaining occurrence in_remaining) with
+          ⟨order, before_count, occurrence_at⟩
+        exact schedule.mem_occurrencesBefore_iff.mpr
+          ⟨order, Nat.lt_of_lt_of_le before_count (Nat.le_max_right _ _), occurrence_at⟩
+
 theorem occurrencesBefore_respects
     {Occurrence : Type u} {isOccurrence : Occurrence → Prop}
     (schedule : UnboundedSchedule isOccurrence)

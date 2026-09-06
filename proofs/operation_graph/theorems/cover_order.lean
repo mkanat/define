@@ -1,4 +1,5 @@
 import definitions
+import Mathlib.Order.Defs.PartialOrder
 
 set_option warningAsError true
 set_option autoImplicit false
@@ -6,7 +7,7 @@ set_option autoImplicit false
 /-!
 # Cover Order
 
-This module defines cover pairs for an arbitrary relation and proves the
+This module uses mathlib's cover relation and proves the
 well-founded order theorem used by maximum-safe-concurrency necessity. If a
 transitive relation omits a pair from a relation that points backward through a
 natural-number order, it omits a cover pair. The occurrence type itself need not
@@ -17,13 +18,10 @@ namespace Define.OperationGraph
 
 universe u
 
-def CoverPair {Occurrence : Type u}
+abbrev CoverPair {Occurrence : Type u}
     (precedence : Occurrence → Occurrence → Prop)
     (following previous : Occurrence) : Prop :=
-  precedence following previous ∧
-    ∀ intermediate,
-      precedence following intermediate →
-        precedence intermediate previous → False
+  @CovBy Occurrence ⟨precedence⟩ following previous
 
 /--
 If a transitive relation omits one pair from a relation that points backward in
@@ -48,7 +46,9 @@ theorem omitted_pair_contains_omitted_coverPair
         ∃ intermediate,
           precedence following intermediate ∧
             precedence intermediate previous := by
-      rw [CoverPair, and_iff_right omitted.1] at cover_pair
+      change ¬(precedence following previous ∧ ∀ intermediate,
+        precedence following intermediate → ¬precedence intermediate previous) at cover_pair
+      rw [and_iff_right omitted.1] at cover_pair
       rcases Classical.not_forall.mp cover_pair with
         ⟨intermediate, not_all_relations⟩
       rcases Classical.not_imp.mp not_all_relations with

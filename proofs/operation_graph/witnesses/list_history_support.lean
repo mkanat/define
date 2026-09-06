@@ -105,11 +105,6 @@ structure Conditions (operations : List ParticleOperation) where
       IsOperation operations operation →
         operation.kind = .move source target →
           ¬ParentOrSame source target
-  operated_position_has_action_parent :
-    ∀ operation position,
-      IsOperation operations operation →
-        OperatesOn operation position →
-          ParentOrSame operation.actionParent position
 
 structure QueryableConditions (operations : List ParticleOperation)
     (queryableBefore : Nat → Position → Prop) where
@@ -162,8 +157,6 @@ def validHistoryWithQueryable (operations : List ParticleOperation)
   fill_position_is_empty := conditions.fill_position_is_empty
   move_source_not_parent_of_target :=
     conditions.move_source_not_parent_of_target
-  operated_position_has_action_parent :=
-    conditions.operated_position_has_action_parent
   operation_transition := by
     intro operationOrder operation operation_at position
     show (match operationAt operations operationOrder with

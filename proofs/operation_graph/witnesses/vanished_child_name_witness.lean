@@ -402,10 +402,6 @@ def history : ValidResolvedHistory isOperation where
     rcases operation_member with rfl | rfl | rfl | rfl | rfl | rfl <;>
       simp [createParent, createChild, destroyChild, destroyParent,
         recreateParent, destroyAgain] at operation_kind
-  operated_position_has_action_parent := by
-    intro operation position operation_member operates_on_position
-    rcases operation_member with rfl | rfl | rfl | rfl | rfl | rfl <;>
-      exact List.nil_prefix
   operation_transition := occupancy.operation_transition
   no_operation_transition := occupancy.no_operation_transition
 
@@ -445,7 +441,7 @@ theorem vanished_child_excluded :
     ¬(calculationFor history destroyAgain).AfterComparison destroyChild := by
   intro destroy_child_after_comparison
   exact
-    destroy_child_after_comparison.2 recreateParent
+    destroy_child_after_comparison.2.1 recreateParent
       (Or.inl ⟨parentPosition, recreated_parent_source_candidate⟩)
       (show MoreRecent recreateParent destroyChild from
         (by decide : destroyChild.operationOrder < recreateParent.operationOrder))
@@ -458,6 +454,7 @@ theorem calculated_dependency :
   change
     (calculationFor history destroyAgain).AfterMoveCorrection
       (CalculatedDependency history) recreateParent
+  simp only [RuleCalculation.AfterMoveCorrection, calculationFor_afterComparison_iff]
   refine ⟨⟨Or.inl ⟨parentPosition, recreated_parent_source_candidate⟩,
     ?_⟩, Or.inl (not_move_of_kind_create rfl)⟩
   intro newerCandidate newer_in_collection newer_than_recreate

@@ -189,13 +189,6 @@ def history : ValidResolvedHistory IsOperation where
       simp [createOperation] at operation_kind
     · subst operation_is_destroy
       simp [destroyOperation] at operation_kind
-  operated_position_has_action_parent := by
-    intro operation position operation_member operates_on_position
-    rcases operation_member with operation_is_create | operation_is_destroy
-    · subst operation_is_create
-      exact List.nil_prefix
-    · subst operation_is_destroy
-      exact List.nil_prefix
   operation_transition := by
     intro operationOrder operation operation_at position
     cases operationOrder with

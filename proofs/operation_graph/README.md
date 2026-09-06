@@ -1,96 +1,74 @@
 # Operation Graph Proofs
 
-The main argument has one foundation, two independent principal results, and one
-point where those results are deliberately combined:
+These proofs investigate whether Define's
+[Particle Operation Dependency Graph](../../define/spec/spec.md#the-particle-operation-dependency-graph)
+preserves particle-operation requirements and provides a transitively minimal
+graph for safe concurrency.
 
-```text
-shared definitions
-        |
-valid resolved histories
-        |
-graph calculation
-        |
-calculation correctness
-        |
-        +-------------------+
-        |                   |
-   minimality          completeness
-        |                   |
-        +---------+---------+
-                  |
-          characterization
-                  |
-       maximum safe concurrency
-```
+## Current proof
 
-Minimality never assumes completeness, and completeness never assumes
-minimality. Characterization is the first proof allowed to depend on both.
-Maximum safe concurrency is a downstream consequence of the characterized
-reachability; it is not used to establish the graph results.
+The English argument derives position and particle requirements from the
+specification, distinguishes vacancy from retained destructor state, and proves
+schedule safety and necessity of the remaining dependencies. It does not impose
+whole-action barriers or keep every ancestor alive for a descendant operation.
 
-## Recommended reading order
+Lean checks the exact-effect collection, incremental Comparison calculation, and
+graph and scheduling results used by that argument. The rules themselves produce
+transitive minimality; no later minimization algorithm is applied. Lean also
+checks the structured-reference and occupancy transitions in
+[`particle_requirements.lean`](definitions/particle_requirements.lean), the
+shared-state components in
+[`retained_requirements.lean`](definitions/retained_requirements.lean), and
+their execution correspondence in
+[`particle_scheduling.lean`](theorems/particle_scheduling.lean).
 
-1. Begin with [Shared Definitions](definitions/definitions.md), which fixes
-   resolved Particle Operations, positions, occurrence order, occupancy, and
-   graph notation without assuming any dependency rule. Then read
-   [Valid Resolved Histories](definitions/valid-history.md), which states the
-   rule-independent history properties available to every later proof. These
-   documents expose the source-to-history obligations that remain outside the
-   current formal model.
-2. Read
-   [Particle Operation Dependency Graph Calculation](definitions/calculation.md)
-   for the actual Fill, Empty, and Move calculation. Its result is only a
-   constructed relation; none of the desired graph properties are assumed. Then
-   read [Calculation Correctness](theorems/calculation-correctness-proof.md),
-   the essential bridge proving that this construction has all candidate,
-   recency, occupancy, and exact-dependency facts consumed downstream.
-3. Read the two principal graph proofs in either order.
-   [Minimality](theorems/minimality-proof.md) proves that the calculated graph
-   is an acyclic, transitively minimal graph.
-   [Completeness](theorems/completeness-proof.md) separately proves that every
-   previous operation on a related operated position is reachable. Auditing the
-   full graph result requires both, but neither proof may borrow the other's
-   conclusion.
-4. Read [Characterization](theorems/characterization-proof.md) only after both
-   principal proofs. It identifies reachability with the transitive closure of
-   the related-and-previous relation and proves uniqueness among transitively
-   minimal relations that respect the occurrence order.
-5. Read [Maximum Safe Concurrency](theorems/maximum-safe-concurrency-proof.md)
-   for the occupancy scheduling consequence, the finite and unbounded-history
-   cases, and the counterexample to the stronger global-maximum claim.
+The derivation of those representations from valid source, geometric
+accessibility, and completion of destruction is an English argument. This is not
+a Lean-checked compiler or a fully formalized source-language semantics. The
+older resolved-name formalization describes a previous graph calculation; it
+must not be mistaken for verification of the revised rules.
 
-The key graph-correctness documents are therefore Calculation Correctness,
-Minimality, Completeness, and Characterization. The earlier documents are
-necessary to audit their definitions and assumptions; Maximum Safe Concurrency
-uses the graph result for a separate behavioral theorem.
+Maximum safe concurrency here means that removing a remaining dependency would
+admit an invalid execution within the chosen dependency orientation. It does not
+mean that one graph admits every possible safe serial ordering of destructors.
 
-## Lean correspondence and supporting evidence
+## Reading order
 
-The `definitions` package contains the rule-independent model, valid-history
-properties, and the calculated dependency relation. The `theorems` package
-starts with `calculation_correctness.lean`; `minimality.lean` and
-`completeness.lean` independently import that foundation, and
-`characterization.lean` is the first module to import both.
+1. [Conceptual definitions](definitions/definitions.md#conceptual-meaning-of-particles-positions-and-operations)
+   and [operation requirements](definitions/operation-requirements.md): what
+   particles, positions, references, and operations mean.
+2. [Reference shape](theorems/reference-shape-proof.md) and
+   [ordinary correspondence](theorems/ordinary-requirements-proof.md): how
+   actual references and relative occupancy preserve Create and Move semantics.
+3. [Vacancy and retained state](theorems/retained-state-proof.md): how
+   simultaneous selection, replacements, and shared destructor operations
+   interact without imposing a destruction-group barrier.
+4. [Graph construction](theorems/requirement-construction.md): collection, local
+   removal of redundant candidates, and completion of destruction.
+5. [Scheduling proof](theorems/requirement-scheduling-proof.md): safety, edge
+   necessity, and unbounded execution.
 
-The maximum-safe-concurrency proof then divides into three branches.
-`calculated_schedule_execution.lean` combines characterization with finite and
-unbounded scheduling to prove sufficiency. `cover_order.lean` supplies generic
-cover theory; `cover_schedule_order.lean` constructs adjacent calculated cover
-schedules; and `cover_schedule_necessity.lean` combines that order construction
-with `occupancy_noncommutation.lean` to prove finite-prefix necessity and extend
-the counterexample to complete stopped and unbounded schedules. The
-order-theoretic branch begins with `cover_graph.lean`;
-`calculated_cover_graph.lean` then identifies the calculated relation with that
-cover graph, and `stopped_dependency_edge_count.lean` derives the finite
-fewest-edge result using `finite_relation_edge_count.lean`.
-`maximum_safe_concurrency.lean` is the aggregate entry point for all three
-branches. Every theorem-bearing Lean module has a Bazel axiom audit.
+[Ordering derivation](theorems/ordering-derivation.md) explains why a serial
+destructor-order choice is needed, and why a direct implied reference can allow
+more concurrency than a written reference through the caller's position.
+[Exact effects](definitions/operation-effects.md) presents the mathematical
+exchange and graph results reused in the scheduling proof.
+[Established mathematical results](theorems/external-results.md) gives the exact
+correspondences, external citations, and limits of the library results reused
+here.
 
-The `witnesses` package is supporting evidence rather than a link in the
-universal proof chain. Its concrete histories establish non-vacuity and exercise
-the calculation's name-retention, moved-child, Move Correction, and Fill
-Dependency removal behavior. Its clause-specific independence modules apply the
-complete calculation to valid histories while changing one clause at a time. The
-aggregate witness modules collect these results, and `minimality_checker.py`
-searches bounded concrete histories for counterexamples. None of this concrete
-or bounded evidence substitutes for the universal English and Lean proofs above.
+## Directory guide
+
+- `definitions/` contains conceptual definitions and mathematical models.
+- `theorems/` contains English arguments and Lean proofs.
+- `witnesses/` contains checked examples, counterexamples, and bounded searches.
+  Examples support the general arguments; they do not replace them.
+
+The [former calculation](definitions/calculation.md),
+[former completeness proof](theorems/completeness-proof.md), and
+[former scheduling analysis](theorems/maximum-safe-concurrency-proof.md)
+document the earlier resolved-name models and the limitations discovered in
+them. Their checked graph facts remain facts about those models, not the current
+requirement-based construction.
+
+See [Building proofs](../README.md#building-proofs) for the Lean build command.

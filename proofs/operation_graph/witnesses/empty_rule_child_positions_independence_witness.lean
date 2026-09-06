@@ -260,10 +260,6 @@ def validHistory : ValidResolvedHistory isOperation where
     intro operation source target operation_member operation_kind
     rcases operation_member with rfl | rfl | rfl | rfl <;>
       simp [createParent, createChild, destroyChild, destroyParent] at operation_kind
-  operated_position_has_action_parent := by
-    intro operation position operation_member operates_on_position
-    rcases operation_member with rfl | rfl | rfl | rfl <;>
-      exact List.nil_prefix
   operation_transition := by
     intro operationOrder operation operation_at position
     show (match operationAt operationOrder with
@@ -330,6 +326,7 @@ theorem child_is_source_candidate :
 
 theorem child_after_comparison :
     (calculationFor validHistory destroyChild).AfterComparison createChild := by
+  rw [calculationFor_afterComparison_iff]
   refine ⟨Or.inl child_is_source_candidate, ?_⟩
   intro newerCandidate newer_in_collection newer_than_child
     newer_related_to_child
@@ -380,6 +377,7 @@ theorem destroy_child_is_parent_source_candidate :
 
 theorem destroy_child_after_parent_comparison :
     (calculationFor validHistory destroyParent).AfterComparison destroyChild := by
+  rw [calculationFor_afterComparison_iff]
   refine ⟨Or.inl destroy_child_is_parent_source_candidate, ?_⟩
   intro newerCandidate newer_in_collection newer_than_destroy
     newer_related_to_destroy
@@ -449,7 +447,7 @@ theorem destroy_child_dependency_is_child {candidate : ParticleOperation}
     exact rule_dependency.1
   rcases candidate_member with rfl | rfl | rfl | rfl
   · exact False.elim
-      (after_comparison.2 createChild (Or.inl child_is_source_candidate)
+      (after_comparison.2.1 createChild (Or.inl child_is_source_candidate)
         (by simp [MoreRecent, createChild, createParent])
         ⟨childPosition, parentPosition, rfl, rfl, Or.inr ⟨[0], rfl⟩⟩)
   · rfl
@@ -472,12 +470,12 @@ theorem destroy_parent_dependency_is_child {candidate : ParticleOperation}
     exact rule_dependency.1
   rcases candidate_member with rfl | rfl | rfl | rfl
   · exact False.elim
-      (after_comparison.2 destroyChild
+      (after_comparison.2.1 destroyChild
         (Or.inl destroy_child_is_parent_source_candidate)
         (by simp [MoreRecent, destroyChild, createParent])
         ⟨childPosition, parentPosition, rfl, rfl, Or.inr ⟨[0], rfl⟩⟩)
   · exact False.elim
-      (after_comparison.2 destroyChild
+      (after_comparison.2.1 destroyChild
         (Or.inl destroy_child_is_parent_source_candidate)
         (by simp [MoreRecent, destroyChild, createChild])
         ⟨childPosition, childPosition, rfl, rfl,

@@ -396,11 +396,6 @@ theorem conditions : ListHistory.Conditions operations where
       rcases operation_kind with ⟨rfl, rfl⟩
       exact (by change ¬targetPosition <+: holderCPosition; decide)
     · simp [destroyBox] at operation_kind
-  operated_position_has_action_parent := by
-    intro operation position operation_member operates_on_position
-    rcases operation_shape operation_member with
-      rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
-      exact List.nil_prefix
 
 theorem operated_position_queryable (operation : ParticleOperation)
     (position : Position) (operation_member : IsOperation operation)
@@ -529,6 +524,7 @@ theorem final_move_source_candidate :
 theorem final_move_after_comparison :
     (calculationFor history destroyBox).AfterComparison
       moveTargetToHolderC := by
+  rw [calculationFor_afterComparison_iff]
   refine ⟨Or.inl ⟨targetPosition, final_move_source_candidate⟩, ?_⟩
   intro newerCandidate newer_in_collection newer_than_move newer_related
   have newer_before_destroy :=

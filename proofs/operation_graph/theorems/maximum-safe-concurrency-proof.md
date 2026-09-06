@@ -1,6 +1,276 @@
 # Particle Operation Maximum Safe Concurrency
 
-## What This Proof Establishes
+The graph calculations in this document describe the former Fill, Empty, and
+Move Rules and their existing Lean models. They do not formalize the revised
+[requirement-based construction](requirement-construction.md). Source-semantic
+arguments must still be distinguished from results about those former models.
+
+This argument uses the serial aggregate Destroy transition and the
+related-and-previous characterization. It is not a scheduling proof for all
+individual destructions under the current specification. In particular, the
+claim below that related operations cannot execute in both orders does not apply
+to individual parent and child destructions selected simultaneously: their
+individual occupancy effects commute. The
+[simultaneous destruction proof](simultaneous-destruction-proof.md) proves that
+case separately, without discarding destructor-induced dependencies.
+
+There is a further limitation even for ordinary operations. Resolving every
+operation to a fixed spatial-name target does not preserve the requirements of
+direct implied references when their defining particle moves. The
+[constructor/Move exchange](../definitions/operation-requirements.md#an-exchange-proved-from-these-requirements)
+is safe without preserving the Create's reference-execution spatial location.
+The serial model below does not admit that exchange and therefore cannot prove
+source-level maximum concurrency for all ordinary Define operations.
+
+## A Move changes the positions of the transitive child particles
+
+Consider a particle at `a` that defines an occupied child position `c`, an empty
+position `b`, and these operations, without constructors or destructors:
+
+```text
+C  = Create the child particle at a::c
+M  = Move the parent particle from a to b
+D  = Destroy the parent particle at b
+E  = the simultaneous destruction of its child particle
+```
+
+Take the earlier creation of the parent as already complete. The former
+calculation gives `M -> C`, `D -> M`, and `E -> M`. In particular, Collection
+for `E` sees `M` at `b` and at `b::c` under the moved-child clause; Comparison
+retains `M`. There is no dependency between `D` and `E`.
+
+For the requirement-based construction, replacing `E -> M` with `E -> C` admits:
+
+```text
+C, E, M, D
+```
+
+An earlier rejection of this order treated `E` as though the caller had written
+`destroy ... b::c`. That would require a particle at `b` and would have to wait
+for `M`. But `E` is an implicit child Destroy selected by the destruction of
+`b`, not another written statement. It selects the original child position
+defined by the parent particle. That position moves with its defining particle;
+its spatial location need not stay fixed to the location in the serial reference
+execution.
+
+The
+[generated-child exchange](retained-state-proof.md#an-implicit-child-vacancy-and-an-ordinary-ancestor-move)
+checks both orders. Vacating the child first means `M` moves an empty child
+position; moving first means the selected vacancy happens after that position
+moves. The written target Destroy `D` still waits for `M`. Detachment and the
+distinction between a selected position and an actual written reference are
+essential here. Particle identity alone would not justify dropping the
+requirements of a genuinely written `b::c` reference.
+
+The integration test
+[`test_destruction_cascade_branches_from_one_preceding_move`](../../../define/compiler/validator/reference_graph/reference_graph_validator_tests/operation_graph_single_action_integration_test.py)
+contains the two-child version. Its existing expectation makes each child
+Destroy depend on the Move. This documents the earlier graph expectation, not
+evidence that this edge is necessary under detachment.
+
+The common-state graph results do not by themselves prove safety or maximum safe
+concurrency for arbitrary interleavings. The
+[requirement-based scheduling proof](requirement-scheduling-proof.md) supplies
+the execution argument respecting movement and the positions on which each
+operation acts.
+
+## Individual occupancy effects do not include every reference precondition
+
+Suppose a particle at `p` defines `p::c`, with no constructors or destructors.
+Compare these endings after creating the child:
+
+```text
+destroy the particle in position<p>.
+```
+
+and
+
+```text
+destroy the particle in position<p>::position</c>.
+destroy the particle in position<p>.
+```
+
+Both contribute exactly the same two individual destructions at the same
+positions: one destroys the child, and one destroys the parent. The second
+ending gives the child Destroy earlier recency. It does not change the
+particles, their positions, or the individual destruction effects.
+
+Let `C` be the child Create, `Dc` the child Destroy, and `Dp` the parent
+Destroy. Take the parent's earlier creation as complete. The first ending gives
+`Dc -> C` and `Dp -> C`. In the second ending, Collection for `Dp` selects `Dc`
+at the child position. Comparison removes the older parent Create, and Move
+Correction cannot remove `Dc`. The calculated graph is therefore
+`Dp -> Dc -> C`.
+
+The individual occupancy effects commute, but that fact alone does not show that
+the second ending can execute in both orders. Its written child position
+reference requires `p` to contain a particle. Executing `Dp` first invalidates
+that precondition. The implicit child Destroy in the first ending has no such
+written reference. A source-correspondence argument must account for these
+preconditions instead of inferring full semantic equivalence solely from the two
+occupancy-removal functions.
+
+The English calculation is tracked by
+[`test_separately_requested_destroys_at_unchanged_positions`](../../../define/compiler/validator/reference_graph/reference_graph_validator_tests/operation_graph_single_action_integration_test.py).
+The existing `later_destroy_dependency_iff` witness checks the corresponding
+graph ordering with an additional transitive child Destroy.
+`occupancy_only_destruction_permutation` shows that the occupancy-removal model
+alone accepts both orders, while `later_destroy_invalidates_parent_reference`
+shows the lost reference precondition. Both are in
+[`step_history_witness.lean`](../witnesses/step_history_witness.lean).
+
+Consequently, this example does not justify ignoring prior Destroys during
+Collection. The proof must preserve reference preconditions as well as the
+spatial effects described in the conceptual definitions. The current
+individual-destruction model proves only the limited occupancy result stated in
+its scope, not a complete source-level scheduling theorem.
+
+## Reusing a child position after simultaneous destruction
+
+The replacement rules in Simultaneous Transitive Destruction resolve the former
+occupancy counterexample without changing Fill or Comparison.
+
+Let `p` require the position quality `/c`, with no constructors or destructors.
+Start with `p` empty and execute this valid source sequence serially:
+
+```text
+create a particle in position<p>.
+create a particle in position<p>::position</c>.
+destroy the particle in position<p>.
+create a particle in position<p>.
+create a particle in position<p>::position</c>.
+```
+
+Call the first two Creates `P0` and `C0`, the simultaneous parent and child
+Destroys `Dp` and `Dc`, and the replacement Creates `P1` and `C1`. Both child
+Creates operate on the same spatial position, as specified in the
+[conceptual definitions](../definitions/definitions.md#conceptual-meaning-of-particles-positions-and-operations).
+The original child is not a child of the replacement particle, even while its
+individual destruction remains unfinished.
+
+The former rules derive these dependencies (an arrow points to a prerequisite):
+
+```text
+C0 -> P0
+Dp -> C0
+Dc -> C0
+P1 -> Dp
+C1 -> P1
+```
+
+Both Destroys collect `C0` and `P0`; Comparison retains `C0`. The Fill for `P1`
+considers `Dp` at `p`, not `Dc` at its child. The Fill for `C1` considers both
+`Dc` at its own position and `P1` at its parent, but selects only `P1` because
+it is more recent. There is no path from `P1` to `Dc`.
+
+Consequently, the graph permits this execution prefix:
+
+```text
+P0, C0, Dp, P1, C1
+```
+
+At `C1`, `Dc` has not executed. Nevertheless, `Dp` has emptied `p` and the
+original child no longer occupies a position defined by the replacement. `C1`
+therefore creates at an empty position. When `Dc` eventually executes, it
+destroys the original child, not the replacement child. This follows from the
+specification's explicit distinction between replacement and unfinished
+destruction work, not merely from different particle identities.
+
+The previously proposed dependency `C1 -> Dc` is unnecessary. `C1 -> P1`
+provides the parent particle for the new child reference, and `P1 -> Dp` ensures
+that the original parent has vacated `p`. Neither simultaneous Destroy needs to
+wait for the other. This argument is for this example without destructors or
+Moves, not a general scheduling theorem.
+
+The integration test
+[`test_child_refill_is_independent_of_old_child_destroy`](../../../define/compiler/validator/reference_graph/reference_graph_validator_tests/operation_graph_single_action_integration_test.py)
+records that graph, including the final automatic Destroys. Every edge is
+necessary: it either makes an operated position occupied or empty as required,
+or supplies the parent particle needed for a written reference. The independent
+Destroys act on their original particles. Thus the expected graph admits their
+safe orders without adding parent-before-child or child-before-parent
+destruction ordering.
+
+The [retained-state proof](retained-state-proof.md) represents the original
+particles retained for destruction separately from occupancy used by
+replacements. A single predicate over spatial position names cannot represent
+both during this execution prefix. This distinction replaces the rejected Fill
+and Move changes.
+
+## Vacancy and final destructor use require different relations
+
+Consider a parent particle at `p` with an occupied implied position `/c` and a
+destructor assigned to the parent. Its entire body is:
+
+```text
+define the position<held>.
+move the particle in position</c> to position<held>.
+move the particle in position<held> to position</c>.
+```
+
+There are no other qualities or destructors. The caller creates the parent,
+creates its child, and destroys the parent. Name those operations `P`, `C`,
+`Dp`, and the implicit child destruction `Dc`; name the destructor's Moves `M1`
+and `M2`. The two Moves together restore the same child particle and qualities,
+so the destructor satisfies its unchanged Action Guarantee. The destructor has
+no reference to the parent particle it is assigned to. Its `/c` reference is an
+implied position, not a written `p::/c` reference that requires `p` occupied.
+
+An earlier calculation treated the Destroy vertices as completion of destruction
+and placed `M1` and `M2` before them. For that choice of previous entries, the
+graph calculation gives:
+
+```text
+C -> P
+M1 -> C
+M2 -> M1
+Dp -> M2
+Dc -> M2
+```
+
+For `Dp`, Collection contains `P` at `p` and `M2` at `p::/c`. The destructor's
+local `held` is not a child name of `p`, but querying it too would add only the
+same `M2`. Comparison excludes `P` because `M2` is newer and operates on its
+child position. `M2` is the only survivor, so Move Correction cannot remove it.
+The Lean calculation `DestructorParentWitness.parent_destroy_dependency_iff`
+checks this candidate calculation. It does not establish that this previous
+entry state is the one for a vacancy vertex under the clarified semantics.
+
+Destroy now means vacancy. The destruction semantics permit vacancy before the
+retained destructor accesses:
+
+```text
+P, C, the simultaneous vacancies Dp and Dc, M1, M2
+```
+
+After `Dp`, the original child and its implied position remain available to the
+destructor. `M1` moves that child into the destructor's empty local position;
+`M2` returns it to the original implied position. The end of the original
+child's existence waits for that final use; its vacancy `Dc` does not. No Move
+of the parent occurs, no replacement is accessed, and no particle is destroyed
+while the destructor still requires it. The parent particle need not survive
+solely because the destructor uses a position it defined: the specification
+expressly permits those implied-position accesses afterward.
+
+Both vacancies must follow `C`: the parent vacancy would invalidate the caller's
+written child reference, and the child vacancy requires the selected child to
+have been created. Neither vacancy needs to wait for `M2` solely to preserve the
+original child's existence. The earlier assertion that `Dc -> M2` must remain
+conflated lifetime and vacancy and is withdrawn.
+
+The integration test
+[`test_destructor_fragments_finish_before_cascade_frees_positions`](../../../define/compiler/validator/reference_graph/reference_graph_validator_tests/operation_graph_destructor_integration_test.py)
+contains the two-independent-child version. Its expected vacancies depend on the
+caller's child Creates rather than the destructor Moves. The original particles
+must still be retained through their final destructor uses. Such lifetime
+obligations are not additional interpretations of the vacancy nodes.
+
+The [ordering derivation](ordering-derivation.md) starts from this distinction.
+The existing graph theorems remain facts about their specified candidate
+calculations; neither the old serial execution model nor those graph facts alone
+establish source correspondence for retained destructor accesses.
+
+## What the serial proof establishes
 
 Consider any valid resolved Particle Operation history. The history may stop or
 may continue without end. This document proves three results about occupancy:
@@ -212,12 +482,11 @@ history's previous-operation order.
 The history's previous-operation order respects `>R`, because every `R` edge
 points from a later operation to an earlier one.
 
-First suppose the history stops. Any two linear orders that respect the same
-finite strict partial order can be connected by exchanges of adjacent
-incomparable operations. To see this, take the first operation in the desired
-order, move it left across the operations that currently precede it, and repeat
-with the remaining operations. Every crossed operation must be incomparable with
-it; otherwise one of the two orders would violate the partial order.
+First suppose the history stops. Apply the
+[finite linear-extension correspondence](external-results.md#finite-schedules-and-adjacent-exchanges)
+to `>R`: it is a strict partial order, and both schedules list every member of
+the finite occurrence set exactly once. The cited connectivity result supplies
+adjacent incomparable exchanges between them.
 
 Operations incomparable under `>R` have pairwise unrelated operated positions.
 If they had related positions, whichever operation is later under `<` would form
@@ -426,6 +695,16 @@ also the unique graph with the fewest edges.
 
 ### Proof
 
+For finite `V`, this is directly the
+[finite transitive-reduction theorem](external-results.md#finite-transitive-reduction).
+Take `>R` as the edge relation: it is transitive and its strictly decreasing
+occurrence indices exclude cycles and loops. Its positive-length reachability is
+itself. The theorem supplies uniqueness, inclusion-minimality, and the
+fewest-edge conclusion. No algorithm from the paper is a construction step.
+
+For unbounded `V`, retain the following rank-difference argument; the finite
+theorem does not apply.
+
 Every cover pair must be a direct edge in any graph with reachability `>R`.
 Without that edge, a path between the pair would have an intermediate operation,
 contrary to the definition of a cover pair.
@@ -448,9 +727,7 @@ same endpoints is the same relation entry, not an alternate edge.
 The transitive reduction therefore consists of exactly the cover-pair edges.
 Every graph with the same reachability contains those edges; any different such
 graph also has at least one additional edge. The cover graph is therefore the
-unique inclusion-minimal graph with that reachability. If `V` is finite, adding
-an edge to the finite cover-edge set strictly increases its cardinality, giving
-the stated unique fewest-edge result. ∎
+unique inclusion-minimal graph with that reachability. ∎
 
 By
 [Particle Operation Dependency Graph Characterization](characterization-proof.md),

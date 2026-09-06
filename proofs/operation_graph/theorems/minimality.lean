@@ -18,7 +18,7 @@ Destroy, and Move Particle Operations. Action Requirements, Action Guarantees,
 and modular destruction values are resolved before they can participate in the
 dependency relation.
 
-`RuleCalculation` encodes the current rules in this order:
+`RuleCalculation` encodes the former resolved-name rules in this order:
 
 1. the Empty Rule Collection and optional Fill Dependency;
 2. the simultaneous Comparison;
@@ -38,40 +38,41 @@ derived.
 
 ## Relation to valid Define programs
 
-`ResolvedDefineGraph` records consequences of valid Define execution:
+`ResolvedDefineGraph` records the history and calculation premises used here:
 
 - candidates are previous concrete Particle Operations with their specified
   position provenance;
 - the position history supplies a candidate at least as recent as every
   applicable earlier operation;
-- Create, Destroy, and Move have their specified occupancy transitions.
+- occupancy satisfies `ValidOccupancyTrace` at logical step boundaries.
 
 `calculation_correctness.lean` machine-checks the construction of a
-`ResolvedDefineGraph` from every `ValidResolvedHistory`. The remaining
-source-to-history conversion is not machine-checked because complete Define
-source and validation semantics are not modeled in Lean.
+`ResolvedDefineGraph` from every serial `ValidResolvedHistory`. This does not
+yet construct the interface from simultaneous individual destructions.
+`ResolvedStepHistory` supplies their common-state occupancy facts, but the
+candidate and exact-dependency construction remains separate.
 
 A valid resolved history assigns each Particle Operation occurrence its
 natural-number index and encodes each fully resolved position as a finite
 chained name. The history may stop or continue without end; the theorem does not
 require a finite vertex type. The occupancy state immediately before each
-occurrence supplies `ExactOccupancyExecution`. The source-to-history proof must
+logical step supplies `ValidOccupancyTrace`. The source-to-history proof must
 show that caller binding preserves and reflects equality and transitive
 parent/child relationships and that caller and destruction resolution
 contribute the concrete Particle Operations and resolved position names used by
 the calculation.
 
-`latest_source_candidate` also covers a position name that is empty when the
-emptying operation runs. A valid resolved history retains every previously
-operated resolved name for graph queries. The construction-correctness proof
-therefore derives its most-recent entry directly, including a Move that became
-the entry for a changed transitive-child name.
+`latest_source_candidate` permits the representative entry to be at the earlier
+operated position or a parent position. It therefore does not require the
+earlier child position to remain defined. `PositionEntryHistory` derives this
+coverage from entry updates, including when a parent operation retires the
+child position. The older retained-name construction supplies the special case
+where the representative is at the original name.
 
 The structure omits validity constraints unrelated to dependency minimality.
-It can therefore describe abstract values that no valid Define program produces,
-but every valid program satisfies the obligations used by the theorem. Proving
-the theorem for this larger class strengthens the result; those abstract values
-do not supply a premise for the valid-program case.
+It can therefore describe abstract values that no valid Define program produces.
+The theorem is conditional on its interface; accepting abstract values does not
+prove that every valid Define program supplies that interface.
 
 The non-Move source-candidate result is derived from occupancy transitions. In
 particular, after an earlier Create or Destroy on a strict parent position, an
@@ -82,8 +83,9 @@ Dependency.
 
 Caller-prefix resolution is injective and preserves position relationships,
 Particle Operation kinds, operation order, and dependency paths. The final
-theorem concerns a completely resolved graph, so automatic and contributed
-Destroy Particle Statements use the same Destroy case.
+theorem concerns a completely resolved graph. Individual automatic destructions
+use the Destroy case only once the resolved graph premises have been derived;
+arbitrarily numbering simultaneous destructions does not derive them.
 
 The separate witness file constructs a nonempty valid occupancy execution with
 a Create-to-Destroy dependency. It demonstrates that the semantic obligations
@@ -282,24 +284,23 @@ theorem ResolvedDefineGraph.laterRelatedOperationExcludesNonMoveCandidate
   rcases graph.latest_source_candidate operation source laterPosition
       laterOperation operation_is_member later_is_operation empty_position
       later_related_to_source later_operates operation_after_later with
-    ⟨latestCandidate, latest_candidate_at_position, latest_recency⟩
+    ⟨latestCandidate, latestPosition, latest_candidate_at_position,
+      latest_position_parent, latest_recency⟩
   have latest_source_candidate :
       (graph.calculation operation).sourceCandidate latestCandidate :=
     (graph.source_candidate_iff operation latestCandidate).mpr
-      ⟨laterPosition, latest_candidate_at_position⟩
+      ⟨latestPosition, latest_candidate_at_position⟩
   have latest_in_collection :
       (graph.calculation operation).InCollection latestCandidate :=
     Or.inl latest_source_candidate
   have latest_after_older : MoreRecent latestCandidate olderCandidate := by
-    rcases latest_recency with latest_is_later | latest_after_later
-    · simpa [latest_is_later] using later_after_older
-    · exact moreRecent_trans latest_after_later later_after_older
+    exact Nat.lt_of_lt_of_le later_after_older latest_recency
   rcases graph.source_candidate_operated_position operation latestCandidate
-      laterPosition latest_candidate_at_position with
+      latestPosition latest_candidate_at_position with
     ⟨latestOperatedPosition, latest_operates, latest_parent_of_position⟩
   have latest_operated_related_to_older_position :
       Related latestOperatedPosition candidatePosition :=
-    parent_of_related_is_related latest_parent_of_position
+    parent_of_related_is_related (latest_parent_of_position.trans latest_position_parent)
       later_related_to_older_position
   have older_operates : OperatesOn olderCandidate candidatePosition :=
     graph.non_move_source_candidate_operates_on_position operation olderCandidate
@@ -309,7 +310,7 @@ theorem ResolvedDefineGraph.laterRelatedOperationExcludesNonMoveCandidate
     ⟨latestOperatedPosition, candidatePosition, latest_operates, older_operates,
       latest_operated_related_to_older_position⟩
   exact
-    older_after_comparison.2 latestCandidate latest_in_collection
+    older_after_comparison.2.1 latestCandidate latest_in_collection
       latest_after_older operations_related
 
 theorem ResolvedDefineGraph.occupiedSourceBridge
@@ -329,7 +330,7 @@ theorem ResolvedDefineGraph.occupiedSourceBridge
         OperatesOn bridgeOperation bridgePosition ∧
         Related bridgePosition candidatePosition ∧
         Related bridgePosition source := by
-  let validOccupancy := graph.occupancy.toValidOccupancyTrace
+  let validOccupancy := graph.occupancy
   have operation_members :=
     graph.source_candidate_operations operation olderCandidate candidatePosition
       older_candidate_at_position
@@ -454,7 +455,7 @@ theorem ResolvedDefineGraph.nonMoveSourceCandidatesAreIrredundant
         ⟨newerOperatedPosition, candidatePosition, newer_operates, older_operates,
           newer_operated_related_to_older_position⟩
       exact
-        older_after_comparison.2 newerCandidate newer_after_comparison.1
+        older_after_comparison.2.1 newerCandidate newer_after_comparison.1
           (graph.reaches_is_moreRecent reaches_older) operations_related
     · rcases graph.occupiedSourceBridge older_candidate_at_position empty_position
           candidate_parent_of_source candidate_position_is_not_source older_not_move with

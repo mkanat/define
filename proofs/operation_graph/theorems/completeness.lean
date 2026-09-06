@@ -6,11 +6,14 @@ set_option autoImplicit false
 /-!
 # Particle Operation Dependency Graph Completeness
 
-This file formalizes `completeness-proof.md`: every previous Particle Operation
+This file formalizes the serial occupancy claim in `completeness-proof.md`:
+every previous Particle Operation
 whose operated positions are related to an operation's positions is reachable
 through the dependency graph. The English proof is the source of the
 mathematical argument; the definitions and theorems here encode that argument
-for Lean to check.
+for Lean to check. This claim requires the serial aggregate destruction model;
+`comparison_completeness.lean` proves the separate post-Comparison reachability
+result without imposing distinct recencies on simultaneous destructions.
 
 ## Formalization boundary
 
@@ -79,6 +82,9 @@ namespace RuleCalculation
 
 theorem exists_afterComparison_orEq_reaching (calculation : RuleCalculation)
     (dependency : ParticleOperation → ParticleOperation → Prop)
+    (same_order_equal : ∀ first second,
+      calculation.InCollection first → calculation.InCollection second →
+      first.operationOrder = second.operationOrder → first = second)
     (candidates_previous :
       ∀ candidate, calculation.InCollection candidate →
         MoreRecent calculation.operation candidate)
@@ -118,7 +124,9 @@ theorem exists_afterComparison_orEq_reaching (calculation : RuleCalculation)
               MoreRecent newerCandidate candidate →
               OperationsRelated newerCandidate candidate →
               False :=
-          fun all => retained ⟨in_collection, all⟩
+          fun all => retained
+            ((calculation.afterComparison_iff_of_distinct_recency same_order_equal candidate).mpr
+              ⟨in_collection, all⟩)
         rcases Classical.not_forall.mp not_all with ⟨excluder, excluder_property⟩
         rcases Classical.not_imp.mp excluder_property with
           ⟨excluder_in, remaining_property⟩
@@ -509,6 +517,17 @@ theorem reaches_of_inCollection (graph : CompleteResolvedDefineGraph)
     ∀ candidate, (graph.calculation operation).InCollection candidate →
       Reaches graph.dependency operation candidate := by
   intro candidate in_collection
+  have same_order_equal : ∀ first second,
+      (graph.calculation operation).InCollection first →
+      (graph.calculation operation).InCollection second →
+      first.operationOrder = second.operationOrder → first = second := by
+    intro first second first_collected second_collected same_order
+    have first_at := graph.execution.member_operation_at first
+      (graph.inCollection_operations first_collected)
+    have second_at := graph.execution.member_operation_at second
+      (graph.inCollection_operations second_collected)
+    rw [same_order] at first_at
+    exact Option.some.inj (first_at.symm.trans second_at)
   have excluders_reach :
       ∀ excluder excluded,
         (graph.calculation operation).InCollection excluder →
@@ -550,7 +569,7 @@ theorem reaches_of_inCollection (graph : CompleteResolvedDefineGraph)
   | destroy target =>
       rcases
         (graph.calculation operation).exists_afterComparison_orEq_reaching
-          graph.dependency graph.candidates_previous excluders_reach candidate
+          graph.dependency same_order_equal graph.candidates_previous excluders_reach candidate
           in_collection with
         ⟨comparisonSurvivor, comparison_retained, comparison_path⟩
       rcases
@@ -571,7 +590,7 @@ theorem reaches_of_inCollection (graph : CompleteResolvedDefineGraph)
   | move source target =>
       rcases
         (graph.calculation operation).exists_afterComparison_orEq_reaching
-          graph.dependency graph.candidates_previous excluders_reach candidate
+          graph.dependency same_order_equal graph.candidates_previous excluders_reach candidate
           in_collection with
         ⟨comparisonSurvivor, comparison_retained, comparison_path⟩
       rcases
@@ -621,27 +640,34 @@ theorem reaches_of_emptyPosition_related (graph : CompleteResolvedDefineGraph)
   rcases graph.latest_source_candidate operation emptyPosition operatedPosition
       previousOperation operation_member previous_member empty_position
       position_related previous_operates operation_after_previous with
-    ⟨candidate, candidate_at_position, candidate_recency⟩
+    ⟨candidate, candidatePosition, candidate_at_position, candidate_position_parent,
+      candidate_recency⟩
   have candidate_in_collection :
       (graph.calculation operation).InCollection candidate :=
     Or.inl ((graph.source_candidate_iff operation candidate).mpr
-      ⟨operatedPosition, candidate_at_position⟩)
+      ⟨candidatePosition, candidate_at_position⟩)
   have operation_reaches_candidate :=
     graph.reaches_of_inCollection complete_below candidate
       candidate_in_collection
-  rcases candidate_recency with candidate_is_previous | candidate_recent
-  · exact candidate_is_previous ▸ operation_reaches_candidate
+  rcases Nat.eq_or_lt_of_le candidate_recency with same_order | candidate_recent
+  · have candidate_member :=
+      (graph.source_candidate_operations operation candidate candidatePosition candidate_at_position).2
+    have previous_at := graph.execution.member_operation_at previousOperation previous_member
+    have candidate_at := graph.execution.member_operation_at candidate candidate_member
+    rw [same_order] at previous_at
+    have candidate_is_previous := Option.some.inj (candidate_at.symm.trans previous_at)
+    exact candidate_is_previous ▸ operation_reaches_candidate
   · rcases graph.source_candidate_operated_position operation candidate
-        operatedPosition candidate_at_position with
+        candidatePosition candidate_at_position with
       ⟨candidateOperatedPosition, candidate_operates, candidate_parent⟩
     have candidate_related : OperationsRelated candidate previousOperation :=
       ⟨candidateOperatedPosition, operatedPosition, candidate_operates,
-        previous_operates, Or.inl candidate_parent⟩
+        previous_operates, Or.inl (candidate_parent.trans candidate_position_parent)⟩
     have candidate_previous :=
-      graph.source_candidate_is_previous operation candidate operatedPosition
+      graph.source_candidate_is_previous operation candidate candidatePosition
         candidate_at_position
     have candidate_member :=
-      (graph.source_candidate_operations operation candidate operatedPosition
+      (graph.source_candidate_operations operation candidate candidatePosition
         candidate_at_position).2
     exact
       operation_reaches_candidate.trans
@@ -730,25 +756,25 @@ theorem reaches_of_fillPosition_strict_child (graph : CompleteResolvedDefineGrap
     (operation_after_previous : MoreRecent operation previousOperation) :
     Reaches graph.dependency operation previousOperation := by
   have fill_occupied_after_previous :
-      graph.occupancy.occupiedBefore
+      graph.execution.occupiedBefore
         (previousOperation.operationOrder + 1) fillPosition :=
-    graph.occupancy.parent_occupied_after_child_operation previous_member
+    graph.execution.parent_occupied_after_child_operation previous_member
       previous_operates fill_parent fill_is_strict
   have fill_empty_before_operation :
-      ¬graph.occupancy.occupiedBefore operation.operationOrder fillPosition :=
-    graph.occupancy.fill_position_is_empty operation fillPosition
+      ¬graph.execution.occupiedBefore operation.operationOrder fillPosition :=
+    graph.execution.fill_position_is_empty operation fillPosition
       operation_member fill_position
   have start_le_operation :
       previousOperation.operationOrder + 1 ≤ operation.operationOrder :=
     Nat.succ_le_of_lt operation_after_previous
   rcases exists_emptying_transition
       (fun operationOrder =>
-        graph.occupancy.occupiedBefore operationOrder fillPosition)
+        graph.execution.occupiedBefore operationOrder fillPosition)
       start_le_operation fill_occupied_after_previous
       fill_empty_before_operation with
     ⟨transition, start_le_transition, transition_before_operation,
       occupied_at_transition, unoccupied_after_transition⟩
-  rcases graph.occupancy.newly_unoccupied_has_operation occupied_at_transition
+  rcases graph.execution.newly_unoccupied_has_operation occupied_at_transition
       unoccupied_after_transition with
     ⟨emptier, emptierPosition, emptier_member, emptier_order, emptier_operates,
       emptier_parent⟩

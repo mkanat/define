@@ -457,10 +457,6 @@ def history : ValidResolvedHistory isOperation where
       rcases operation_kind with ⟨rfl, rfl⟩
       exact (by decide : ¬targetPosition <+: finalPosition)
     · simp [destroyMovedChild] at operation_kind
-  operated_position_has_action_parent := by
-    intro operation position operation_member operates_on_position
-    rcases operation_member with rfl | rfl | rfl | rfl | rfl <;>
-      exact List.nil_prefix
   operation_transition := occupancy.operation_transition
   no_operation_transition := occupancy.no_operation_transition
 
@@ -546,6 +542,7 @@ theorem destroy_collection_candidate_is_move_again {candidate : ParticleOperatio
 theorem move_parent_after_comparison :
     (calculationFor history destroyMovedChild).AfterComparison
       moveParentAgain := by
+  rw [calculationFor_afterComparison_iff]
   refine ⟨Or.inl ⟨finalChild, moved_child_source_candidate⟩, ?_⟩
   intro newerCandidate newer_in_collection newer_than_move operations_related
   have newer_is_move_again :=

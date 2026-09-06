@@ -6,8 +6,20 @@ filegroup(
     name = "all_proofs",
     srcs = [
         ":calculation",
+        ":calculation_congruence",
         ":definitions",
+        ":entry_calculation",
+        ":entry_history",
+        ":entry_update",
         ":occupancy_semantics",
+        ":operation_effects",
+        ":ordered_calculations",
+        ":particle_requirements",
+        ":retained_requirements",
+        ":simultaneous_calculation",
+        ":simultaneous_destruction",
+        ":simultaneous_history",
+        ":step_calculation",
         ":valid_history",
     ],
 )
@@ -29,6 +41,7 @@ lean_axiom_test(
     imports = ["calculation"],
     theorems = [
         "Define.OperationGraph.IsEntryBefore.unique",
+        "Define.OperationGraph.RuleCalculation.afterComparison_iff_of_distinct_recency",
         "Define.OperationGraph.RuleCalculation.dependency_isInCollection",
         "Define.OperationGraph.calculatedDependencyBefore_add_operation_iff",
         "Define.OperationGraph.calculatedDependencyBefore_source_order_lt",
@@ -38,8 +51,32 @@ lean_axiom_test(
         "Define.OperationGraph.exists_isFillCandidateFor_iff",
         "Define.OperationGraph.isEntryBefore_after_operation_iff",
         "Define.OperationGraph.not_isEntryBefore_zero",
+        "Define.OperationGraph.sameRecencyParentDestroy_irrefl",
     ],
     deps = [":calculation"],
+)
+
+lean_library(
+    name = "calculation_congruence",
+    srcs = ["calculation_congruence.lean"],
+    deps = [":calculation"],
+)
+
+lean_axiom_test(
+    name = "calculation_congruence_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["calculation_congruence"],
+    theorems = [
+        "Define.OperationGraph.RuleCalculation.afterMoveCorrection_congr",
+        "Define.OperationGraph.RuleCalculation.dependency_congr",
+        "Define.OperationGraph.RuleCalculation.moveRuleDependency_congr",
+    ],
+    deps = [":calculation_congruence"],
 )
 
 lean_library(
@@ -60,6 +97,89 @@ lean_axiom_test(
         "Define.OperationGraph.transitivelyMinimal_of_directDependenciesAreAntichains",
     ],
     deps = [":definitions"],
+)
+
+lean_library(
+    name = "entry_calculation",
+    srcs = ["entry_calculation.lean"],
+    deps = [
+        ":entry_history",
+        ":ordered_calculations",
+    ],
+)
+
+lean_axiom_test(
+    name = "entry_calculation_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["entry_calculation"],
+    theorems = [
+        "Define.OperationGraph.PositionEntryHistory.calculation_well_formed",
+        "Define.OperationGraph.PositionEntryHistory.collection_facts",
+        "Define.OperationGraph.PositionEntryHistory.equal_of_same_order",
+        "Define.OperationGraph.PositionEntryHistory.fill_candidate_iff",
+        "Define.OperationGraph.PositionEntryHistory.fill_entry_facts",
+        "Define.OperationGraph.PositionEntryHistory.most_recent_fill_unique",
+        "Define.OperationGraph.PositionEntryHistory.orderedCalculations",
+    ],
+    deps = [":entry_calculation"],
+)
+
+lean_library(
+    name = "entry_history",
+    srcs = ["entry_history.lean"],
+    deps = [
+        ":entry_update",
+        ":valid_history",
+    ],
+)
+
+lean_axiom_test(
+    name = "entry_history_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["entry_history"],
+    theorems = [
+        "Define.OperationGraph.PositionEntryHistory.entry_exists_of_previous_writer",
+        "Define.OperationGraph.PositionEntryHistory.entry_facts",
+        "Define.OperationGraph.PositionEntryHistory.entry_iff_most_recent_previous",
+        "Define.OperationGraph.PositionEntryHistory.entry_is_most_recent_previous",
+        "Define.OperationGraph.PositionEntryHistory.previous_operation_entry",
+    ],
+    deps = [":entry_history"],
+)
+
+lean_library(
+    name = "entry_update",
+    srcs = ["entry_update.lean"],
+    deps = [":definitions"],
+)
+
+lean_axiom_test(
+    name = "entry_update_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["entry_update"],
+    theorems = [
+        "Define.OperationGraph.EntryWrittenBy.non_move_operates",
+        "Define.OperationGraph.EntryWrittenBy.operated_parent",
+        "Define.OperationGraph.entryAfter_provenance",
+        "Define.OperationGraph.entryAfter_unchanged_without_operated_parent",
+        "Define.OperationGraph.entryAfter_writes_operated_position",
+    ],
+    deps = [":entry_update"],
 )
 
 lean_library(
@@ -88,6 +208,197 @@ lean_axiom_test(
         "Define.OperationGraph.operationEnabled_move_source_not_parent_of_target",
     ],
     deps = [":occupancy_semantics"],
+)
+
+lean_library(
+    name = "operation_effects",
+    srcs = ["operation_effects.lean"],
+)
+
+lean_axiom_test(
+    name = "operation_effects_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["operation_effects"],
+    theorems = [
+        "Define.OperationGraph.ExactEffects.conflicting_enabled_pair_cannot_reverse",
+        "Define.OperationGraph.ExactEffects.independent_apply_commutes",
+        "Define.OperationGraph.ExactEffects.independent_enabled_exchange",
+        "Define.OperationGraph.ExactEffects.independent_symm",
+        "Define.OperationGraph.ExactEffects.unchanged_required_component",
+    ],
+    deps = [":operation_effects"],
+)
+
+lean_library(
+    name = "ordered_calculations",
+    srcs = ["ordered_calculations.lean"],
+    deps = [":calculation_congruence"],
+)
+
+lean_axiom_test(
+    name = "ordered_calculations_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["ordered_calculations"],
+    theorems = [
+        "Define.OperationGraph.OrderedCalculations.acyclic",
+        "Define.OperationGraph.OrderedCalculations.dependencyBefore_iff",
+        "Define.OperationGraph.OrderedCalculations.exact_dependency",
+        "Define.OperationGraph.OrderedCalculations.no_path_of_identical_recency",
+        "Define.OperationGraph.OrderedCalculations.pointsBackward",
+        "Define.OperationGraph.OrderedCalculations.prefix_reaches_iff",
+        "Define.OperationGraph.OrderedCalculations.toRuleGraph",
+    ],
+    deps = [":ordered_calculations"],
+)
+
+lean_library(
+    name = "particle_requirements",
+    srcs = ["particle_requirements.lean"],
+    deps = [":operation_effects"],
+)
+
+lean_library(
+    name = "retained_requirements",
+    srcs = ["retained_requirements.lean"],
+    deps = [":operation_effects"],
+)
+
+lean_library(
+    name = "simultaneous_calculation",
+    srcs = ["simultaneous_calculation.lean"],
+    deps = [":calculation"],
+)
+
+lean_axiom_test(
+    name = "simultaneous_calculation_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["simultaneous_calculation"],
+    theorems = [
+        "Define.OperationGraph.prior_reaches_with_simultaneous_destruction",
+        "Define.OperationGraph.simultaneousDestroyCalculation_enumeration_independent",
+        "Define.OperationGraph.simultaneousDestroyDependency_has_prior_entry",
+        "Define.OperationGraph.simultaneousDestroyDependency_no_implicit_order",
+        "Define.OperationGraph.simultaneousDestruction_no_order_without_dependency_path",
+        "Define.OperationGraph.simultaneousDestruction_preserves_acyclicity",
+        "Define.OperationGraph.simultaneousDestruction_preserves_dependency_antichains",
+        "Define.OperationGraph.simultaneousDestruction_reaches_from_selected_iff",
+        "Define.OperationGraph.simultaneousDestruction_reaches_from_unselected_iff",
+    ],
+    deps = [":simultaneous_calculation"],
+)
+
+lean_library(
+    name = "simultaneous_destruction",
+    srcs = ["simultaneous_destruction.lean"],
+    deps = [":definitions"],
+)
+
+lean_axiom_test(
+    name = "simultaneous_destruction_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["simultaneous_destruction"],
+    theorems = [
+        "Define.OperationGraph.destructionSequenceAfter_iff",
+        "Define.OperationGraph.destructionSequenceEnabled_of_nodup",
+        "Define.OperationGraph.individualDestruction_preserves_other_occupancy",
+        "Define.OperationGraph.individualDestructions_commute",
+        "Define.OperationGraph.simultaneousDestruction_exact_individual_execution",
+        "Define.OperationGraph.simultaneousDestruction_permuted_execution",
+        "Define.OperationGraph.simultaneousDestruction_parent_first",
+        "Define.OperationGraph.simultaneousDestruction_preserves_prefixClosure",
+        "Define.OperationGraph.simultaneousDestruction_single_target",
+    ],
+    deps = [":simultaneous_destruction"],
+)
+
+lean_library(
+    name = "simultaneous_history",
+    srcs = ["simultaneous_history.lean"],
+    deps = [
+        ":simultaneous_destruction",
+        ":valid_history",
+    ],
+)
+
+lean_axiom_test(
+    name = "simultaneous_history_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["simultaneous_history"],
+    theorems = [
+        "Define.OperationGraph.destructionTargets_permuted_iff",
+        "Define.OperationGraph.ResolvedStep.destruction_after_permutation",
+        "Define.OperationGraph.ResolvedStep.destruction_matches_common_snapshot",
+        "Define.OperationGraph.ResolvedStep.empty_position_occupied",
+        "Define.OperationGraph.ResolvedStep.newly_occupied_has_operation",
+        "Define.OperationGraph.ResolvedStep.non_move_strict_child_unoccupied_after",
+        "Define.OperationGraph.ResolvedStep.preserves_prefixClosure",
+        "Define.OperationGraph.ResolvedStepHistory.destroy_position_empty_after",
+        "Define.OperationGraph.ResolvedStepHistory.fill_position_available",
+        "Define.OperationGraph.ResolvedStepHistory.newly_occupied_has_parent_operation",
+        "Define.OperationGraph.ResolvedStepHistory.prefix_closed",
+        "Define.OperationGraph.ResolvedStepHistory.same_order_equal_or_distinct_destroys",
+        "Define.OperationGraph.ResolvedStepHistory.toValidOccupancyTrace",
+        "Define.OperationGraph.pairwise_kinds_unique",
+    ],
+    deps = [":simultaneous_history"],
+)
+
+lean_library(
+    name = "step_calculation",
+    srcs = ["step_calculation.lean"],
+    deps = [
+        ":entry_update",
+        ":ordered_calculations",
+        ":simultaneous_history",
+    ],
+)
+
+lean_axiom_test(
+    name = "step_calculation_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["step_calculation"],
+    theorems = [
+        "Define.OperationGraph.StepPositionHistory.calculation_well_formed",
+        "Define.OperationGraph.StepPositionHistory.child_destroy_not_afterComparison",
+        "Define.OperationGraph.StepPositionHistory.child_destroy_not_fill_candidate",
+        "Define.OperationGraph.StepPositionHistory.collection_facts",
+        "Define.OperationGraph.StepPositionHistory.fill_candidate_iff",
+        "Define.OperationGraph.StepPositionHistory.later_fill_after_destroyed_parent",
+        "Define.OperationGraph.StepPositionHistory.latest_source_candidate",
+        "Define.OperationGraph.StepPositionHistory.most_recent_fill_unique",
+        "Define.OperationGraph.StepPositionHistory.most_recent_writer_unique",
+    ],
+    deps = [":step_calculation"],
 )
 
 lean_library(

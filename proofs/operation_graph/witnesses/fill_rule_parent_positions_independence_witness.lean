@@ -202,9 +202,6 @@ def validHistory : ValidResolvedHistory isOperation where
     intro operation source target operation_member operation_kind
     rcases operation_member with rfl | rfl <;>
       simp [createParent, createChild] at operation_kind
-  operated_position_has_action_parent := by
-    intro operation position operation_member operates_on_position
-    rcases operation_member with rfl | rfl <;> exact List.nil_prefix
   operation_transition := by
     intro operationOrder operation operation_at position
     show (match operationAt operationOrder with

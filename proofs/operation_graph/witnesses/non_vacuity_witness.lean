@@ -52,6 +52,7 @@ theorem calculated_dependency :
   change
     (calculationFor history destroyOperation).AfterMoveCorrection
       (CalculatedDependency history) createOperation
+  simp only [RuleCalculation.AfterMoveCorrection, calculationFor_afterComparison_iff]
   refine ⟨⟨Or.inl calculated_source_candidate, ?_⟩, Or.inl ?_⟩
   · intro newerCandidate newer_in_collection newer_than_create
       operations_related

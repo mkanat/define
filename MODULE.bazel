@@ -54,6 +54,7 @@ git_override(
 lake = use_extension("@rules_lean//lean:lake.bzl", "lake")
 lake.workspace(
     name = "lean_deps",
+    cache_roots = ["Mathlib.Order.Defs.PartialOrder"],
     lake_manifest = "//proofs:lake-manifest.json",
     lakefile = "//proofs:lakefile.lean",
     lean_toolchain = "//proofs:lean-toolchain",

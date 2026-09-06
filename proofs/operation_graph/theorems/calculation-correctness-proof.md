@@ -1,5 +1,10 @@
 # Particle Operation Dependency Graph Calculation Correctness
 
+The graph calculations in this document describe the former Fill, Empty, and
+Move Rules and their existing Lean models. They do not formalize the revised
+[requirement-based construction](requirement-construction.md). Source-semantic
+arguments must still be distinguished from results about those former models.
+
 ## Claim
 
 For every valid resolved Particle Operation history, the recursive calculation
@@ -12,6 +17,14 @@ This theorem is a bridge. It does not assume or prove that the calculated graph
 is complete or transitively minimal. Instead, it replaces the manually supplied
 calculation facts in those proofs with consequences of one arbitrary valid
 resolved history.
+
+The history here is `ValidResolvedHistory`, with its serial aggregate Destroy
+transition and unique occurrence indices. This theorem does not construct the
+graph for simultaneous individual destructions. The shared minimality interface
+now requires only `ValidOccupancyTrace`; the completeness interface additionally
+requires `ExactOccupancyExecution`. A simultaneous common-state history supplies
+the former occupancy facts, but not the latter serial execution. The distinction
+must not be erased when applying this construction theorem.
 
 ## Resolved-name persistence
 
@@ -240,11 +253,13 @@ the independent minimality and completeness arguments. No field of that
 interface needs to assume minimality, completeness, acyclicity, or the desired
 reachability relation. ∎
 
-## Remaining boundary
+## Scope of the resolved-history model
 
-This theorem begins with a valid resolved history. A separate source-to-history
-proof must still show that resolving valid Define source produces its occurrence
-order, occupancy states, distinct resolved names, name-persistence trace, and
-Move name changes. The theorem above then applies uniformly to every such
-history, whether it stops after finitely many occurrences or continues without
-end.
+This theorem begins with a valid resolved history, not arbitrary Define source.
+Its premises include occurrence order, occupancy states, distinct resolved
+names, the name-persistence trace, and Move name changes. It applies uniformly
+to every such history, finite or infinite. The current requirement-based
+construction's correspondence to source is developed separately in the
+[ordinary requirements proof](ordinary-requirements-proof.md) and
+[retained-state proof](retained-state-proof.md); those arguments do not turn
+this former resolved-history model into a model of the current construction.

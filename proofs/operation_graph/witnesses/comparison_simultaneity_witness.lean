@@ -324,11 +324,6 @@ theorem conditions : ListHistory.Conditions operations where
       simp [createParent, createChild, createGrandChildX, destroyGrandChildX,
         destroyChild, recreateChild, createGrandChildY, destroyGrandChildY,
         destroyRecreatedChild] at operation_kind
-  operated_position_has_action_parent := by
-    intro operation position operation_member operates_on_position
-    rcases operation_shape operation_member with
-      rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
-      exact List.nil_prefix
 
 def history : ValidResolvedHistory IsOperation :=
   ListHistory.validHistory operations conditions
@@ -362,6 +357,7 @@ theorem grand_child_y_source_candidate :
 theorem grand_child_y_after_comparison :
     (calculationFor history destroyRecreatedChild).AfterComparison
       destroyGrandChildY := by
+  rw [calculationFor_afterComparison_iff]
   refine ⟨Or.inl ⟨grandChildYPosition, grand_child_y_source_candidate⟩, ?_⟩
   intro newerCandidate newer_in_collection newer_than_y newer_related
   have newer_before_final :=

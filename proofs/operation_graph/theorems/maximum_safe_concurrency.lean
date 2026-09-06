@@ -9,6 +9,10 @@ set_option autoImplicit false
 /-!
 # Particle Operation Maximum Safe Concurrency
 
+These are conditional results for the serial aggregate occupancy model. They
+do not establish safety or necessity for arbitrary interleavings of individual
+destructions, or for destructor-induced dependency paths.
+
 This aggregate module exposes the two independent components of maximum safe
 concurrency. `calculated_schedule_execution` proves that every schedule allowed
 by calculated reachability preserves the history's occupancy observations and,

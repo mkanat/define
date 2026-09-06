@@ -1,6 +1,43 @@
 # Particle Operation Dependency Graph Characterization
 
-## Claims
+The graph calculations in this document describe the former Fill, Empty, and
+Move Rules and their existing Lean models. They do not formalize the revised
+[requirement-based construction](requirement-construction.md). Source-semantic
+arguments must still be distinguished from results about those former models.
+
+## Common-state histories with individual destructions
+
+For the common-state construction, let `K` have the meaning derived in the
+[completeness proof](completeness-proof.md#completeness-with-simultaneous-individual-destructions):
+exclude exactly the Destroys with an equally recent Destroy at a strict
+transitive parent position. Define a relation on the actual operations by
+
+```text
+O Rₖ A exactly when A belongs to K, A is previous to O,
+and some operated positions of O and A are related.
+```
+
+The graph's reachability is exactly the transitive closure of `Rₖ`. Every
+dependency points to a previous operation, and candidate provenance proves that
+their operated positions are related. The no-dependents theorem proves that its
+target belongs to `K`. Thus every graph edge is an `Rₖ` pair, and every graph
+path is an `Rₖ` path. Independently, the replacement completeness theorem proves
+a graph path for every `Rₖ` pair; concatenating those paths proves the converse.
+
+The independent minimality theorem applies to this same calculated graph.
+Combining the two results with the generic backward-graph uniqueness theorem
+therefore proves that it is the unique transitively minimal graph with this
+reachability among graphs pointing backward in the same recency indices.
+Distinct operations may have identical indices; none of these arguments imposes
+an order between them.
+
+Unlike the post-Comparison characterization, `Rₖ` is defined without the
+calculation's candidate sets or survivors. This is a characterization of the
+graph, not a proof that every permitted schedule preserves occupancy. For the
+requirement-based construction, source correspondence and scheduling are proved
+separately in the [scheduling argument](requirement-scheduling-proof.md).
+
+## Serial-model claims
 
 For every valid resolved Particle Operation history, let `G` be the graph
 calculated by the Fill, Empty, and Move Rules, and define `R` by
@@ -19,6 +56,12 @@ Then:
 
 These are combined results. They use both the independent completeness and
 minimality theorems but are not premises of either theorem.
+
+Both claims are conditional on the serial-history model used by completeness.
+They do not characterize the current specification's simultaneous individual
+destructions. Merely numbering related simultaneous destructions must not
+introduce a pair into the required reachability relation; see the
+[simultaneous destruction proof](simultaneous-destruction-proof.md).
 
 ## Inputs
 
@@ -152,11 +195,12 @@ direct dependencies. Infinite edge counts are not compared.
 ## Coverage and scope
 
 The characterization quantifies over the concrete occurrences and resolved
-positions in a valid history. Automatic and contributed Destroy Particle
-Statements, operations obtained through Action resolution, implied positions,
-and moved transitive-child names are covered because the independent premises
-already cover them. The Action Parent Rule remains modular compiler-resolution
-behavior rather than another edge kind in `G`.
+positions supplied by its serial-history premises. A source operation is covered
+only after those premises have been established for its resolved occurrences.
+Calling a destruction automatic, or obtaining it through a destructor or Action
+resolution, does not establish the serial premises. In particular, the earlier
+simultaneous-destruction counterexample prevents applying this characterization
+to arbitrary enumerations. The Action Parent Rule is excluded.
 
 Source-to-history correspondence and compiler conformance remain separate
 obligations. This theorem characterizes the specification-level graph calculated

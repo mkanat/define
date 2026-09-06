@@ -28,17 +28,16 @@ namespace Define.OperationGraph
 Two distinct operations from one valid resolved history that are incomparable
 in the calculated graph operate on pairwise unrelated positions.
 -/
-theorem incomparable_calculated_operations_are_unrelated
-    {isOperation : ParticleOperation → Prop}
-    (history : ValidResolvedHistory isOperation)
+theorem CompleteResolvedDefineGraph.incomparable_operations_are_unrelated
+    (graph : CompleteResolvedDefineGraph)
     {firstOperation secondOperation : ParticleOperation}
-    (first_member : isOperation firstOperation)
-    (second_member : isOperation secondOperation)
+    (first_member : graph.isOperation firstOperation)
+    (second_member : graph.isOperation secondOperation)
     (operations_distinct : firstOperation ≠ secondOperation)
     (first_does_not_reach_second :
-      ¬Reaches (CalculatedDependency history) firstOperation secondOperation)
+      ¬Reaches graph.dependency firstOperation secondOperation)
     (second_does_not_reach_first :
-      ¬Reaches (CalculatedDependency history) secondOperation firstOperation) :
+      ¬Reaches graph.dependency secondOperation firstOperation) :
     ¬OperationsRelated firstOperation secondOperation := by
   intro operations_related
   rcases Nat.lt_trichotomy firstOperation.operationOrder
@@ -46,37 +45,46 @@ theorem incomparable_calculated_operations_are_unrelated
     first_before_second | same_order | second_before_first
   · exact
       second_does_not_reach_first
-        (calculatedDependency_reaches_of_relatedPrevious history second_member
-          first_member
+        (graph.reaches_of_relatedPrevious _ _ second_member first_member
           ⟨first_before_second, operationsRelated_symm operations_related⟩)
-  · have first_at_order := history.member_operation_at firstOperation first_member
+  · have first_at_order := graph.execution.member_operation_at firstOperation first_member
     have second_at_order :=
-      history.member_operation_at secondOperation second_member
+      graph.execution.member_operation_at secondOperation second_member
     rw [same_order] at first_at_order
     exact
       operations_distinct
         (Option.some.inj (first_at_order.symm.trans second_at_order))
   · exact
       first_does_not_reach_second
-        (calculatedDependency_reaches_of_relatedPrevious history first_member
-          second_member ⟨second_before_first, operations_related⟩)
+        (graph.reaches_of_relatedPrevious _ _ first_member second_member
+          ⟨second_before_first, operations_related⟩)
+
+theorem incomparable_calculated_operations_are_unrelated
+    {isOperation : ParticleOperation → Prop} (history : ValidResolvedHistory isOperation)
+    {firstOperation secondOperation : ParticleOperation}
+    (first_member : isOperation firstOperation) (second_member : isOperation secondOperation)
+    (operations_distinct : firstOperation ≠ secondOperation)
+    (first_does_not_reach_second : ¬Reaches (CalculatedDependency history) firstOperation secondOperation)
+    (second_does_not_reach_first : ¬Reaches (CalculatedDependency history) secondOperation firstOperation) :
+    ¬OperationsRelated firstOperation secondOperation :=
+  (calculatedCompleteResolvedDefineGraph history).incomparable_operations_are_unrelated
+    first_member second_member operations_distinct first_does_not_reach_second second_does_not_reach_first
 
 /--
 A sequence of exchanges between operations incomparable in calculated graph
 reachability preserves a finite schedule execution.
 -/
-theorem IncomparableSwapSequence.preserves_calculated_schedule_execution
-    {isOperation : ParticleOperation → Prop}
-    (history : ValidResolvedHistory isOperation)
+theorem IncomparableSwapSequence.preserves_graph_schedule_execution
+    (graph : CompleteResolvedDefineGraph)
     {firstSchedule secondSchedule : List ParticleOperation}
     {observation : ParticleOperation → Position → Prop}
     {occupiedBefore occupiedAfter : Position → Prop}
     (exchanges :
-      IncomparableSwapSequence (Reaches (CalculatedDependency history))
+      IncomparableSwapSequence (Reaches graph.dependency)
         firstSchedule secondSchedule)
     (all_operations :
       ∀ operation,
-        operation ∈ firstSchedule → isOperation operation)
+        operation ∈ firstSchedule → graph.isOperation operation)
     (first_nodup : firstSchedule.Nodup)
     (execution :
       ScheduleExecution observation firstSchedule occupiedBefore
@@ -91,12 +99,12 @@ theorem IncomparableSwapSequence.preserves_calculated_schedule_execution
       cases final_exchange with
       | swap schedulePrefix firstOperation secondOperation scheduleSuffix
           first_does_not_reach_second second_does_not_reach_first =>
-          have first_member : isOperation firstOperation := by
+          have first_member : graph.isOperation firstOperation := by
             apply all_operations firstOperation
             exact
               earlier_exchanges.perm.mem_iff.mpr
                 (by simp)
-          have second_member : isOperation secondOperation := by
+          have second_member : graph.isOperation secondOperation := by
             apply all_operations secondOperation
             exact
               earlier_exchanges.perm.mem_iff.mpr
@@ -111,11 +119,64 @@ theorem IncomparableSwapSequence.preserves_calculated_schedule_execution
             subst secondOperation
             exact first_not_in_remaining (by simp)
           have not_related :=
-            incomparable_calculated_operations_are_unrelated history
+            graph.incomparable_operations_are_unrelated
               first_member second_member operations_distinct
               first_does_not_reach_second second_does_not_reach_first
           exact
             middle_execution.swap_adjacent_unrelated schedulePrefix not_related
+
+theorem IncomparableSwapSequence.preserves_calculated_schedule_execution
+    {isOperation : ParticleOperation → Prop} (history : ValidResolvedHistory isOperation)
+    {firstSchedule secondSchedule : List ParticleOperation}
+    {observation : ParticleOperation → Position → Prop}
+    {occupiedBefore occupiedAfter : Position → Prop}
+    (exchanges : IncomparableSwapSequence (Reaches (CalculatedDependency history)) firstSchedule secondSchedule)
+    (all_operations : ∀ operation, operation ∈ firstSchedule → isOperation operation)
+    (first_nodup : firstSchedule.Nodup)
+    (execution : ScheduleExecution observation firstSchedule occupiedBefore occupiedAfter) :
+    ScheduleExecution observation secondSchedule occupiedBefore occupiedAfter :=
+  exchanges.preserves_graph_schedule_execution (calculatedCompleteResolvedDefineGraph history)
+    all_operations first_nodup execution
+
+theorem CompleteResolvedDefineGraph.finite_respecting_schedule_execution
+    (graph : CompleteResolvedDefineGraph)
+    {referenceSchedule candidateSchedule : List ParticleOperation}
+    {observation : ParticleOperation → Position → Prop}
+    {occupiedBefore occupiedAfter : Position → Prop}
+    (schedules_permuted : referenceSchedule.Perm candidateSchedule)
+    (reference_nodup : referenceSchedule.Nodup)
+    (all_operations : ∀ operation, operation ∈ referenceSchedule → graph.isOperation operation)
+    (reference_respects : RespectsPrecedence (Reaches graph.dependency) referenceSchedule)
+    (candidate_respects : RespectsPrecedence (Reaches graph.dependency) candidateSchedule)
+    (reference_execution : ScheduleExecution observation referenceSchedule occupiedBefore occupiedAfter) :
+    ScheduleExecution observation candidateSchedule occupiedBefore occupiedAfter := by
+  have exchanges := respecting_permutations_connected schedules_permuted reference_nodup
+    reference_respects candidate_respects
+  exact exchanges.preserves_graph_schedule_execution graph all_operations reference_nodup reference_execution
+
+theorem CompleteResolvedDefineGraph.unbounded_respecting_schedule_execution
+    (graph : CompleteResolvedDefineGraph)
+    (reference candidate : UnboundedSchedule graph.isOperation)
+    {observation : ParticleOperation → Position → Prop} {initiallyOccupied : Position → Prop}
+    (reference_respects : reference.RespectsPrecedence (Reaches graph.dependency))
+    (candidate_respects : candidate.RespectsPrecedence (Reaches graph.dependency))
+    (reference_execution : UnboundedScheduleExecution observation reference initiallyOccupied) :
+    UnboundedScheduleExecution observation candidate initiallyOccupied := by
+  intro count
+  rcases reference.exists_prefix_containing (candidate.occurrencesBefore count)
+      (fun _ member => candidate.occurrencesBefore_are_members member) with
+    ⟨reference_count, candidate_subset⟩
+  rcases candidate.exists_respecting_completion candidate_respects
+      (reference.occurrencesBefore_nodup reference_count)
+      (fun _ member => reference.occurrencesBefore_are_members member)
+      (reference.occurrencesBefore_respects reference_respects reference_count) candidate_subset with
+    ⟨remaining, permuted, completed_respects⟩
+  rcases reference_execution reference_count with ⟨occupiedAfter, execution⟩
+  have completed_execution := graph.finite_respecting_schedule_execution permuted
+    (reference.occurrencesBefore_nodup reference_count)
+    (fun _ member => reference.occurrencesBefore_are_members member)
+    (reference.occurrencesBefore_respects reference_respects reference_count) completed_respects execution
+  exact completed_execution.prefix_execution
 
 /--
 Every dependency-respecting permutation of a defined finite schedule of

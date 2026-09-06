@@ -123,7 +123,7 @@ theorem coverPair_transitivelyMinimal
         Reaches.collapse (dependency := precedence) precedence_transitive
           remaining_precedence_path
       exact
-        cover_pair.2 intermediate first_edge.1.1
+        cover_pair.2 first_edge.1.1
           intermediate_precedes_target
 
 /--
@@ -149,7 +149,7 @@ theorem coverPair_required
         (same_reachability intermediate target).mp remaining_path
       exact
         False.elim
-          (cover_pair.2 intermediate source_precedes_intermediate
+          (cover_pair.2 source_precedes_intermediate
             intermediate_precedes_target)
 
 /--

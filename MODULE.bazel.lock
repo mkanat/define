@@ -1016,7 +1016,7 @@
     "@@rules_lean+//lean:lake.bzl%lake": {
       "general": {
         "bzlTransitiveDigest": "aPkIHVzLdKk7M5dLQvp7CTCytLzOfKrd3uxlAiQhJ0A=",
-        "usagesDigest": "C6K5DDg/VoU8Z4ix8uTj9vtBrdVoc1gBLB2RTuEIrdI=",
+        "usagesDigest": "DhK5U5onXdQogxf0Fb3zj5Y9uhY+T44aZgr+BDpRQ8k=",
         "recordedInputs": [
           "FILE:@@//proofs/lean-toolchain 2bdc48adfa58d0017e538a0ad117c5d73d35deec879978f909406a80c8037273"
         ],
@@ -1034,7 +1034,9 @@
               "lakefile": "@@//proofs:lakefile.lean",
               "lake_manifest": "@@//proofs:lake-manifest.json",
               "allow_source_build": false,
-              "cache_roots": [],
+              "cache_roots": [
+                "Mathlib.Order.Defs.PartialOrder"
+              ],
               "olean_cache": "",
               "olean_cache_packages": [],
               "emit_imports_manifest": false,
