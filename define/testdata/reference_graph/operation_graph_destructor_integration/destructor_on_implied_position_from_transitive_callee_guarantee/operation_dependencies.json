@@ -240,7 +240,7 @@
           "action_name": "test"
         },
         "operation_name": "destroy",
-        "target": "box::/middle::run",
+        "target": "box::/child",
         "occurrence": 1
       },
       {
@@ -248,8 +248,8 @@
           "caller": null,
           "action_name": "test"
         },
-        "operation_name": "destroy",
-        "target": "box::/child",
+        "operation_name": "create",
+        "target": "box::/middle::run",
         "occurrence": 1
       }
     ]

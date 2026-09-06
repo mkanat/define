@@ -60,6 +60,7 @@ class MiddleExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_box__action_inner: local.my_domain_com.my_lib.inner.InnerExecution
+        self.destruction_position_position_box__action_inner__position_run: literal.Position
         self.join_for_move_position_box__action_inner__position_result_to_position_result: literal.Join
         self.join_for_destroy_position_box = self.scheduler.create_join(2)
         self.join_when_empty_position_result: literal.Join
@@ -92,11 +93,12 @@ class MiddleExecution:
         ).get_interface_position(
             "position<run>"
         ).create_particle()
-        self.local_position_box.particle.get_action(
+        self.destruction_position_position_box__action_inner__position_run = self.local_position_box.particle.get_action(
             local.my_domain_com.my_lib.inner.Inner
         ).get_interface_position(
             "position<run>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_box__action_inner__position_run.destroy_particle()
         self.destroy_position_box()
 
     def move_position_box__action_inner__position_result__global_position_marker_to_position_held_marker(self):

@@ -49,6 +49,7 @@ class DestroyerExecution:
         )
         self.guarantees = DestroyerGuarantees()
         self.destruction_connections = destruction_connections
+        self.destruction_position_position_run__global_position_run: literal.Position
         self.join_for_destroy_position_run__global_position_run: literal.Join
         self.join_for_destroy_position_run: literal.Join
         self.join_for_empty_rule_position_run__global_position_run: literal.Join
@@ -57,6 +58,11 @@ class DestroyerExecution:
     def accept_for_empty_rule_position_run__global_position_run(self):
         if not self.join_for_empty_rule_position_run__global_position_run.arrive():
             return
+        self.destruction_position_position_run__global_position_run = self.action.get_interface_position(
+            "position<run>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.run.Run
+        )
         self.destroy_position_run__global_position_run()
 
     def accept_for_empty_rule_position_run(self):
@@ -70,11 +76,7 @@ class DestroyerExecution:
         literal.continue_destruction(self.continue_destroy_position_run__global_position_run)
 
     def continue_destroy_position_run__global_position_run(self):
-        self.action.get_interface_position(
-            "position<run>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.run.Run
-        ).destroy_particle()
+        self.destruction_position_position_run__global_position_run.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "run::/run",

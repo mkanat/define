@@ -51,6 +51,8 @@ class MiddleExecution:
         self.guarantees = MiddleGuarantees()
         self.destruction_connections = destruction_connections
         self.execution_position_gateway__action_inner: local.my_domain_com.my_lib.inner.InnerExecution
+        self.destruction_position_position_gateway__action_inner__position_destination: literal.Position
+        self.destruction_position_position_gateway__action_inner__position_trigger_pos: literal.Position
         self.join_for_move_position_gateway__global_position_source_particle_to_position_gateway__action_inner__position_source: literal.Join
         self.join_for_destroy_position_gateway: literal.Join
         self.join_for_empty_rule_position_gateway__global_position_source_particle: literal.Join
@@ -72,6 +74,9 @@ class MiddleExecution:
             self.scheduler,
         )
         self.execution_position_gateway__action_inner.join_for_move_position_source_to_position_destination = literal.NO_JOIN
+        self.execution_position_gateway__action_inner.guarantees.position_destination__global_position_child.inits.append(
+            self.init_position_gateway__action_inner__position_destination__global_position_child
+        )
         self.execution_position_gateway__action_inner.guarantees.position_destination__global_position_child.consumers.append(
             self.destroy_position_gateway__action_inner__position_destination
         )
@@ -88,6 +93,9 @@ class MiddleExecution:
             self.scheduler,
         )
         self.execution_position_gateway__action_inner.join_for_move_position_source_to_position_destination = literal.NO_JOIN
+        self.execution_position_gateway__action_inner.guarantees.position_destination__global_position_child.inits.append(
+            self.init_position_gateway__action_inner__position_destination__global_position_child
+        )
         self.execution_position_gateway__action_inner.guarantees.position_destination__global_position_child.consumers.append(
             self.destroy_position_gateway__action_inner__position_destination
         )
@@ -140,26 +148,21 @@ class MiddleExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.get_interface_position(
+        self.destruction_position_position_gateway__action_inner__position_trigger_pos = self.action.get_interface_position(
             "position<gateway>"
         ).particle.get_action(
             local.my_domain_com.my_lib.inner.Inner
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_gateway__action_inner__position_trigger_pos.destroy_particle()
         self.destroy_position_gateway()
 
     def destroy_position_gateway__action_inner__position_destination(self):
         literal.continue_destruction(self.continue_destroy_position_gateway__action_inner__position_destination)
 
     def continue_destroy_position_gateway__action_inner__position_destination(self):
-        self.action.get_interface_position(
-            "position<gateway>"
-        ).particle.get_action(
-            local.my_domain_com.my_lib.inner.Inner
-        ).get_interface_position(
-            "position<destination>"
-        ).destroy_particle()
+        self.destruction_position_position_gateway__action_inner__position_destination.destroy_particle()
         self.destroy_position_gateway()
 
     def destroy_position_gateway(self):
@@ -173,4 +176,13 @@ class MiddleExecution:
         ).destroy_particle()
         self.guarantees.position_gateway.publish(
             self.scheduler,
+        )
+
+    def init_position_gateway__action_inner__position_destination__global_position_child(self):
+        self.destruction_position_position_gateway__action_inner__position_destination = self.action.get_interface_position(
+            "position<gateway>"
+        ).particle.get_action(
+            local.my_domain_com.my_lib.inner.Inner
+        ).get_interface_position(
+            "position<destination>"
         )

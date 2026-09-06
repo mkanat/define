@@ -34,6 +34,7 @@ class TestExecution:
         self.action = action
         self.scheduler = scheduler
         self.execution_action_triggered: local.my_domain_com.my_lib.triggered.TriggeredExecution
+        self.destruction_position_action_triggered__position_dest: literal.Position
         self.join_when_empty_action_triggered__position_dest: literal.Join
         self.execution_action_triggered = local.my_domain_com.my_lib.triggered.TriggeredExecution(
             self.action.on_particle.get_action(
@@ -42,6 +43,9 @@ class TestExecution:
             self.scheduler,
         )
         self.execution_action_triggered.join_for_move_position_run_to_position_dest = literal.NO_JOIN
+        self.execution_action_triggered.guarantees.position_run__move__position_dest.inits.append(
+            self.init_action_triggered__position_run__move__position_dest
+        )
         self.execution_action_triggered.guarantees.position_run__move__position_dest.consumers.append(
             self.destroy_action_triggered__position_dest
         )
@@ -63,8 +67,11 @@ class TestExecution:
         self.execution_action_triggered.accept_for_empty_rule_position_run()
 
     def destroy_action_triggered__position_dest(self):
-        self.action.on_particle.get_action(
+        self.destruction_position_action_triggered__position_dest.destroy_particle()
+
+    def init_action_triggered__position_run__move__position_dest(self):
+        self.destruction_position_action_triggered__position_dest = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.triggered.Triggered
         ).get_interface_position(
             "position<dest>"
-        ).destroy_particle()
+        )

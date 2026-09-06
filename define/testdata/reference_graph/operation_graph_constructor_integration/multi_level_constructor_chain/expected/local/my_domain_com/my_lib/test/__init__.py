@@ -34,6 +34,8 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_box__action_construct_b: local.my_domain_com.my_lib.construct_b.ConstructBExecution
+        self.destruction_position_position_box__global_position_inner: literal.Position
+        self.destruction_position_position_box__global_position_inner__global_position_leaf: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_box()
@@ -51,18 +53,35 @@ class TestExecution:
         )
         self.execution_position_box__action_construct_b.accept_when_empty_global_position_inner()
 
+    def destroy_position_box(self):
+        self.local_position_box.destroy_particle()
+
+    def destroy_position_box__global_position_inner(self):
+        self.destruction_position_position_box__global_position_inner.destroy_particle()
+
     def destroy_position_box__global_position_inner__global_position_leaf(self):
-        self.local_position_box.particle.get_position(
+        self.destruction_position_position_box__global_position_inner__global_position_leaf.destroy_particle()
+
+    def init_position_box__action_construct_b__global_position_inner__action_construct_c__global_position_leaf(self):
+        self.destruction_position_position_box__global_position_inner = self.local_position_box.particle.get_position(
+            local.my_domain_com.my_lib.inner.Inner
+        )
+        self.destruction_position_position_box__global_position_inner__global_position_leaf = self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.inner.Inner
         ).particle.get_position(
             local.my_domain_com.my_lib.leaf.Leaf
-        ).destroy_particle()
-        self.local_position_box.particle.get_position(
-            local.my_domain_com.my_lib.inner.Inner
-        ).destroy_particle()
-        self.local_position_box.destroy_particle()
+        )
 
     def register_guarantee_global_position_leaf(self):
+        self.execution_position_box__action_construct_b.execution_global_position_inner__action_construct_c.guarantees.global_position_leaf.inits.append(
+            self.init_position_box__action_construct_b__global_position_inner__action_construct_c__global_position_leaf
+        )
+        self.execution_position_box__action_construct_b.execution_global_position_inner__action_construct_c.guarantees.global_position_leaf.consumers.append(
+            self.destroy_position_box
+        )
+        self.execution_position_box__action_construct_b.execution_global_position_inner__action_construct_c.guarantees.global_position_leaf.consumers.append(
+            self.destroy_position_box__global_position_inner
+        )
         self.execution_position_box__action_construct_b.execution_global_position_inner__action_construct_c.guarantees.global_position_leaf.consumers.append(
             self.destroy_position_box__global_position_inner__global_position_leaf
         )

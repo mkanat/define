@@ -3,6 +3,7 @@
 from typing import ClassVar, final, override
 
 from define.runtime import literal
+from define.runtime import tracing
 
 import local.my_domain_com.my_lib.destroyer
 import local.my_domain_com.my_lib.first_destructor
@@ -53,6 +54,13 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_action_destroyer: local.my_domain_com.my_lib.destroyer.DestroyerExecution
+        self.destruction_connection_action_destroyer: tracing.DestructionConnection
+        self.destruction_position_action_destroyer__position_target__global_position_second: literal.Position
+        self.destruction_connection_action_destroyer = tracing.DestructionConnection(
+            self.scheduler,
+            1,
+            self.destroy_action_destroyer__position_target__global_position_second,
+        )
         self.execution_action_destroyer = local.my_domain_com.my_lib.destroyer.DestroyerExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.destroyer.Destroyer
@@ -60,6 +68,11 @@ class TestExecution:
             self.scheduler,
             self.trace_execution,
             "destroyer",
+            destruction_connections=literal.DestructionConnections(
+            {
+                local.my_domain_com.my_lib.destroyer.DestroyerExecution.continue_destroy_position_target: self.destruction_connection_action_destroyer,
+            },
+            ),
         )
         self.execution_action_destroyer.join_for_empty_rule_position_target__global_position_second = literal.NO_JOIN
         self.execution_action_destroyer.join_for_empty_rule_position_target = literal.NO_JOIN
@@ -96,6 +109,13 @@ class TestExecution:
             "/destroyer::target",
             1,
         )
+        self.destruction_position_action_destroyer__position_target__global_position_second = self.action.on_particle.get_action(
+            local.my_domain_com.my_lib.destroyer.Destroyer
+        ).get_interface_position(
+            "position<target>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.second.Second
+        )
         self.execution_action_destroyer.init_when_occupied_position_target()
         self.execution_action_destroyer.execution_position_target__action_second_destructor.join_for_empty_rule_global_position_second = literal.NO_JOIN
         self.execution_action_destroyer.execution_position_target__action_second_destructor.join_for_move_global_position_second_to_position_holder = literal.NO_JOIN
@@ -103,3 +123,12 @@ class TestExecution:
         self.scheduler.submit(self.execution_action_destroyer.accept_when_empty_position_target__global_position_third)
         self.scheduler.submit(self.execution_action_destroyer.accept_for_empty_rule_position_target__global_position_second)
         self.execution_action_destroyer.accept_when_empty_position_target__global_position_marker()
+
+    def destroy_action_destroyer__position_target__global_position_second(self):
+        self.destruction_position_action_destroyer__position_target__global_position_second.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.destruction_connection_action_destroyer.trace_execution,
+            "target::/second",
+            1,
+        )
+        self.destruction_connection_action_destroyer.complete()

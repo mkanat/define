@@ -1,4 +1,5 @@
 {% from "position_expression.j2" import position_expression %}
+{% from "destruction_position.j2" import retain_destruction_positions %}
 {% macro action_statements(statements) %}
     {% for stmt in statements %}
         {% if stmt.kind == StatementKind.LOCAL_POSITION %}
@@ -57,5 +58,6 @@
         )
             {% endif %}
         {% endif %}
+{{ retain_destruction_positions(stmt.destruction_positions_to_retain) -}}
     {% endfor %}
 {%- endmacro %}

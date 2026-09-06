@@ -199,7 +199,9 @@ def test_retriggered_action_resolves_both_triggers_to_the_one_parent_fill(
         # at the same child position.
         "maker#2.create(held::/c)": ["test.destroy(gw::/maker::held::/c)"],
         "test.destroy(gw::/maker::held::/c)#2": ["maker#2.create(held::/c)"],
-        "test.destroy(gw::/maker::held)": ["test.destroy(gw::/maker::held::/c)#2"],
+        # Both particles are destroyed simultaneously, so the Empty Rule for
+        # the parent selects the second Create at the child position.
+        "test.destroy(gw::/maker::held)": ["maker#2.create(held::/c)"],
         "test.destroy(gw::/maker::trigger_pos)#2": [
             "test.create(gw::/maker::trigger_pos)#2"
         ],
@@ -273,11 +275,7 @@ def test_retriggered_move_has_one_predecessor_then_two_predecessors(
         "test.destroy(gateway::/worker::item::/a)": ["worker#2.move(holder, item)"],
         "test.destroy(gateway::/worker::item::/b)": ["worker#2.move(holder, item)"],
         "test.destroy(gateway::/worker::item::/c)": ["worker#2.move(holder, item)"],
-        "test.destroy(gateway::/worker::item)": [
-            "test.destroy(gateway::/worker::item::/c)",
-            "test.destroy(gateway::/worker::item::/b)",
-            "test.destroy(gateway::/worker::item::/a)",
-        ],
+        "test.destroy(gateway::/worker::item)": ["worker#2.move(holder, item)"],
         "test.destroy(gateway)": [
             "test.destroy(gateway::/worker::item)",
             "worker#2.destroy(trigger_pos)",
@@ -343,7 +341,7 @@ def test_two_actions_each_triggering_one_action_twice_number_its_invocations_acr
         "first.destroy(gw::/worker::trigger_pos)#2": [
             "first.create(gw::/worker::trigger_pos)#2"
         ],
-        "first.destroy(gw)": ["first.destroy(gw::/worker::trigger_pos)#2"],
+        "first.destroy(gw)": ["first.create(gw::/worker::trigger_pos)#2"],
         "second.create(gw)": ["test.create(holder_second)"],
         "second.create(gw::/worker::trigger_pos)": ["second.create(gw)"],
         "second.destroy(gw::/worker::trigger_pos)": [
@@ -355,7 +353,7 @@ def test_two_actions_each_triggering_one_action_twice_number_its_invocations_acr
         "second.destroy(gw::/worker::trigger_pos)#2": [
             "second.create(gw::/worker::trigger_pos)#2"
         ],
-        "second.destroy(gw)": ["second.destroy(gw::/worker::trigger_pos)#2"],
+        "second.destroy(gw)": ["second.create(gw::/worker::trigger_pos)#2"],
         "first:worker.create(scratch)": ["first.create(gw)"],
         "first:worker.destroy(scratch)": ["first:worker.create(scratch)"],
         # The worker action runs twice when /first is triggered; these are its
@@ -403,7 +401,7 @@ def test_retriggered_action_that_retriggers_an_action_names_its_callee_per_invoc
         "middle.destroy(gw::/worker::trigger_pos)#2": [
             "middle.create(gw::/worker::trigger_pos)#2"
         ],
-        "middle.destroy(gw)": ["middle.destroy(gw::/worker::trigger_pos)#2"],
+        "middle.destroy(gw)": ["middle.create(gw::/worker::trigger_pos)#2"],
         "middle:worker.create(scratch)": ["middle.create(gw)"],
         "middle:worker.destroy(scratch)": ["middle:worker.create(scratch)"],
         "middle:worker#2.create(scratch)": ["middle.create(gw)"],
@@ -419,7 +417,7 @@ def test_retriggered_action_that_retriggers_an_action_names_its_callee_per_invoc
         "middle#2.destroy(gw::/worker::trigger_pos)#2": [
             "middle#2.create(gw::/worker::trigger_pos)#2"
         ],
-        "middle#2.destroy(gw)": ["middle#2.destroy(gw::/worker::trigger_pos)#2"],
+        "middle#2.destroy(gw)": ["middle#2.create(gw::/worker::trigger_pos)#2"],
         "middle#2:worker.create(scratch)": ["middle#2.create(gw)"],
         "middle#2:worker.destroy(scratch)": ["middle#2:worker.create(scratch)"],
         # When /middle runs for the second time, it triggers /worker twice; these

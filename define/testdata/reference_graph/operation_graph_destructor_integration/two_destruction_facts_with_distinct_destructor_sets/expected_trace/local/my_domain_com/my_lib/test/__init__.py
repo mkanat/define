@@ -61,6 +61,7 @@ class TestExecution:
         self.execution_action_destroyer: local.my_domain_com.my_lib.destroyer.DestroyerExecution
         self.destruction_connection_action_destroyer: tracing.DestructionConnection
         self.destruction_connection_action_destroyer_2: tracing.DestructionConnection
+        self.destruction_position_action_destroyer__position_run: literal.Position
         self.destruction_connection_action_destroyer = tracing.DestructionConnection(
             self.scheduler,
             0,
@@ -153,11 +154,12 @@ class TestExecution:
             "/destroyer::run",
             1,
         )
-        self.action.on_particle.get_action(
+        self.destruction_position_action_destroyer__position_run = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.destroyer.Destroyer
         ).get_interface_position(
             "position<run>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_destroyer__position_run.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "/destroyer::run",

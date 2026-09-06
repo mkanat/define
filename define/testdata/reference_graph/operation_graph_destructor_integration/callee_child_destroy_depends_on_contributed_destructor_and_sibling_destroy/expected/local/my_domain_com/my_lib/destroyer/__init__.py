@@ -57,9 +57,11 @@ class DestroyerExecution:
             ),
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_parent__global_position_required: literal.Position
+        self.destruction_position_position_parent__global_position_required__global_position_extra_a: literal.Position
+        self.destruction_position_position_parent__global_position_required__global_position_extra_b: literal.Position
         self.join_for_move_position_parent__global_position_required_to_position_held_required: literal.Join
         self.join_for_move_position_held_required_to_position_parent__global_position_required = self.scheduler.create_join(2)
-        self.join_for_destroy_position_parent__global_position_required = self.scheduler.create_join(2)
         self.join_for_destroy_position_parent: literal.Join
         self.join_for_empty_rule_position_parent__global_position_required: literal.Join
         self.join_for_empty_rule_position_parent: literal.Join
@@ -107,47 +109,29 @@ class DestroyerExecution:
                 local.my_domain_com.my_lib.required.Required
             )
         )
-        self.scheduler.submit(self.destroy_position_parent__global_position_required__global_position_extra_b)
-        self.destroy_position_parent__global_position_required__global_position_extra_a()
-
-    def destroy_position_parent__global_position_required__global_position_extra_b(self):
-        literal.continue_destruction(self.continue_destroy_position_parent__global_position_required__global_position_extra_b)
-
-    def continue_destroy_position_parent__global_position_required__global_position_extra_b(self):
-        self.action.get_interface_position(
+        self.destruction_position_position_parent__global_position_required = self.action.get_interface_position(
             "position<parent>"
         ).particle.get_position(
             local.my_domain_com.my_lib.required.Required
-        ).particle.get_position(
-            local.my_domain_com.my_lib.extra_b.ExtraB
-        ).destroy_particle()
-        self.destroy_position_parent__global_position_required()
-
-    def destroy_position_parent__global_position_required__global_position_extra_a(self):
-        literal.continue_destruction(self.continue_destroy_position_parent__global_position_required__global_position_extra_a)
-
-    def continue_destroy_position_parent__global_position_required__global_position_extra_a(self):
-        self.action.get_interface_position(
+        )
+        self.destruction_position_position_parent__global_position_required__global_position_extra_a = self.action.get_interface_position(
             "position<parent>"
         ).particle.get_position(
             local.my_domain_com.my_lib.required.Required
         ).particle.get_position(
             local.my_domain_com.my_lib.extra_a.ExtraA
-        ).destroy_particle()
-        self.destroy_position_parent__global_position_required()
-
-    def destroy_position_parent__global_position_required(self):
-        if not self.join_for_destroy_position_parent__global_position_required.arrive():
-            return
-        literal.continue_destruction(self.continue_destroy_position_parent__global_position_required)
-
-    def continue_destroy_position_parent__global_position_required(self):
-        self.action.get_interface_position(
+        )
+        self.destruction_position_position_parent__global_position_required__global_position_extra_b = self.action.get_interface_position(
             "position<parent>"
         ).particle.get_position(
             local.my_domain_com.my_lib.required.Required
-        ).destroy_particle()
-        self.destroy_position_parent()
+        ).particle.get_position(
+            local.my_domain_com.my_lib.extra_b.ExtraB
+        )
+        self.scheduler.submit(self.destroy_position_parent)
+        self.scheduler.submit(self.destroy_position_parent__global_position_required)
+        self.scheduler.submit(self.destroy_position_parent__global_position_required__global_position_extra_a)
+        self.destroy_position_parent__global_position_required__global_position_extra_b()
 
     def destroy_position_parent(self):
         if not self.join_for_destroy_position_parent.arrive():
@@ -161,3 +145,21 @@ class DestroyerExecution:
         self.guarantees.position_parent.publish(
             self.scheduler,
         )
+
+    def destroy_position_parent__global_position_required(self):
+        literal.continue_destruction(self.continue_destroy_position_parent__global_position_required)
+
+    def continue_destroy_position_parent__global_position_required(self):
+        self.destruction_position_position_parent__global_position_required.destroy_particle()
+
+    def destroy_position_parent__global_position_required__global_position_extra_a(self):
+        literal.continue_destruction(self.continue_destroy_position_parent__global_position_required__global_position_extra_a)
+
+    def continue_destroy_position_parent__global_position_required__global_position_extra_a(self):
+        self.destruction_position_position_parent__global_position_required__global_position_extra_a.destroy_particle()
+
+    def destroy_position_parent__global_position_required__global_position_extra_b(self):
+        literal.continue_destruction(self.continue_destroy_position_parent__global_position_required__global_position_extra_b)
+
+    def continue_destroy_position_parent__global_position_required__global_position_extra_b(self):
+        self.destruction_position_position_parent__global_position_required__global_position_extra_b.destroy_particle()

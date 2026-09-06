@@ -56,6 +56,7 @@ class TestExecution:
         self.scheduler = scheduler
         self.guarantees = TestGuarantees()
         self.execution_action_other: local.my_domain_com.my_lib.other.OtherExecution
+        self.destruction_position_action_other__position_trigger_pos: literal.Position
         self.join_for_move_global_position_input__global_position_a_to_global_position_holder: literal.Join
         self.join_for_move_global_position_holder_to_global_position_intermediate: literal.Join
         self.join_when_empty_global_position_holder: literal.Join
@@ -139,8 +140,9 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_other__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.other.Other
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_other__position_trigger_pos.destroy_particle()

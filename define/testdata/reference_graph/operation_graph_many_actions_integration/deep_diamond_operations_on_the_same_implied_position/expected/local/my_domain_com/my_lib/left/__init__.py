@@ -34,6 +34,7 @@ class LeftExecution:
         self.action = action
         self.scheduler = scheduler
         self.execution_action_left_child: local.my_domain_com.my_lib.left_child.LeftChildExecution
+        self.destruction_position_action_left_child__position_trigger_pos: literal.Position
         self.execution_action_left_child = local.my_domain_com.my_lib.left_child.LeftChildExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.left_child.LeftChild
@@ -53,8 +54,9 @@ class LeftExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_left_child__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.left_child.LeftChild
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_left_child__position_trigger_pos.destroy_particle()

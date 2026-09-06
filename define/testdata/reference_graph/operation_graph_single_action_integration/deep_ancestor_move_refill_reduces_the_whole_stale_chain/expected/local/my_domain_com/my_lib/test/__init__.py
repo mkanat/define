@@ -39,6 +39,10 @@ class TestExecution:
             ),
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_box__global_position_mid__global_position_leaf: literal.Position
+        self.destruction_position_position_box__global_position_mid: literal.Position
+        self.destruction_position_position_box__global_position_mid__global_position_leaf_2: literal.Position
+        self.destruction_position_position_box__global_position_mid_2: literal.Position
         self.join_for_move_position_source_to_position_box = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -55,14 +59,16 @@ class TestExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.leaf.Leaf
         ).create_particle()
-        self.local_position_box.particle.get_position(
+        self.destruction_position_position_box__global_position_mid__global_position_leaf = self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.mid.Mid
         ).particle.get_position(
             local.my_domain_com.my_lib.leaf.Leaf
-        ).destroy_particle()
-        self.local_position_box.particle.get_position(
+        )
+        self.destruction_position_position_box__global_position_mid__global_position_leaf.destroy_particle()
+        self.destruction_position_position_box__global_position_mid = self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.mid.Mid
-        ).destroy_particle()
+        )
+        self.destruction_position_position_box__global_position_mid.destroy_particle()
         self.local_position_box.destroy_particle()
         self.move_position_source_to_position_box()
 
@@ -82,12 +88,14 @@ class TestExecution:
         if not self.join_for_move_position_source_to_position_box.arrive():
             return
         self.local_position_source.move_particle_to(self.local_position_box)
-        self.local_position_box.particle.get_position(
+        self.destruction_position_position_box__global_position_mid__global_position_leaf_2 = self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.mid.Mid
         ).particle.get_position(
             local.my_domain_com.my_lib.leaf.Leaf
-        ).destroy_particle()
-        self.local_position_box.particle.get_position(
+        )
+        self.destruction_position_position_box__global_position_mid__global_position_leaf_2.destroy_particle()
+        self.destruction_position_position_box__global_position_mid_2 = self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.mid.Mid
-        ).destroy_particle()
+        )
+        self.destruction_position_position_box__global_position_mid_2.destroy_particle()
         self.local_position_box.destroy_particle()

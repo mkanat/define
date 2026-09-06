@@ -480,7 +480,8 @@
           },
           "action_name": "destroyer"
         },
-        "operation_name": "destroy",
+        "operation_name": "move",
+        "source": "holder_b",
         "target": "run::/marker_b",
         "occurrence": 1
       },
@@ -495,7 +496,8 @@
           },
           "action_name": "destroyer"
         },
-        "operation_name": "destroy",
+        "operation_name": "move",
+        "source": "holder_a",
         "target": "run::/marker_a",
         "occurrence": 1
       }

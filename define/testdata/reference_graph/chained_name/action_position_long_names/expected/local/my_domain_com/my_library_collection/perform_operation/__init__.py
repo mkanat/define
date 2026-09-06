@@ -52,6 +52,7 @@ class PerformOperationExecution:
             "position<result>",
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_operation_trigger__global_position_inner_position: literal.Position
         self.join_for_destroy_position_operation_trigger__global_position_inner_position: literal.Join
         self.join_for_destroy_position_operation_trigger: literal.Join
         self.join_for_destroy_position_run: literal.Join
@@ -65,6 +66,11 @@ class PerformOperationExecution:
     def accept_for_empty_rule_position_operation_trigger__global_position_inner_position(self):
         if not self.join_for_empty_rule_position_operation_trigger__global_position_inner_position.arrive():
             return
+        self.destruction_position_position_operation_trigger__global_position_inner_position = self.action.get_interface_position(
+            "position<operation_trigger>"
+        ).particle.get_position(
+            local.my_domain_com.my_library_collection.inner_position.InnerPosition
+        )
         self.destroy_position_operation_trigger__global_position_inner_position()
 
     def accept_for_empty_rule_position_operation_trigger(self):
@@ -87,11 +93,7 @@ class PerformOperationExecution:
         literal.continue_destruction(self.continue_destroy_position_operation_trigger__global_position_inner_position)
 
     def continue_destroy_position_operation_trigger__global_position_inner_position(self):
-        self.action.get_interface_position(
-            "position<operation_trigger>"
-        ).particle.get_position(
-            local.my_domain_com.my_library_collection.inner_position.InnerPosition
-        ).destroy_particle()
+        self.destruction_position_position_operation_trigger__global_position_inner_position.destroy_particle()
         self.destroy_position_operation_trigger()
 
     def destroy_position_operation_trigger(self):

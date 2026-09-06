@@ -88,29 +88,34 @@ class ActExecution:
             "position<local_dest>",
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_chain_src_a__global_position_mid_src_a: literal.Position
+        self.destruction_position_position_chain_src_b__global_position_mid_src_b: literal.Position
+        self.destruction_position_position_chain_src_c__global_position_mid_src_c: literal.Position
+        self.destruction_position_position_chain_dest__global_position_mid_dest: literal.Position
+        self.destruction_position_position_chain_dest__global_position_mid_dest__global_position_end_dest: literal.Position
         self.join_for_move_position_chain_src_a__global_position_mid_src_a__global_position_end_src_a_to_position_local_dest: literal.Join
         self.join_for_move_position_chain_src_b__global_position_mid_src_b__global_position_end_src_b_to_position_iface_dest: literal.Join
         self.join_for_move_position_chain_src_c__global_position_mid_src_c__global_position_end_src_c_to_position_chain_dest__global_position_mid_dest__global_position_end_dest: literal.Join
-        self.join_for_destroy_position_chain_src_a__global_position_mid_src_a: literal.Join
         self.join_for_destroy_position_chain_src_a: literal.Join
-        self.join_for_destroy_position_chain_src_b__global_position_mid_src_b: literal.Join
+        self.join_for_destroy_position_chain_src_a__global_position_mid_src_a: literal.Join
         self.join_for_destroy_position_chain_src_b: literal.Join
-        self.join_for_destroy_position_chain_src_c__global_position_mid_src_c: literal.Join
+        self.join_for_destroy_position_chain_src_b__global_position_mid_src_b: literal.Join
         self.join_for_destroy_position_chain_src_c: literal.Join
-        self.join_for_destroy_position_chain_dest__global_position_mid_dest: literal.Join
+        self.join_for_destroy_position_chain_src_c__global_position_mid_src_c: literal.Join
         self.join_for_destroy_position_chain_dest: literal.Join
+        self.join_for_destroy_position_chain_dest__global_position_mid_dest: literal.Join
         self.join_for_destroy_position_trigger: literal.Join
         self.join_for_empty_rule_position_chain_src_a__global_position_mid_src_a__global_position_end_src_a: literal.Join
         self.join_for_empty_rule_position_chain_src_b__global_position_mid_src_b__global_position_end_src_b: literal.Join
         self.join_for_empty_rule_position_chain_src_c__global_position_mid_src_c__global_position_end_src_c: literal.Join
-        self.join_for_empty_rule_position_chain_src_a__global_position_mid_src_a: literal.Join
         self.join_for_empty_rule_position_chain_src_a: literal.Join
-        self.join_for_empty_rule_position_chain_src_b__global_position_mid_src_b: literal.Join
+        self.join_for_empty_rule_position_chain_src_a__global_position_mid_src_a: literal.Join
         self.join_for_empty_rule_position_chain_src_b: literal.Join
-        self.join_for_empty_rule_position_chain_src_c__global_position_mid_src_c: literal.Join
+        self.join_for_empty_rule_position_chain_src_b__global_position_mid_src_b: literal.Join
         self.join_for_empty_rule_position_chain_src_c: literal.Join
-        self.join_for_empty_rule_position_chain_dest__global_position_mid_dest: literal.Join
+        self.join_for_empty_rule_position_chain_src_c__global_position_mid_src_c: literal.Join
         self.join_for_empty_rule_position_chain_dest: literal.Join
+        self.join_for_empty_rule_position_chain_dest__global_position_mid_dest: literal.Join
         self.join_for_empty_rule_position_trigger: literal.Join
 
     def accept_for_empty_rule_position_chain_src_a__global_position_mid_src_a__global_position_end_src_a(self):
@@ -128,45 +133,45 @@ class ActExecution:
             return
         self.move_position_chain_src_c__global_position_mid_src_c__global_position_end_src_c_to_position_chain_dest__global_position_mid_dest__global_position_end_dest()
 
-    def accept_for_empty_rule_position_chain_src_a__global_position_mid_src_a(self):
-        if not self.join_for_empty_rule_position_chain_src_a__global_position_mid_src_a.arrive():
-            return
-        self.destroy_position_chain_src_a__global_position_mid_src_a()
-
     def accept_for_empty_rule_position_chain_src_a(self):
         if not self.join_for_empty_rule_position_chain_src_a.arrive():
             return
         self.destroy_position_chain_src_a()
 
-    def accept_for_empty_rule_position_chain_src_b__global_position_mid_src_b(self):
-        if not self.join_for_empty_rule_position_chain_src_b__global_position_mid_src_b.arrive():
+    def accept_for_empty_rule_position_chain_src_a__global_position_mid_src_a(self):
+        if not self.join_for_empty_rule_position_chain_src_a__global_position_mid_src_a.arrive():
             return
-        self.destroy_position_chain_src_b__global_position_mid_src_b()
+        self.destroy_position_chain_src_a__global_position_mid_src_a()
 
     def accept_for_empty_rule_position_chain_src_b(self):
         if not self.join_for_empty_rule_position_chain_src_b.arrive():
             return
         self.destroy_position_chain_src_b()
 
-    def accept_for_empty_rule_position_chain_src_c__global_position_mid_src_c(self):
-        if not self.join_for_empty_rule_position_chain_src_c__global_position_mid_src_c.arrive():
+    def accept_for_empty_rule_position_chain_src_b__global_position_mid_src_b(self):
+        if not self.join_for_empty_rule_position_chain_src_b__global_position_mid_src_b.arrive():
             return
-        self.destroy_position_chain_src_c__global_position_mid_src_c()
+        self.destroy_position_chain_src_b__global_position_mid_src_b()
 
     def accept_for_empty_rule_position_chain_src_c(self):
         if not self.join_for_empty_rule_position_chain_src_c.arrive():
             return
         self.destroy_position_chain_src_c()
 
-    def accept_for_empty_rule_position_chain_dest__global_position_mid_dest(self):
-        if not self.join_for_empty_rule_position_chain_dest__global_position_mid_dest.arrive():
+    def accept_for_empty_rule_position_chain_src_c__global_position_mid_src_c(self):
+        if not self.join_for_empty_rule_position_chain_src_c__global_position_mid_src_c.arrive():
             return
-        self.destroy_position_chain_dest__global_position_mid_dest()
+        self.destroy_position_chain_src_c__global_position_mid_src_c()
 
     def accept_for_empty_rule_position_chain_dest(self):
         if not self.join_for_empty_rule_position_chain_dest.arrive():
             return
         self.destroy_position_chain_dest()
+
+    def accept_for_empty_rule_position_chain_dest__global_position_mid_dest(self):
+        if not self.join_for_empty_rule_position_chain_dest__global_position_mid_dest.arrive():
+            return
+        self.destroy_position_chain_dest__global_position_mid_dest()
 
     def accept_for_empty_rule_position_trigger(self):
         if not self.join_for_empty_rule_position_trigger.arrive():
@@ -183,6 +188,12 @@ class ActExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.end_src_a.EndSrcA
         ).move_particle_to(self.local_position_local_dest)
+        self.destruction_position_position_chain_src_a__global_position_mid_src_a = self.action.get_interface_position(
+            "position<chain_src_a>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.mid_src_a.MidSrcA
+        )
+        self.scheduler.submit(self.destroy_position_chain_src_a)
         self.scheduler.submit(self.destroy_position_chain_src_a__global_position_mid_src_a)
         self.destroy_position_local_dest()
 
@@ -200,6 +211,12 @@ class ActExecution:
                 "position<iface_dest>"
             )
         )
+        self.destruction_position_position_chain_src_b__global_position_mid_src_b = self.action.get_interface_position(
+            "position<chain_src_b>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.mid_src_b.MidSrcB
+        )
+        self.scheduler.submit(self.destroy_position_chain_src_b)
         self.scheduler.submit(self.destroy_position_chain_src_b__global_position_mid_src_b)
         self.destroy_position_iface_dest()
 
@@ -221,21 +238,28 @@ class ActExecution:
                 local.my_domain_com.my_lib.end_dest.EndDest
             )
         )
-        self.scheduler.submit(self.destroy_position_chain_src_c__global_position_mid_src_c)
-        self.destroy_position_chain_dest__global_position_mid_dest__global_position_end_dest()
-
-    def destroy_position_chain_src_a__global_position_mid_src_a(self):
-        if not self.join_for_destroy_position_chain_src_a__global_position_mid_src_a.arrive():
-            return
-        literal.continue_destruction(self.continue_destroy_position_chain_src_a__global_position_mid_src_a)
-
-    def continue_destroy_position_chain_src_a__global_position_mid_src_a(self):
-        self.action.get_interface_position(
-            "position<chain_src_a>"
+        self.destruction_position_position_chain_src_c__global_position_mid_src_c = self.action.get_interface_position(
+            "position<chain_src_c>"
         ).particle.get_position(
-            local.my_domain_com.my_lib.mid_src_a.MidSrcA
-        ).destroy_particle()
-        self.destroy_position_chain_src_a()
+            local.my_domain_com.my_lib.mid_src_c.MidSrcC
+        )
+        self.destruction_position_position_chain_dest__global_position_mid_dest = self.action.get_interface_position(
+            "position<chain_dest>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.mid_dest.MidDest
+        )
+        self.destruction_position_position_chain_dest__global_position_mid_dest__global_position_end_dest = self.action.get_interface_position(
+            "position<chain_dest>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.mid_dest.MidDest
+        ).particle.get_position(
+            local.my_domain_com.my_lib.end_dest.EndDest
+        )
+        self.scheduler.submit(self.destroy_position_chain_src_c)
+        self.scheduler.submit(self.destroy_position_chain_src_c__global_position_mid_src_c)
+        self.scheduler.submit(self.destroy_position_chain_dest)
+        self.scheduler.submit(self.destroy_position_chain_dest__global_position_mid_dest)
+        self.destroy_position_chain_dest__global_position_mid_dest__global_position_end_dest()
 
     def destroy_position_chain_src_a(self):
         if not self.join_for_destroy_position_chain_src_a.arrive():
@@ -250,18 +274,13 @@ class ActExecution:
             self.scheduler,
         )
 
-    def destroy_position_chain_src_b__global_position_mid_src_b(self):
-        if not self.join_for_destroy_position_chain_src_b__global_position_mid_src_b.arrive():
+    def destroy_position_chain_src_a__global_position_mid_src_a(self):
+        if not self.join_for_destroy_position_chain_src_a__global_position_mid_src_a.arrive():
             return
-        literal.continue_destruction(self.continue_destroy_position_chain_src_b__global_position_mid_src_b)
+        literal.continue_destruction(self.continue_destroy_position_chain_src_a__global_position_mid_src_a)
 
-    def continue_destroy_position_chain_src_b__global_position_mid_src_b(self):
-        self.action.get_interface_position(
-            "position<chain_src_b>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.mid_src_b.MidSrcB
-        ).destroy_particle()
-        self.destroy_position_chain_src_b()
+    def continue_destroy_position_chain_src_a__global_position_mid_src_a(self):
+        self.destruction_position_position_chain_src_a__global_position_mid_src_a.destroy_particle()
 
     def destroy_position_chain_src_b(self):
         if not self.join_for_destroy_position_chain_src_b.arrive():
@@ -276,18 +295,13 @@ class ActExecution:
             self.scheduler,
         )
 
-    def destroy_position_chain_src_c__global_position_mid_src_c(self):
-        if not self.join_for_destroy_position_chain_src_c__global_position_mid_src_c.arrive():
+    def destroy_position_chain_src_b__global_position_mid_src_b(self):
+        if not self.join_for_destroy_position_chain_src_b__global_position_mid_src_b.arrive():
             return
-        literal.continue_destruction(self.continue_destroy_position_chain_src_c__global_position_mid_src_c)
+        literal.continue_destruction(self.continue_destroy_position_chain_src_b__global_position_mid_src_b)
 
-    def continue_destroy_position_chain_src_c__global_position_mid_src_c(self):
-        self.action.get_interface_position(
-            "position<chain_src_c>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.mid_src_c.MidSrcC
-        ).destroy_particle()
-        self.destroy_position_chain_src_c()
+    def continue_destroy_position_chain_src_b__global_position_mid_src_b(self):
+        self.destruction_position_position_chain_src_b__global_position_mid_src_b.destroy_particle()
 
     def destroy_position_chain_src_c(self):
         if not self.join_for_destroy_position_chain_src_c.arrive():
@@ -302,6 +316,14 @@ class ActExecution:
             self.scheduler,
         )
 
+    def destroy_position_chain_src_c__global_position_mid_src_c(self):
+        if not self.join_for_destroy_position_chain_src_c__global_position_mid_src_c.arrive():
+            return
+        literal.continue_destruction(self.continue_destroy_position_chain_src_c__global_position_mid_src_c)
+
+    def continue_destroy_position_chain_src_c__global_position_mid_src_c(self):
+        self.destruction_position_position_chain_src_c__global_position_mid_src_c.destroy_particle()
+
     def destroy_position_iface_dest(self):
         literal.continue_destruction(self.continue_destroy_position_iface_dest)
 
@@ -312,32 +334,6 @@ class ActExecution:
         self.guarantees.position_iface_dest.publish(
             self.scheduler,
         )
-
-    def destroy_position_chain_dest__global_position_mid_dest__global_position_end_dest(self):
-        literal.continue_destruction(self.continue_destroy_position_chain_dest__global_position_mid_dest__global_position_end_dest)
-
-    def continue_destroy_position_chain_dest__global_position_mid_dest__global_position_end_dest(self):
-        self.action.get_interface_position(
-            "position<chain_dest>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.mid_dest.MidDest
-        ).particle.get_position(
-            local.my_domain_com.my_lib.end_dest.EndDest
-        ).destroy_particle()
-        self.destroy_position_chain_dest__global_position_mid_dest()
-
-    def destroy_position_chain_dest__global_position_mid_dest(self):
-        if not self.join_for_destroy_position_chain_dest__global_position_mid_dest.arrive():
-            return
-        literal.continue_destruction(self.continue_destroy_position_chain_dest__global_position_mid_dest)
-
-    def continue_destroy_position_chain_dest__global_position_mid_dest(self):
-        self.action.get_interface_position(
-            "position<chain_dest>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.mid_dest.MidDest
-        ).destroy_particle()
-        self.destroy_position_chain_dest()
 
     def destroy_position_chain_dest(self):
         if not self.join_for_destroy_position_chain_dest.arrive():
@@ -351,6 +347,20 @@ class ActExecution:
         self.guarantees.position_chain_dest.publish(
             self.scheduler,
         )
+
+    def destroy_position_chain_dest__global_position_mid_dest(self):
+        if not self.join_for_destroy_position_chain_dest__global_position_mid_dest.arrive():
+            return
+        literal.continue_destruction(self.continue_destroy_position_chain_dest__global_position_mid_dest)
+
+    def continue_destroy_position_chain_dest__global_position_mid_dest(self):
+        self.destruction_position_position_chain_dest__global_position_mid_dest.destroy_particle()
+
+    def destroy_position_chain_dest__global_position_mid_dest__global_position_end_dest(self):
+        literal.continue_destruction(self.continue_destroy_position_chain_dest__global_position_mid_dest__global_position_end_dest)
+
+    def continue_destroy_position_chain_dest__global_position_mid_dest__global_position_end_dest(self):
+        self.destruction_position_position_chain_dest__global_position_mid_dest__global_position_end_dest.destroy_particle()
 
     def destroy_position_trigger(self):
         if not self.join_for_destroy_position_trigger.arrive():

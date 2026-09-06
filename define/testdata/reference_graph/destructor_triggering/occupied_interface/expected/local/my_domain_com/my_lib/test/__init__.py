@@ -32,6 +32,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_box__action_destructor: local.my_domain_com.my_lib.destructor.DestructorExecution
+        self.destruction_position_position_box__action_destructor__position_item: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_box()
@@ -46,6 +47,12 @@ class TestExecution:
         )
         self.execution_position_box__action_destructor.join_for_empty_rule_position_item = literal.NO_JOIN
         self.execution_position_box__action_destructor.join_for_move_position_item_to_position_holder = literal.NO_JOIN
+        self.execution_position_box__action_destructor.guarantees.position_item.inits.append(
+            self.init_position_box__action_destructor__position_item
+        )
+        self.execution_position_box__action_destructor.guarantees.position_item.consumers.append(
+            self.destroy_position_box
+        )
         self.execution_position_box__action_destructor.guarantees.position_item.consumers.append(
             self.destroy_position_box__action_destructor__position_item
         )
@@ -59,10 +66,15 @@ class TestExecution:
         ).create_particle()
         self.execution_position_box__action_destructor.accept_for_empty_rule_position_item()
 
+    def destroy_position_box(self):
+        self.local_position_box.destroy_particle()
+
     def destroy_position_box__action_destructor__position_item(self):
-        self.local_position_box.particle.get_action(
+        self.destruction_position_position_box__action_destructor__position_item.destroy_particle()
+
+    def init_position_box__action_destructor__position_item(self):
+        self.destruction_position_position_box__action_destructor__position_item = self.local_position_box.particle.get_action(
             local.my_domain_com.my_lib.destructor.Destructor
         ).get_interface_position(
             "position<item>"
-        ).destroy_particle()
-        self.local_position_box.destroy_particle()
+        )

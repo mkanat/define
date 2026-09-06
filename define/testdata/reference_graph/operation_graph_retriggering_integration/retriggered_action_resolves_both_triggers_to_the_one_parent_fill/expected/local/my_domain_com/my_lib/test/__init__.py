@@ -34,6 +34,11 @@ class TestExecution:
         )
         self.execution_position_gw__action_maker: local.my_domain_com.my_lib.maker.MakerExecution
         self.execution_position_gw__action_maker_2: local.my_domain_com.my_lib.maker.MakerExecution
+        self.destruction_position_position_gw__action_maker__position_held__global_position_c: literal.Position
+        self.destruction_position_position_gw__action_maker__position_trigger_pos: literal.Position
+        self.destruction_position_position_gw__action_maker__position_held: literal.Position
+        self.destruction_position_position_gw__action_maker__position_held__global_position_c_2: literal.Position
+        self.destruction_position_position_gw__action_maker__position_trigger_pos_2: literal.Position
         self.join_for_destroy_position_gw = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -47,6 +52,9 @@ class TestExecution:
             ),
             self.scheduler,
         )
+        self.execution_position_gw__action_maker.guarantees.position_held__global_position_c.inits.append(
+            self.init_position_gw__action_maker__position_held__global_position_c
+        )
         self.execution_position_gw__action_maker.guarantees.position_held__global_position_c.consumers.append(
             self.destroy_position_gw__action_maker__position_held__global_position_c
         )
@@ -55,6 +63,12 @@ class TestExecution:
                 local.my_domain_com.my_lib.maker.Maker
             ),
             self.scheduler,
+        )
+        self.execution_position_gw__action_maker_2.guarantees.position_held__global_position_c.inits.append(
+            self.init_position_gw__action_maker__position_held__global_position_c_2
+        )
+        self.execution_position_gw__action_maker_2.guarantees.position_held__global_position_c.consumers.append(
+            self.destroy_position_gw__action_maker__position_held
         )
         self.execution_position_gw__action_maker_2.guarantees.position_held__global_position_c.consumers.append(
             self.destroy_position_gw__action_maker__position_held__global_position_c_2
@@ -76,49 +90,60 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_gw.particle.get_action(
+        self.destruction_position_position_gw__action_maker__position_trigger_pos = self.local_position_gw.particle.get_action(
             local.my_domain_com.my_lib.maker.Maker
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_gw__action_maker__position_trigger_pos.destroy_particle()
         self.local_position_gw.particle.get_action(
             local.my_domain_com.my_lib.maker.Maker
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_gw.particle.get_action(
+        self.destruction_position_position_gw__action_maker__position_trigger_pos_2 = self.local_position_gw.particle.get_action(
             local.my_domain_com.my_lib.maker.Maker
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_gw__action_maker__position_trigger_pos_2.destroy_particle()
         self.destroy_position_gw()
 
     def destroy_position_gw__action_maker__position_held__global_position_c(self):
-        self.local_position_gw.particle.get_action(
-            local.my_domain_com.my_lib.maker.Maker
-        ).get_interface_position(
-            "position<held>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.c.C
-        ).destroy_particle()
+        self.destruction_position_position_gw__action_maker__position_held__global_position_c.destroy_particle()
         self.execution_position_gw__action_maker_2.accept_when_empty_position_held__global_position_c()
 
-    def destroy_position_gw__action_maker__position_held__global_position_c_2(self):
-        self.local_position_gw.particle.get_action(
-            local.my_domain_com.my_lib.maker.Maker
-        ).get_interface_position(
-            "position<held>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.c.C
-        ).destroy_particle()
-        self.local_position_gw.particle.get_action(
-            local.my_domain_com.my_lib.maker.Maker
-        ).get_interface_position(
-            "position<held>"
-        ).destroy_particle()
+    def destroy_position_gw__action_maker__position_held(self):
+        self.destruction_position_position_gw__action_maker__position_held.destroy_particle()
         self.destroy_position_gw()
+
+    def destroy_position_gw__action_maker__position_held__global_position_c_2(self):
+        self.destruction_position_position_gw__action_maker__position_held__global_position_c_2.destroy_particle()
 
     def destroy_position_gw(self):
         if not self.join_for_destroy_position_gw.arrive():
             return
         self.local_position_gw.destroy_particle()
+
+    def init_position_gw__action_maker__position_held__global_position_c(self):
+        self.destruction_position_position_gw__action_maker__position_held__global_position_c = self.local_position_gw.particle.get_action(
+            local.my_domain_com.my_lib.maker.Maker
+        ).get_interface_position(
+            "position<held>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.c.C
+        )
+
+    def init_position_gw__action_maker__position_held__global_position_c_2(self):
+        self.destruction_position_position_gw__action_maker__position_held = self.local_position_gw.particle.get_action(
+            local.my_domain_com.my_lib.maker.Maker
+        ).get_interface_position(
+            "position<held>"
+        )
+        self.destruction_position_position_gw__action_maker__position_held__global_position_c_2 = self.local_position_gw.particle.get_action(
+            local.my_domain_com.my_lib.maker.Maker
+        ).get_interface_position(
+            "position<held>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.c.C
+        )

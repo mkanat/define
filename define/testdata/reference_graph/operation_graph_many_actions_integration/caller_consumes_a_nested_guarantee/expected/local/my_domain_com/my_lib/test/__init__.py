@@ -36,6 +36,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_box__action_middle: local.my_domain_com.my_lib.middle.MiddleExecution
+        self.destruction_position_position_box__action_middle__position_trigger_pos: literal.Position
         self.join_for_destroy_position_box = self.scheduler.create_join(3)
 
     def on_action_parent_occupied(self):
@@ -78,11 +79,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_box.particle.get_action(
+        self.destruction_position_position_box__action_middle__position_trigger_pos = self.local_position_box.particle.get_action(
             local.my_domain_com.my_lib.middle.Middle
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_box__action_middle__position_trigger_pos.destroy_particle()
         self.destroy_position_box()
 
     def move_position_box__action_middle__position_out_to_position_result(self):
@@ -91,13 +93,13 @@ class TestExecution:
         ).get_interface_position(
             "position<out>"
         ).move_particle_to(self.local_position_result)
-        self.scheduler.submit(self.destroy_position_box)
-        self.destroy_position_result()
+        self.scheduler.submit(self.destroy_position_result)
+        self.destroy_position_box()
+
+    def destroy_position_result(self):
+        self.local_position_result.destroy_particle()
 
     def destroy_position_box(self):
         if not self.join_for_destroy_position_box.arrive():
             return
         self.local_position_box.destroy_particle()
-
-    def destroy_position_result(self):
-        self.local_position_result.destroy_particle()

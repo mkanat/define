@@ -58,6 +58,8 @@ class CallerExecution:
         self.destruction_connections = destruction_connections
         self.execution_position_first_gateway__action_worker: local.my_domain_com.my_lib.worker.WorkerExecution
         self.execution_position_second_gateway__action_worker: local.my_domain_com.my_lib.worker.WorkerExecution
+        self.destruction_position_position_first_gateway__action_worker__position_first: literal.Position
+        self.destruction_position_position_second_gateway__action_worker__position_first: literal.Position
         self.join_for_destroy_position_first_gateway = self.scheduler.create_join(3)
         self.join_for_destroy_position_second_gateway = self.scheduler.create_join(3)
         self.join_for_destroy_position_run: literal.Join
@@ -128,13 +130,14 @@ class CallerExecution:
         ).get_interface_position(
             "position<first>"
         ).create_particle()
-        self.action.get_interface_position(
+        self.destruction_position_position_first_gateway__action_worker__position_first = self.action.get_interface_position(
             "position<first_gateway>"
         ).particle.get_action(
             local.my_domain_com.my_lib.worker.Worker
         ).get_interface_position(
             "position<first>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_first_gateway__action_worker__position_first.destroy_particle()
         self.destroy_position_first_gateway()
 
     def create_position_second_gateway(self):
@@ -191,13 +194,14 @@ class CallerExecution:
         ).get_interface_position(
             "position<first>"
         ).create_particle()
-        self.action.get_interface_position(
+        self.destruction_position_position_second_gateway__action_worker__position_first = self.action.get_interface_position(
             "position<second_gateway>"
         ).particle.get_action(
             local.my_domain_com.my_lib.worker.Worker
         ).get_interface_position(
             "position<first>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_second_gateway__action_worker__position_first.destroy_particle()
         self.destroy_position_second_gateway()
 
     def destroy_position_first_gateway(self):

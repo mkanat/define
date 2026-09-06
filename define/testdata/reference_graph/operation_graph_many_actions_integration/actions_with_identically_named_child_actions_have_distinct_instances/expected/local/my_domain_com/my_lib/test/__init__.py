@@ -34,6 +34,8 @@ class TestExecution:
         self.scheduler = scheduler
         self.execution_action_first: local.my_domain_com.my_lib.first.FirstExecution
         self.execution_action_second: local.my_domain_com.my_lib.second.SecondExecution
+        self.destruction_position_action_first__position_trigger_pos: literal.Position
+        self.destruction_position_action_second__position_trigger_pos: literal.Position
         self.execution_action_first = local.my_domain_com.my_lib.first.FirstExecution(
             self.scheduler,
         )
@@ -53,11 +55,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_first__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.first.First
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_first__position_trigger_pos.destroy_particle()
 
     def create_action_second__position_trigger_pos(self):
         self.action.on_particle.get_action(
@@ -65,8 +68,9 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_second__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.second.Second
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_second__position_trigger_pos.destroy_particle()

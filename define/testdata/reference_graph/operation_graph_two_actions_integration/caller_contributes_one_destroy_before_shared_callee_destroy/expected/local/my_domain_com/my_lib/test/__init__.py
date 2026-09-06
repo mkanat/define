@@ -40,6 +40,7 @@ class TestExecution:
         self.destruction_connection_position_gateway__action_other_2: literal.DestructionConnection
         self.destruction_position_position_gateway__action_other__position_parent__global_position_child__global_position_grandchild__global_position_greatgrandchild: literal.Position
         self.destruction_position_position_gateway__action_other__position_parent__global_position_child__global_position_sibling: literal.Position
+        self.destruction_position_position_gateway__action_other__position_trigger_pos: literal.Position
         self.join_for_destroy_position_gateway = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -70,11 +71,11 @@ class TestExecution:
             ),
         )
         self.execution_position_gateway__action_other.join_for_empty_rule_position_parent__global_position_child__global_position_grandchild = literal.NO_JOIN
-        self.execution_position_gateway__action_other.join_for_empty_rule_position_parent__global_position_child = literal.NO_JOIN
         self.execution_position_gateway__action_other.join_for_empty_rule_position_parent = literal.NO_JOIN
+        self.execution_position_gateway__action_other.join_for_empty_rule_position_parent__global_position_child = literal.NO_JOIN
         self.execution_position_gateway__action_other.join_for_destroy_position_parent__global_position_child__global_position_grandchild = literal.NO_JOIN
+        self.execution_position_gateway__action_other.join_for_destroy_position_parent = self.scheduler.create_join(2)
         self.execution_position_gateway__action_other.join_for_destroy_position_parent__global_position_child = self.scheduler.create_join(2)
-        self.execution_position_gateway__action_other.join_for_destroy_position_parent = literal.NO_JOIN
         self.execution_position_gateway__action_other.guarantees.position_parent.consumers.append(
             self.destroy_position_gateway
         )
@@ -116,6 +117,7 @@ class TestExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.sibling.Sibling
         )
+        self.scheduler.submit(self.execution_position_gateway__action_other.accept_for_empty_rule_position_parent)
         self.execution_position_gateway__action_other.accept_for_empty_rule_position_parent__global_position_child()
 
     def create_position_gateway__action_other__position_parent__global_position_child__global_position_grandchild(self):
@@ -158,11 +160,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_gateway.particle.get_action(
+        self.destruction_position_position_gateway__action_other__position_trigger_pos = self.local_position_gateway.particle.get_action(
             local.my_domain_com.my_lib.other.Other
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_gateway__action_other__position_trigger_pos.destroy_particle()
         self.destroy_position_gateway()
 
     def destroy_position_gateway__action_other__position_parent__global_position_child__global_position_grandchild__global_position_greatgrandchild(self):

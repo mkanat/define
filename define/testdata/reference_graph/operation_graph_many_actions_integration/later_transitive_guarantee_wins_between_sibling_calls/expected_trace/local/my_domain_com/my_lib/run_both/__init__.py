@@ -43,6 +43,8 @@ class RunBothExecution:
         )
         self.execution_action_call_fill: local.my_domain_com.my_lib.call_fill.CallFillExecution
         self.execution_action_call_empty: local.my_domain_com.my_lib.call_empty.CallEmptyExecution
+        self.destruction_position_action_call_fill__position_trigger_pos: literal.Position
+        self.destruction_position_action_call_empty__position_trigger_pos: literal.Position
         self.execution_action_call_fill = local.my_domain_com.my_lib.call_fill.CallFillExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.call_fill.CallFill
@@ -86,11 +88,12 @@ class RunBothExecution:
             "/call_fill::trigger_pos",
             1,
         )
-        self.action.on_particle.get_action(
+        self.destruction_position_action_call_fill__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.call_fill.CallFill
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_call_fill__position_trigger_pos.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "/call_fill::trigger_pos",
@@ -108,11 +111,12 @@ class RunBothExecution:
             "/call_empty::trigger_pos",
             1,
         )
-        self.action.on_particle.get_action(
+        self.destruction_position_action_call_empty__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.call_empty.CallEmpty
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_call_empty__position_trigger_pos.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "/call_empty::trigger_pos",

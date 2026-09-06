@@ -187,7 +187,7 @@
         "action_name": "test"
       },
       "operation_name": "destroy",
-      "target": "gateway::/other::destination::/a",
+      "target": "gateway::/other::destination::/b",
       "occurrence": 1
     },
     "dependencies": [
@@ -273,45 +273,10 @@
         "action_name": "test"
       },
       "operation_name": "destroy",
-      "target": "gateway::/other::destination::/b",
-      "occurrence": 1
-    },
-    "dependencies": [
-      {
-        "execution": {
-          "caller": {
-            "caller": null,
-            "action_name": "test"
-          },
-          "action_name": "other"
-        },
-        "operation_name": "move",
-        "source": "source",
-        "target": "destination",
-        "occurrence": 1
-      }
-    ]
-  },
-  {
-    "operation": {
-      "execution": {
-        "caller": null,
-        "action_name": "test"
-      },
-      "operation_name": "destroy",
       "target": "gateway::/other::destination",
       "occurrence": 1
     },
     "dependencies": [
-      {
-        "execution": {
-          "caller": null,
-          "action_name": "test"
-        },
-        "operation_name": "destroy",
-        "target": "gateway::/other::destination::/a",
-        "occurrence": 1
-      },
       {
         "execution": {
           "caller": {
@@ -325,15 +290,6 @@
         },
         "operation_name": "destroy",
         "target": "run",
-        "occurrence": 1
-      },
-      {
-        "execution": {
-          "caller": null,
-          "action_name": "test"
-        },
-        "operation_name": "destroy",
-        "target": "gateway::/other::destination::/b",
         "occurrence": 1
       }
     ]
@@ -368,6 +324,32 @@
         },
         "operation_name": "destroy",
         "target": "gateway::/other::destination",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "operation": {
+      "execution": {
+        "caller": null,
+        "action_name": "test"
+      },
+      "operation_name": "destroy",
+      "target": "gateway::/other::destination::/a",
+      "occurrence": 1
+    },
+    "dependencies": [
+      {
+        "execution": {
+          "caller": {
+            "caller": null,
+            "action_name": "test"
+          },
+          "action_name": "other"
+        },
+        "operation_name": "move",
+        "source": "source",
+        "target": "destination",
         "occurrence": 1
       }
     ]

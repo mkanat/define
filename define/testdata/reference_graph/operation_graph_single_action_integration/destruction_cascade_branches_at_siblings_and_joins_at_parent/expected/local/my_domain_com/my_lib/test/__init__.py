@@ -34,6 +34,9 @@ class TestExecution:
             ),
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_box__global_position_child: literal.Position
+        self.destruction_position_position_box__global_position_child__global_position_grandchild: literal.Position
+        self.destruction_position_position_box__global_position_sibling: literal.Position
         self.join_for_destroy_position_box = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -53,26 +56,38 @@ class TestExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.grandchild.Grandchild
         ).create_particle()
-        self.local_position_box.particle.get_position(
+        self.destruction_position_position_box__global_position_child = self.local_position_box.particle.get_position(
+            local.my_domain_com.my_lib.child.Child
+        )
+        self.destruction_position_position_box__global_position_child__global_position_grandchild = self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.child.Child
         ).particle.get_position(
             local.my_domain_com.my_lib.grandchild.Grandchild
-        ).destroy_particle()
-        self.local_position_box.particle.get_position(
-            local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
-        self.destroy_position_box()
+        )
+        self.scheduler.submit(self.destroy_position_box)
+        self.scheduler.submit(self.destroy_position_box__global_position_child)
+        self.destroy_position_box__global_position_child__global_position_grandchild()
 
     def create_position_box__global_position_sibling(self):
         self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.sibling.Sibling
         ).create_particle()
-        self.local_position_box.particle.get_position(
+        self.destruction_position_position_box__global_position_sibling = self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.sibling.Sibling
-        ).destroy_particle()
-        self.destroy_position_box()
+        )
+        self.scheduler.submit(self.destroy_position_box)
+        self.destroy_position_box__global_position_sibling()
 
     def destroy_position_box(self):
         if not self.join_for_destroy_position_box.arrive():
             return
         self.local_position_box.destroy_particle()
+
+    def destroy_position_box__global_position_child(self):
+        self.destruction_position_position_box__global_position_child.destroy_particle()
+
+    def destroy_position_box__global_position_child__global_position_grandchild(self):
+        self.destruction_position_position_box__global_position_child__global_position_grandchild.destroy_particle()
+
+    def destroy_position_box__global_position_sibling(self):
+        self.destruction_position_position_box__global_position_sibling.destroy_particle()

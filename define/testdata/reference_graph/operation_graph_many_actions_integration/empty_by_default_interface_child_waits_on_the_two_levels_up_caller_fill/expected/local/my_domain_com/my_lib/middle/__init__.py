@@ -51,6 +51,9 @@ class MiddleExecution:
         self.guarantees = MiddleGuarantees()
         self.destruction_connections = destruction_connections
         self.execution_position_gw__action_inner: local.my_domain_com.my_lib.inner.InnerExecution
+        self.destruction_position_position_gw__action_inner__position_holder: literal.Position
+        self.destruction_position_position_gw__action_inner__position_holder__global_position_a: literal.Position
+        self.destruction_position_position_gw__action_inner__position_trigger_pos: literal.Position
         self.join_for_move_position_gw__global_position_holder_to_position_gw__action_inner__position_holder: literal.Join
         self.join_for_destroy_position_gw: literal.Join
         self.join_for_empty_rule_position_gw__global_position_holder: literal.Join
@@ -70,6 +73,12 @@ class MiddleExecution:
             ),
             self.scheduler,
         )
+        self.execution_position_gw__action_inner.guarantees.position_holder__global_position_a.inits.append(
+            self.init_position_gw__action_inner__position_holder__global_position_a
+        )
+        self.execution_position_gw__action_inner.guarantees.position_holder__global_position_a.consumers.append(
+            self.destroy_position_gw__action_inner__position_holder
+        )
         self.execution_position_gw__action_inner.guarantees.position_holder__global_position_a.consumers.append(
             self.destroy_position_gw__action_inner__position_holder__global_position_a
         )
@@ -84,6 +93,12 @@ class MiddleExecution:
                 local.my_domain_com.my_lib.inner.Inner
             ),
             self.scheduler,
+        )
+        self.execution_position_gw__action_inner.guarantees.position_holder__global_position_a.inits.append(
+            self.init_position_gw__action_inner__position_holder__global_position_a
+        )
+        self.execution_position_gw__action_inner.guarantees.position_holder__global_position_a.consumers.append(
+            self.destroy_position_gw__action_inner__position_holder
         )
         self.execution_position_gw__action_inner.guarantees.position_holder__global_position_a.consumers.append(
             self.destroy_position_gw__action_inner__position_holder__global_position_a
@@ -123,42 +138,28 @@ class MiddleExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.get_interface_position(
+        self.destruction_position_position_gw__action_inner__position_trigger_pos = self.action.get_interface_position(
             "position<gw>"
         ).particle.get_action(
             local.my_domain_com.my_lib.inner.Inner
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_gw__action_inner__position_trigger_pos.destroy_particle()
+        self.destroy_position_gw()
+
+    def destroy_position_gw__action_inner__position_holder(self):
+        literal.continue_destruction(self.continue_destroy_position_gw__action_inner__position_holder)
+
+    def continue_destroy_position_gw__action_inner__position_holder(self):
+        self.destruction_position_position_gw__action_inner__position_holder.destroy_particle()
         self.destroy_position_gw()
 
     def destroy_position_gw__action_inner__position_holder__global_position_a(self):
         literal.continue_destruction(self.continue_destroy_position_gw__action_inner__position_holder__global_position_a)
 
     def continue_destroy_position_gw__action_inner__position_holder__global_position_a(self):
-        self.action.get_interface_position(
-            "position<gw>"
-        ).particle.get_action(
-            local.my_domain_com.my_lib.inner.Inner
-        ).get_interface_position(
-            "position<holder>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.a.A
-        ).destroy_particle()
-        self.destroy_position_gw__action_inner__position_holder()
-
-    def destroy_position_gw__action_inner__position_holder(self):
-        literal.continue_destruction(self.continue_destroy_position_gw__action_inner__position_holder)
-
-    def continue_destroy_position_gw__action_inner__position_holder(self):
-        self.action.get_interface_position(
-            "position<gw>"
-        ).particle.get_action(
-            local.my_domain_com.my_lib.inner.Inner
-        ).get_interface_position(
-            "position<holder>"
-        ).destroy_particle()
-        self.destroy_position_gw()
+        self.destruction_position_position_gw__action_inner__position_holder__global_position_a.destroy_particle()
 
     def destroy_position_gw(self):
         if not self.join_for_destroy_position_gw.arrive():
@@ -171,4 +172,22 @@ class MiddleExecution:
         ).destroy_particle()
         self.guarantees.position_gw.publish(
             self.scheduler,
+        )
+
+    def init_position_gw__action_inner__position_holder__global_position_a(self):
+        self.destruction_position_position_gw__action_inner__position_holder = self.action.get_interface_position(
+            "position<gw>"
+        ).particle.get_action(
+            local.my_domain_com.my_lib.inner.Inner
+        ).get_interface_position(
+            "position<holder>"
+        )
+        self.destruction_position_position_gw__action_inner__position_holder__global_position_a = self.action.get_interface_position(
+            "position<gw>"
+        ).particle.get_action(
+            local.my_domain_com.my_lib.inner.Inner
+        ).get_interface_position(
+            "position<holder>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.a.A
         )

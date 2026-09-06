@@ -36,6 +36,8 @@ class TestExecution:
         )
         self.execution_position_box__action_maker: local.my_domain_com.my_lib.maker.MakerExecution
         self.execution_position_box__global_position_child__action_destructor: local.my_domain_com.my_lib.destructor.DestructorExecution
+        self.destruction_position_position_box__global_position_child: literal.Position
+        self.destruction_position_position_box__action_maker__position_run: literal.Position
         self.join_for_destroy_position_box = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -66,17 +68,16 @@ class TestExecution:
         ).get_interface_position(
             "position<run>"
         ).create_particle()
-        self.local_position_box.particle.get_action(
+        self.destruction_position_position_box__action_maker__position_run = self.local_position_box.particle.get_action(
             local.my_domain_com.my_lib.maker.Maker
         ).get_interface_position(
             "position<run>"
-        ).destroy_particle()
-        self.destroy_position_box()
+        )
+        self.scheduler.submit(self.destroy_position_box)
+        self.destroy_position_box__action_maker__position_run()
 
     def destroy_position_box__global_position_child(self):
-        self.local_position_box.particle.get_position(
-            local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
+        self.destruction_position_position_box__global_position_child.destroy_particle()
         self.destroy_position_box()
 
     def destroy_position_box(self):
@@ -84,7 +85,13 @@ class TestExecution:
             return
         self.local_position_box.destroy_particle()
 
+    def destroy_position_box__action_maker__position_run(self):
+        self.destruction_position_position_box__action_maker__position_run.destroy_particle()
+
     def init_position_box__action_maker__global_position_child(self):
+        self.destruction_position_position_box__global_position_child = self.local_position_box.particle.get_position(
+            local.my_domain_com.my_lib.child.Child
+        )
         self.execution_position_box__global_position_child__action_destructor = local.my_domain_com.my_lib.destructor.DestructorExecution(
             self.scheduler,
         )

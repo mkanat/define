@@ -37,12 +37,17 @@ class MiddleExecution:
         self.scheduler = scheduler
         self.destruction_connections = destruction_connections
         self.execution_action_mover: local.my_domain_com.my_lib.mover.MoverExecution
+        self.destruction_position_action_mover__position_destination: literal.Position
+        self.destruction_position_action_mover__position_trigger_pos: literal.Position
         self.join_for_empty_rule_global_position_parent: literal.Join
         self.execution_action_mover = local.my_domain_com.my_lib.mover.MoverExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.mover.Mover
             ),
             self.scheduler,
+        )
+        self.execution_action_mover.guarantees.global_position_parent__move__position_destination.inits.append(
+            self.init_action_mover__global_position_parent__move__position_destination
         )
         self.execution_action_mover.guarantees.global_position_parent__move__position_destination.consumers.append(
             self.destroy_action_mover__position_destination
@@ -62,18 +67,22 @@ class MiddleExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_mover__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.mover.Mover
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_mover__position_trigger_pos.destroy_particle()
 
     def destroy_action_mover__position_destination(self):
         literal.continue_destruction(self.continue_destroy_action_mover__position_destination)
 
     def continue_destroy_action_mover__position_destination(self):
-        self.action.on_particle.get_action(
+        self.destruction_position_action_mover__position_destination.destroy_particle()
+
+    def init_action_mover__global_position_parent__move__position_destination(self):
+        self.destruction_position_action_mover__position_destination = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.mover.Mover
         ).get_interface_position(
             "position<destination>"
-        ).destroy_particle()
+        )

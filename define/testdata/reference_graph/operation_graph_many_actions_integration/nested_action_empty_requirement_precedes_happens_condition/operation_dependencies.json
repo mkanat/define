@@ -428,18 +428,6 @@
       {
         "execution": {
           "caller": {
-            "caller": null,
-            "action_name": "test"
-          },
-          "action_name": "runner"
-        },
-        "operation_name": "destroy",
-        "target": "wrapper::/middle::final",
-        "occurrence": 1
-      },
-      {
-        "execution": {
-          "caller": {
             "caller": {
               "caller": null,
               "action_name": "test"

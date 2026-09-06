@@ -38,6 +38,7 @@ class TestExecution:
         self.action = action
         self.scheduler = scheduler
         self.guarantees = TestGuarantees()
+        self.destruction_position_global_position_implied__global_position_child: literal.Position
 
     def accept_when_empty_global_position_implied(self):
         self.create_global_position_implied()
@@ -51,14 +52,21 @@ class TestExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.child.Child
         ).create_particle()
-        self.action.on_particle.get_position(
+        self.destruction_position_global_position_implied__global_position_child = self.action.on_particle.get_position(
             local.my_domain_com.my_lib.implied.Implied
         ).particle.get_position(
             local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
+        )
+        self.scheduler.submit(self.destroy_global_position_implied)
+        self.destroy_global_position_implied__global_position_child()
+
+    def destroy_global_position_implied(self):
         self.action.on_particle.get_position(
             local.my_domain_com.my_lib.implied.Implied
         ).destroy_particle()
         self.guarantees.global_position_implied.publish(
             self.scheduler,
         )
+
+    def destroy_global_position_implied__global_position_child(self):
+        self.destruction_position_global_position_implied__global_position_child.destroy_particle()

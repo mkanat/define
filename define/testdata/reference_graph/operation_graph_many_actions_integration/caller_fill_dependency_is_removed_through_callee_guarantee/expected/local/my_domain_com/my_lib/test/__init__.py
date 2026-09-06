@@ -46,6 +46,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_action_mover: local.my_domain_com.my_lib.mover.MoverExecution
+        self.destruction_position_action_mover__position_trigger_pos: literal.Position
         self.join_for_move_position_temp_to_global_position_slot: literal.Join
         self.join_when_empty_global_position_slot: literal.Join
         self.join_when_empty_global_position_out: literal.Join
@@ -102,8 +103,9 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_mover__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.mover.Mover
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_mover__position_trigger_pos.destroy_particle()

@@ -108,11 +108,22 @@ def _verified_destructor_guarantees(
 
 
 @dataclass(frozen=True, slots=True)
+class _DestructionTarget:
+    """A particle whose destruction also destroys its occupied children."""
+
+    position: ast.PositionReference
+    destruction_fact: operation_graph_model.DestructionFact
+    auto_destruction_target: ast.PositionReference | None
+
+
+@dataclass(frozen=True, slots=True)
 class _PendingDestructionContract:
-    """Contract data retained until the explicit Destroy operation is recorded."""
+    """A Destruction Contract captured before tracked particle state changes."""
 
     particle: particle_info.ParticleInfo
     child_state: dict[tuple[str, ...], action_contract.ChildOccupancy]
+    destroyed_particle_position: ast.PositionReference
+    destruction_fact: operation_graph_model.DestructionFact
 
 
 class ActionPostorderValidator:
@@ -317,7 +328,8 @@ class ActionPostorderValidator:
                 continue
             definition_result = self._definition_results.get(quality)
             # The constructor's file may have failed to load or parse, which is
-            # reported elsewhere; skipping it here keeps the cascade crash-free.
+            # reported elsewhere; skipping it here keeps destruction analysis
+            # from failing on an already-reported error.
             if definition_result is None:
                 continue
             definition = typing.cast(
@@ -343,35 +355,86 @@ class ActionPostorderValidator:
                 ),
             )
 
-    def _execute_destruction_cascade(
+    def _destroy_particles(
+        self,
+        targets: Sequence[_DestructionTarget],
+        scope: scope_tracker.ScopeTracker,
+        *,
+        is_auto_destruction: bool,
+    ):
+        """Destroy the target particles and their occupied transitive children."""
+        particle_destructions: list[particle_tracker.ParticleDestruction] = []
+        destructors: list[
+            tuple[action_contract.Destructor, ast.PositionReference | None]
+        ] = []
+        pending_contracts: list[_PendingDestructionContract] = []
+        for target in targets:
+            transitive_children: list[ast.PositionReference] = []
+            particle_destructions.append(
+                particle_tracker.ParticleDestruction(
+                    target.position, target.destruction_fact, transitive_children
+                )
+            )
+            self._collect_particle_destructions(
+                target.position,
+                self._tracker.get_occupant(target.position),
+                target,
+                transitive_children,
+                destructors,
+                pending_contracts,
+            )
+
+        for destructor, auto_destruction_target in destructors:
+            self._run_destructor(
+                destructor,
+                scope,
+                auto_destruction_target=auto_destruction_target,
+            )
+
+        self._tracker.destroy_simultaneously(particle_destructions)
+        for pending_contract in pending_contracts:
+            self._record_destruction_contract(
+                pending_contract.particle,
+                pending_contract.child_state,
+                pending_contract.destruction_fact,
+                pending_contract.destroyed_particle_position,
+                is_auto_destruction=is_auto_destruction,
+            )
+
+    def _collect_particle_destructions(
         self,
         position: ast.PositionReference,
         particle: particle_info.ParticleInfo,
-        destruction_fact: operation_graph_model.DestructionFact,
-        scope: scope_tracker.ScopeTracker,
-        *,
-        is_auto_destruction: bool = False,
-        auto_destruction_target: ast.PositionReference | None = None,
-        destroy_particle: bool = True,
-        has_active_destruction_fact: bool = False,
-    ) -> _PendingDestructionContract | None:
-        """Execute one occupied particle's destruction cascade."""
-        child_state = None
+        target: _DestructionTarget,
+        transitive_children: list[ast.PositionReference],
+        destructors: list[
+            tuple[action_contract.Destructor, ast.PositionReference | None]
+        ],
+        pending_contracts: list[_PendingDestructionContract],
+    ):
+        """Collect one particle and every occupied transitive child."""
         if particle.from_caller:
-            child_state = self._tracker.snapshot_child_state(position)
-            has_active_destruction_fact = True
-        # A particle keeps its own qualities across moves, so it is the source
-        # of the qualities to check for destructors (not the position).
-        for quality in reversed(particle.qualities.assignments):
+            pending_contracts.append(
+                _PendingDestructionContract(
+                    particle=particle,
+                    child_state=self._tracker.snapshot_child_state(position),
+                    destroyed_particle_position=position,
+                    destruction_fact=target.destruction_fact,
+                )
+            )
+
+        # A particle keeps its own qualities across Moves, so its qualities—not
+        # the current Position's constraints—determine its child Positions and
+        # Destructors.
+        for quality in particle.qualities.assignments:
             if quality.name_type == ast.NameType.POSITION:
                 child = position.with_position_suffix(quality)
-                self._execute_cascade_child(
+                self._collect_child_particle_destructions(
                     child,
-                    destruction_fact,
-                    scope,
-                    is_auto_destruction=is_auto_destruction,
-                    auto_destruction_target=auto_destruction_target,
-                    has_active_destruction_fact=has_active_destruction_fact,
+                    target,
+                    transitive_children,
+                    destructors,
+                    pending_contracts,
                 )
             else:
                 definition_result = self._definition_results.get(quality)
@@ -381,74 +444,50 @@ class ActionPostorderValidator:
                     "ast.ActionDefinition", definition_result.definition
                 )
                 if definition.is_destructor:
-                    self._run_destructor(
-                        action_contract.CascadeDestructor(
-                            destructor=quality,
-                            position=position,
-                            origin_position=particle.origin_position,
-                        ),
-                        scope,
-                        auto_destruction_target=auto_destruction_target,
+                    destructors.append(
+                        (
+                            action_contract.Destructor(
+                                destructor=quality,
+                                position=position,
+                                origin_position=particle.origin_position,
+                            ),
+                            target.auto_destruction_target,
+                        )
                     )
-                for interface_position in reversed(definition.interface_positions):
+                for interface_position in definition.interface_positions:
                     child = position.with_position_suffix(
                         quality, interface_position.typed_name
                     )
-                    self._execute_cascade_child(
+                    self._collect_child_particle_destructions(
                         child,
-                        destruction_fact,
-                        scope,
-                        is_auto_destruction=is_auto_destruction,
-                        auto_destruction_target=auto_destruction_target,
-                        has_active_destruction_fact=has_active_destruction_fact,
+                        target,
+                        transitive_children,
+                        destructors,
+                        pending_contracts,
                     )
-        if destroy_particle:
-            if has_active_destruction_fact:
-                self._tracker.destroy_for_destruction_fact(
-                    position,
-                    destruction_fact,
-                )
-            else:
-                self._tracker.destroy(position)
-            if child_state is not None:
-                self._record_destruction_contract(
-                    particle,
-                    child_state,
-                    destruction_fact,
-                    position,
-                    is_auto_destruction=is_auto_destruction,
-                )
-            return None
-        if child_state is None:
-            return None
-        return _PendingDestructionContract(particle, child_state)
 
-    def _execute_cascade_child(
+    def _collect_child_particle_destructions(
         self,
         position: ast.PositionReference,
-        destruction_fact: operation_graph_model.DestructionFact,
-        scope: scope_tracker.ScopeTracker,
-        *,
-        is_auto_destruction: bool,
-        auto_destruction_target: ast.PositionReference | None,
-        has_active_destruction_fact: bool,
+        target: _DestructionTarget,
+        transitive_children: list[ast.PositionReference],
+        destructors: list[
+            tuple[action_contract.Destructor, ast.PositionReference | None]
+        ],
+        pending_contracts: list[_PendingDestructionContract],
     ):
-        """Execute destruction for one position reached during a cascade."""
+        """Collect an occupied child Position's transitive destruction."""
         occupancy = self._tracker.get_occupancy_info(position)
-        if occupancy.has_error:
+        if occupancy.has_error or occupancy.occupant is None:
             return
-        if occupancy.occupant is None:
-            # The walk already has the nearest particle, so an exact-position
-            # check avoids searching the particle trie for an occupied ancestor.
-            return
-        _ = self._execute_destruction_cascade(
+        transitive_children.append(position)
+        self._collect_particle_destructions(
             position,
             occupancy.occupant,
-            destruction_fact,
-            scope,
-            is_auto_destruction=is_auto_destruction,
-            auto_destruction_target=auto_destruction_target,
-            has_active_destruction_fact=has_active_destruction_fact,
+            target,
+            transitive_children,
+            destructors,
+            pending_contracts,
         )
 
     def _record_destruction_contract(
@@ -480,11 +519,11 @@ class ActionPostorderValidator:
 
     def _run_destructor(
         self,
-        destructor: action_contract.CascadeDestructor,
+        destructor: action_contract.Destructor,
         scope: scope_tracker.ScopeTracker,
         auto_destruction_target: ast.PositionReference | None = None,
     ):
-        """Trigger one destructor at its point in a destruction cascade."""
+        """Trigger one directly known destructor before particle destruction."""
         # A destructor's requirements are checked as though it triggered
         # synchronously at the moment of destruction (DLP 41). The destructor is a
         # quality of the particle in `position`, so its interface positions
@@ -706,7 +745,7 @@ class ActionPostorderValidator:
 
     def _check_destructor_requirements(
         self,
-        destructor: action_contract.CascadeDestructor,
+        destructor: action_contract.Destructor,
         requirements_in_caller: list[action_contract.PositionRequirementInCaller],
         *,
         auto_destruction_target: ast.PositionReference | None,
@@ -732,11 +771,11 @@ class ActionPostorderValidator:
     def _destructor_quality_assignments(
         self, qualities: quality_assignment.QualityAssignments
     ) -> quality_assignment.QualityAssignments:
-        """Return destructor assignments in firing order."""
+        """Return the destructor assignments among a particle's qualities."""
         # TODO: This feels inefficient to do every time, but let's wait for actual
         # profiling data to tell us if that's important.
         result: list[ast.GlobalTypedNameReference] = []
-        for quality in reversed(qualities.assignments):
+        for quality in qualities.assignments:
             if quality.name_type != ast.NameType.ACTION:
                 continue
             definition_result = self._definition_results[quality]
@@ -1265,11 +1304,12 @@ class ActionPostorderValidator:
     def _auto_destruct_locals(self, scope: scope_tracker.ScopeTracker):
         """Destroy any particles still in positions defined locally in this block.
 
-        Per the spec's "Automatic Destruction" section: at block end, particles
-        still occupying positions defined only within this block are destroyed in
-        reverse definition order, firing destructors along the way.
+        Per the spec's "Automatic Destruction" section, all particles still
+        occupying Positions defined only within this block are simultaneously
+        automatically destroyed.
         """
-        for definition in reversed(scope.current_scope_definitions()):
+        targets: list[_DestructionTarget] = []
+        for definition in scope.current_scope_definitions():
             position = ast.PositionReference(
                 typed_names=(definition.typed_name,),
                 location=definition.location,
@@ -1281,17 +1321,18 @@ class ActionPostorderValidator:
             if occupancy.has_error or occupancy.occupant is None:
                 continue
             auto_destruction_target = occupancy.occupant.last_position
-            _ = self._execute_destruction_cascade(
-                position,
-                occupancy.occupant,
-                operation_graph_model.DestructionFact(
-                    destroyed_position_in_destroyer=position,
-                    destroying_action=self._definition.typed_name,
-                ),
-                scope,
-                is_auto_destruction=True,
-                auto_destruction_target=auto_destruction_target,
+            targets.append(
+                _DestructionTarget(
+                    position=position,
+                    destruction_fact=operation_graph_model.DestructionFact(
+                        destroyed_position_in_destroyer=position,
+                        destroying_action=self._definition.typed_name,
+                    ),
+                    auto_destruction_target=auto_destruction_target,
+                )
             )
+        if targets:
+            self._destroy_particles(targets, scope, is_auto_destruction=True)
 
     def _analyze_create(
         self,
@@ -1339,32 +1380,24 @@ class ActionPostorderValidator:
             destroying_action=self._definition.typed_name,
         )
 
-        def before_destroy() -> _PendingDestructionContract | None:
-            return self._execute_destruction_cascade(
-                stmt.target_position,
-                self._tracker.get_occupant(stmt.target_position),
-                destruction_fact,
+        def destroy() -> None:
+            self._destroy_particles(
+                (
+                    _DestructionTarget(
+                        position=stmt.target_position,
+                        destruction_fact=destruction_fact,
+                        auto_destruction_target=None,
+                    ),
+                ),
                 scope,
-                destroy_particle=False,
+                is_auto_destruction=False,
             )
 
-        diags, pending_contract = self._executor.execute_destroy(
+        diags = self._executor.execute_destroy(
             particle_operation.Destroy(target=stmt.target_position),
-            before_destroy=before_destroy,
-            destruction_fact=destruction_fact,
+            destroy=destroy,
         )
         self._diagnostics.extend(diags)
-        if diags:
-            return
-        if pending_contract is None:
-            return
-        self._record_destruction_contract(
-            pending_contract.particle,
-            pending_contract.child_state,
-            destruction_fact,
-            stmt.target_position,
-            is_auto_destruction=False,
-        )
 
     def _analyze_move(
         self,

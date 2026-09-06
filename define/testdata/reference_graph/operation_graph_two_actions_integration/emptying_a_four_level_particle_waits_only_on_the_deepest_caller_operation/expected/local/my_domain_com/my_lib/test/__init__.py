@@ -40,6 +40,11 @@ class TestExecution:
         self.action = action
         self.scheduler = scheduler
         self.execution_action_other: local.my_domain_com.my_lib.other.OtherExecution
+        self.destruction_position_action_other__position_out: literal.Position
+        self.destruction_position_action_other__position_out__global_position_child: literal.Position
+        self.destruction_position_action_other__position_out__global_position_child__global_position_grandchild: literal.Position
+        self.destruction_position_action_other__position_out__global_position_child__global_position_grandchild__global_position_greatgrandchild: literal.Position
+        self.destruction_position_action_other__position_trigger_pos: literal.Position
         self.join_when_empty_action_other__position_out: literal.Join
         self.execution_action_other = local.my_domain_com.my_lib.other.OtherExecution(
             self.action.on_particle.get_action(
@@ -48,6 +53,18 @@ class TestExecution:
             self.scheduler,
         )
         self.execution_action_other.join_for_move_global_position_parent_to_position_out = literal.NO_JOIN
+        self.execution_action_other.guarantees.global_position_parent__move__position_out.inits.append(
+            self.init_action_other__global_position_parent__move__position_out
+        )
+        self.execution_action_other.guarantees.global_position_parent__move__position_out.consumers.append(
+            self.destroy_action_other__position_out
+        )
+        self.execution_action_other.guarantees.global_position_parent__move__position_out.consumers.append(
+            self.destroy_action_other__position_out__global_position_child
+        )
+        self.execution_action_other.guarantees.global_position_parent__move__position_out.consumers.append(
+            self.destroy_action_other__position_out__global_position_child__global_position_grandchild
+        )
         self.execution_action_other.guarantees.global_position_parent__move__position_out.consumers.append(
             self.destroy_action_other__position_out__global_position_child__global_position_grandchild__global_position_greatgrandchild
         )
@@ -96,14 +113,48 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_other__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.other.Other
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_other__position_trigger_pos.destroy_particle()
+
+    def destroy_action_other__position_out(self):
+        self.destruction_position_action_other__position_out.destroy_particle()
+
+    def destroy_action_other__position_out__global_position_child(self):
+        self.destruction_position_action_other__position_out__global_position_child.destroy_particle()
+
+    def destroy_action_other__position_out__global_position_child__global_position_grandchild(self):
+        self.destruction_position_action_other__position_out__global_position_child__global_position_grandchild.destroy_particle()
 
     def destroy_action_other__position_out__global_position_child__global_position_grandchild__global_position_greatgrandchild(self):
-        self.action.on_particle.get_action(
+        self.destruction_position_action_other__position_out__global_position_child__global_position_grandchild__global_position_greatgrandchild.destroy_particle()
+
+    def init_action_other__global_position_parent__move__position_out(self):
+        self.destruction_position_action_other__position_out = self.action.on_particle.get_action(
+            local.my_domain_com.my_lib.other.Other
+        ).get_interface_position(
+            "position<out>"
+        )
+        self.destruction_position_action_other__position_out__global_position_child = self.action.on_particle.get_action(
+            local.my_domain_com.my_lib.other.Other
+        ).get_interface_position(
+            "position<out>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.child.Child
+        )
+        self.destruction_position_action_other__position_out__global_position_child__global_position_grandchild = self.action.on_particle.get_action(
+            local.my_domain_com.my_lib.other.Other
+        ).get_interface_position(
+            "position<out>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.child.Child
+        ).particle.get_position(
+            local.my_domain_com.my_lib.grandchild.Grandchild
+        )
+        self.destruction_position_action_other__position_out__global_position_child__global_position_grandchild__global_position_greatgrandchild = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.other.Other
         ).get_interface_position(
             "position<out>"
@@ -113,25 +164,4 @@ class TestExecution:
             local.my_domain_com.my_lib.grandchild.Grandchild
         ).particle.get_position(
             local.my_domain_com.my_lib.greatgrandchild.Greatgrandchild
-        ).destroy_particle()
-        self.action.on_particle.get_action(
-            local.my_domain_com.my_lib.other.Other
-        ).get_interface_position(
-            "position<out>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.child.Child
-        ).particle.get_position(
-            local.my_domain_com.my_lib.grandchild.Grandchild
-        ).destroy_particle()
-        self.action.on_particle.get_action(
-            local.my_domain_com.my_lib.other.Other
-        ).get_interface_position(
-            "position<out>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
-        self.action.on_particle.get_action(
-            local.my_domain_com.my_lib.other.Other
-        ).get_interface_position(
-            "position<out>"
-        ).destroy_particle()
+        )

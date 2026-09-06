@@ -115,7 +115,7 @@
           "caller": null,
           "action_name": "test"
         },
-        "operation_name": "destroy",
+        "operation_name": "create",
         "target": "box::/b",
         "occurrence": 1
       },
@@ -124,7 +124,7 @@
           "caller": null,
           "action_name": "test"
         },
-        "operation_name": "destroy",
+        "operation_name": "create",
         "target": "box::/a",
         "occurrence": 1
       }

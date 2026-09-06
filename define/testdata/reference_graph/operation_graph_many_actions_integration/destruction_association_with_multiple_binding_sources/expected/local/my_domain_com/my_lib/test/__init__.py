@@ -61,6 +61,8 @@ class TestExecution:
         self.execution_action_mover: local.my_domain_com.my_lib.mover.MoverExecution
         self.destruction_connection_action_mover: literal.DestructionConnection
         self.destruction_position_action_mover__position_discard__global_position_caller_only: literal.Position
+        self.destruction_position_action_fill_a__position_trigger_pos: literal.Position
+        self.destruction_position_action_fill_b__position_trigger_pos: literal.Position
         self.join_when_empty_action_mover__position_guaranteed_destination: literal.Join
         self.join_when_empty_action_mover__position_caller_destination: literal.Join
         self.join_for_accept_guarantee_action_mover: literal.Join
@@ -185,11 +187,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_fill_a__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.fill_a.FillA
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_fill_a__position_trigger_pos.destroy_particle()
 
     def create_action_fill_b__position_trigger_pos(self):
         self.action.on_particle.get_action(
@@ -197,11 +200,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_fill_b__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.fill_b.FillB
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_fill_b__position_trigger_pos.destroy_particle()
 
     def create_action_mover__position_trigger_pos(self):
         self.action.on_particle.get_action(

@@ -56,6 +56,7 @@ class WorkExecution:
         self.scheduler = scheduler
         self.guarantees = WorkGuarantees()
         self.destruction_connections = destruction_connections
+        self.destruction_position_position_dest__global_position_shared: literal.Position
         self.join_for_move_position_source_to_position_dest: literal.Join
         self.join_for_destroy_position_run: literal.Join
         self.join_when_empty_position_dest: literal.Join
@@ -95,17 +96,18 @@ class WorkExecution:
                 "position<dest>"
             )
         )
+        self.destruction_position_position_dest__global_position_shared = self.action.get_interface_position(
+            "position<dest>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.shared.Shared
+        )
         self.guarantees.position_source.publish(
             self.scheduler,
             self.destroy_position_dest__global_position_shared,
         )
 
     def destroy_position_dest__global_position_shared(self):
-        self.action.get_interface_position(
-            "position<dest>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.shared.Shared
-        ).destroy_particle()
+        self.destruction_position_position_dest__global_position_shared.destroy_particle()
         self.action.get_interface_position(
             "position<dest>"
         ).destroy_particle()

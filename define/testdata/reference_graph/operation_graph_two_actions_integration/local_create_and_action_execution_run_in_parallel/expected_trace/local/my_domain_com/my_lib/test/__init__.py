@@ -43,6 +43,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_action_other: local.my_domain_com.my_lib.other.OtherExecution
+        self.destruction_position_action_other__position_trigger_pos: literal.Position
         self.execution_action_other = local.my_domain_com.my_lib.other.OtherExecution(
             self.scheduler,
             self.trace_execution,
@@ -65,11 +66,12 @@ class TestExecution:
             "/other::trigger_pos",
             1,
         )
-        self.action.on_particle.get_action(
+        self.destruction_position_action_other__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.other.Other
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_other__position_trigger_pos.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "/other::trigger_pos",

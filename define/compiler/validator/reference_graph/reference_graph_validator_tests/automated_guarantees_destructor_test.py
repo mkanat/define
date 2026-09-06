@@ -14,6 +14,18 @@ if TYPE_CHECKING:
     )
 
 
+def test_body_error_does_not_add_a_destructor_guarantee_error(
+    validate_testdata_project_with_reference_graph: ValidateTestdataProjectWithReferenceGraph,
+):
+    result = validate_testdata_project_with_reference_graph()
+    assert result.program_result.all_exceptions == []
+    (diagnostic,) = result.program_result.all_diagnostics
+    assert isinstance(diagnostic, diagnostics.MoveFromEmptyPositionDiagnostic)
+    assert diagnostic.location.file_path == PurePosixPath("test.dfn")
+    assert diagnostic.location.line == 11
+    assert diagnostic.position_name == "position</item>"
+
+
 def test_create_in_interface_produces_occupied_guarantee(
     validate_testdata_project_with_reference_graph: ValidateTestdataProjectWithReferenceGraph,
 ):

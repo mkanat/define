@@ -66,6 +66,7 @@ class MiddleExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_inner_holder__action_inner: local.my_domain_com.my_lib.inner.InnerExecution
+        self.destruction_position_position_final__global_position_implied: literal.Position
         self.join_for_move_position_box_to_position_inner_holder__action_inner__position_input: literal.Join
         self.join_for_move_position_inner_holder__action_inner__position_output_to_position_final: literal.Join
         self.join_for_destroy_position_run: literal.Join
@@ -150,6 +151,11 @@ class MiddleExecution:
                 "position<final>"
             )
         )
+        self.destruction_position_position_final__global_position_implied = self.action.get_interface_position(
+            "position<final>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.implied.Implied
+        )
         self.scheduler.submit(self.destroy_position_final__global_position_implied)
         self.destroy_position_inner_holder()
 
@@ -157,11 +163,7 @@ class MiddleExecution:
         literal.continue_destruction(self.continue_destroy_position_final__global_position_implied)
 
     def continue_destroy_position_final__global_position_implied(self):
-        self.action.get_interface_position(
-            "position<final>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.implied.Implied
-        ).destroy_particle()
+        self.destruction_position_position_final__global_position_implied.destroy_particle()
         self.destroy_position_final()
 
     def destroy_position_final(self):

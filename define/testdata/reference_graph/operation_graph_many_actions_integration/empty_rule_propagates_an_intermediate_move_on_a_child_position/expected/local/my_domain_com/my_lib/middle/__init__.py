@@ -39,6 +39,7 @@ class MiddleExecution:
         self.action = action
         self.scheduler = scheduler
         self.execution_action_inner: local.my_domain_com.my_lib.inner.InnerExecution
+        self.destruction_position_action_inner__position_trigger_pos: literal.Position
         self.join_for_move_global_position_destination_to_global_position_input__global_position_marker: literal.Join
         self.join_for_empty_rule_global_position_destination: literal.Join
         self.join_for_empty_rule_global_position_input: literal.Join
@@ -83,8 +84,9 @@ class MiddleExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_inner__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.inner.Inner
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_inner__position_trigger_pos.destroy_particle()

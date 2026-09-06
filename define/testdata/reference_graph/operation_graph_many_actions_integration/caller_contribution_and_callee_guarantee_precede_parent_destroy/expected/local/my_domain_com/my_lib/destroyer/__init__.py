@@ -48,6 +48,7 @@ class DestroyerExecution:
         self.guarantees = DestroyerGuarantees()
         self.destruction_connections = destruction_connections
         self.execution_position_parent__action_maker: local.my_domain_com.my_lib.maker.MakerExecution
+        self.destruction_position_position_parent__action_maker__position_trigger_pos: literal.Position
         self.join_for_destroy_position_parent: literal.Join
         self.join_for_empty_rule_position_parent: literal.Join
 
@@ -98,20 +99,15 @@ class DestroyerExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.destroy_position_parent__action_maker__position_trigger_pos()
-
-    def destroy_position_parent__action_maker__position_trigger_pos(self):
-        literal.continue_destruction(self.continue_destroy_position_parent__action_maker__position_trigger_pos)
-
-    def continue_destroy_position_parent__action_maker__position_trigger_pos(self):
-        self.action.get_interface_position(
+        self.destruction_position_position_parent__action_maker__position_trigger_pos = self.action.get_interface_position(
             "position<parent>"
         ).particle.get_action(
             local.my_domain_com.my_lib.maker.Maker
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
-        self.destroy_position_parent()
+        )
+        self.scheduler.submit(self.destroy_position_parent)
+        self.destroy_position_parent__action_maker__position_trigger_pos()
 
     def destroy_position_parent(self):
         if not self.join_for_destroy_position_parent.arrive():
@@ -125,3 +121,9 @@ class DestroyerExecution:
         self.guarantees.position_parent.publish(
             self.scheduler,
         )
+
+    def destroy_position_parent__action_maker__position_trigger_pos(self):
+        literal.continue_destruction(self.continue_destroy_position_parent__action_maker__position_trigger_pos)
+
+    def continue_destroy_position_parent__action_maker__position_trigger_pos(self):
+        self.destruction_position_position_parent__action_maker__position_trigger_pos.destroy_particle()

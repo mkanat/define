@@ -33,6 +33,8 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_gw__action_worker: local.my_domain_com.my_lib.worker.WorkerExecution
+        self.destruction_position_position_gw__action_worker__position_box: literal.Position
+        self.destruction_position_position_gw__action_worker__position_box__global_position_y: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_gw()
@@ -47,6 +49,12 @@ class TestExecution:
         )
         self.execution_position_gw__action_worker.join_for_empty_rule_position_in = self.scheduler.create_join(2)
         self.execution_position_gw__action_worker.join_for_move_position_in_to_position_box__global_position_y = literal.NO_JOIN
+        self.execution_position_gw__action_worker.guarantees.position_in__move__position_box__global_position_y.inits.append(
+            self.init_position_gw__action_worker__position_in__move__position_box__global_position_y
+        )
+        self.execution_position_gw__action_worker.guarantees.position_in__move__position_box__global_position_y.consumers.append(
+            self.destroy_position_gw__action_worker__position_box
+        )
         self.execution_position_gw__action_worker.guarantees.position_in__move__position_box__global_position_y.consumers.append(
             self.destroy_position_gw__action_worker__position_box__global_position_y
         )
@@ -69,17 +77,23 @@ class TestExecution:
         ).create_particle()
         self.execution_position_gw__action_worker.accept_for_empty_rule_position_in()
 
+    def destroy_position_gw__action_worker__position_box(self):
+        self.destruction_position_position_gw__action_worker__position_box.destroy_particle()
+        self.local_position_gw.destroy_particle()
+
     def destroy_position_gw__action_worker__position_box__global_position_y(self):
-        self.local_position_gw.particle.get_action(
+        self.destruction_position_position_gw__action_worker__position_box__global_position_y.destroy_particle()
+
+    def init_position_gw__action_worker__position_in__move__position_box__global_position_y(self):
+        self.destruction_position_position_gw__action_worker__position_box = self.local_position_gw.particle.get_action(
+            local.my_domain_com.my_lib.worker.Worker
+        ).get_interface_position(
+            "position<box>"
+        )
+        self.destruction_position_position_gw__action_worker__position_box__global_position_y = self.local_position_gw.particle.get_action(
             local.my_domain_com.my_lib.worker.Worker
         ).get_interface_position(
             "position<box>"
         ).particle.get_position(
             local.my_domain_com.my_lib.y.Y
-        ).destroy_particle()
-        self.local_position_gw.particle.get_action(
-            local.my_domain_com.my_lib.worker.Worker
-        ).get_interface_position(
-            "position<box>"
-        ).destroy_particle()
-        self.local_position_gw.destroy_particle()
+        )

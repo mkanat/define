@@ -33,6 +33,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_mw__action_middle: local.my_domain_com.my_lib.middle.MiddleExecution
+        self.destruction_position_position_mw__action_middle__position_run: literal.Position
         self.join_for_destroy_position_mw = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -76,11 +77,12 @@ class TestExecution:
         ).get_interface_position(
             "position<run>"
         ).create_particle()
-        self.local_position_mw.particle.get_action(
+        self.destruction_position_position_mw__action_middle__position_run = self.local_position_mw.particle.get_action(
             local.my_domain_com.my_lib.middle.Middle
         ).get_interface_position(
             "position<run>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_mw__action_middle__position_run.destroy_particle()
         self.destroy_position_mw()
 
     def destroy_position_mw(self):

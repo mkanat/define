@@ -36,7 +36,8 @@ class RunnerExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_wrapper__action_middle: local.my_domain_com.my_lib.middle.MiddleExecution
-        self.join_for_destroy_position_wrapper = self.scheduler.create_join(3)
+        self.destruction_position_position_wrapper__action_middle__position_final: literal.Position
+        self.join_for_destroy_position_wrapper = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
         self.create_position_wrapper()
@@ -56,14 +57,17 @@ class RunnerExecution:
         self.execution_position_wrapper__action_middle.join_for_move_position_box__action_worker__position_output_to_position_final = literal.NO_JOIN
         self.execution_position_wrapper__action_middle.join_for_destroy_position_box = self.scheduler.create_join(2)
         self.execution_position_wrapper__action_middle.join_for_destroy_position_run = literal.NO_JOIN
-        self.execution_position_wrapper__action_middle.guarantees.position_final.consumers.append(
-            self.destroy_position_wrapper__action_middle__position_final
-        )
         self.execution_position_wrapper__action_middle.guarantees.position_box.consumers.append(
             self.destroy_position_wrapper
         )
         self.execution_position_wrapper__action_middle.guarantees.position_run.consumers.append(
             self.destroy_position_wrapper
+        )
+        self.execution_position_wrapper__action_middle.guarantees.position_final.inits.append(
+            self.init_position_wrapper__action_middle__position_final
+        )
+        self.execution_position_wrapper__action_middle.guarantees.position_final.consumers.append(
+            self.destroy_position_wrapper__action_middle__position_final
         )
         self.scheduler.submit(self.create_position_wrapper__action_middle__position_box)
         self.create_position_wrapper__action_middle__position_run()
@@ -86,15 +90,17 @@ class RunnerExecution:
         ).create_particle()
         self.execution_position_wrapper__action_middle.accept_for_empty_rule_position_run()
 
-    def destroy_position_wrapper__action_middle__position_final(self):
-        self.local_position_wrapper.particle.get_action(
-            local.my_domain_com.my_lib.middle.Middle
-        ).get_interface_position(
-            "position<final>"
-        ).destroy_particle()
-        self.destroy_position_wrapper()
-
     def destroy_position_wrapper(self):
         if not self.join_for_destroy_position_wrapper.arrive():
             return
         self.local_position_wrapper.destroy_particle()
+
+    def destroy_position_wrapper__action_middle__position_final(self):
+        self.destruction_position_position_wrapper__action_middle__position_final.destroy_particle()
+
+    def init_position_wrapper__action_middle__position_final(self):
+        self.destruction_position_position_wrapper__action_middle__position_final = self.local_position_wrapper.particle.get_action(
+            local.my_domain_com.my_lib.middle.Middle
+        ).get_interface_position(
+            "position<final>"
+        )

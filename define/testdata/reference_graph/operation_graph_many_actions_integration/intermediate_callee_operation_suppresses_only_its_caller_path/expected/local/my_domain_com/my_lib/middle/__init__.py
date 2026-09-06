@@ -43,6 +43,8 @@ class MiddleExecution:
         self.execution_action_inner: local.my_domain_com.my_lib.inner.InnerExecution
         self.destruction_connection_action_inner: literal.DestructionConnection
         self.destruction_position_global_position_parent__global_position_child: literal.Position
+        self.destruction_position_global_position_parent__global_position_child__global_position_grandchild: literal.Position
+        self.destruction_position_action_inner__position_trigger_pos: literal.Position
         self.join_for_destroy_global_position_parent__global_position_child__global_position_grandchild: literal.Join
         self.join_for_empty_rule_global_position_parent__global_position_child__global_position_grandchild: literal.Join
         self.join_for_empty_rule_global_position_parent: literal.Join
@@ -71,6 +73,13 @@ class MiddleExecution:
     def accept_for_empty_rule_global_position_parent__global_position_child__global_position_grandchild(self):
         if not self.join_for_empty_rule_global_position_parent__global_position_child__global_position_grandchild.arrive():
             return
+        self.destruction_position_global_position_parent__global_position_child__global_position_grandchild = self.action.on_particle.get_position(
+            local.my_domain_com.my_lib.parent.Parent
+        ).particle.get_position(
+            local.my_domain_com.my_lib.child.Child
+        ).particle.get_position(
+            local.my_domain_com.my_lib.grandchild.Grandchild
+        )
         self.destroy_global_position_parent__global_position_child__global_position_grandchild()
 
     def on_action_parent_occupied(self):
@@ -87,13 +96,7 @@ class MiddleExecution:
         literal.continue_destruction(self.continue_destroy_global_position_parent__global_position_child__global_position_grandchild)
 
     def continue_destroy_global_position_parent__global_position_child__global_position_grandchild(self):
-        self.action.on_particle.get_position(
-            local.my_domain_com.my_lib.parent.Parent
-        ).particle.get_position(
-            local.my_domain_com.my_lib.child.Child
-        ).particle.get_position(
-            local.my_domain_com.my_lib.grandchild.Grandchild
-        ).destroy_particle()
+        self.destruction_position_global_position_parent__global_position_child__global_position_grandchild.destroy_particle()
         self.action_inner__for_empty_rule_global_position_parent()
 
     def create_action_inner__position_trigger_pos(self):
@@ -102,11 +105,12 @@ class MiddleExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_inner__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.inner.Inner
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_inner__position_trigger_pos.destroy_particle()
 
     def destroy_global_position_parent__global_position_child(self):
         literal.continue_destruction(self.continue_destroy_global_position_parent__global_position_child)

@@ -374,6 +374,48 @@
         "action_name": "destroyer"
       },
       "operation_name": "destroy",
+      "target": "target",
+      "occurrence": 1
+    },
+    "dependencies": [
+      {
+        "execution": {
+          "caller": {
+            "caller": null,
+            "action_name": "test"
+          },
+          "action_name": "destroyer"
+        },
+        "operation_name": "move",
+        "source": "right_holder",
+        "target": "target::/right",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": null,
+            "action_name": "test"
+          },
+          "action_name": "destroyer"
+        },
+        "operation_name": "move",
+        "source": "left_holder",
+        "target": "target::/left",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "operation": {
+      "execution": {
+        "caller": {
+          "caller": null,
+          "action_name": "test"
+        },
+        "action_name": "destroyer"
+      },
+      "operation_name": "destroy",
       "target": "target::/left::/extra",
       "occurrence": 1
     },
@@ -458,6 +500,63 @@
         "operation_name": "move",
         "source": "/left",
         "target": "holder",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "operation": {
+      "execution": {
+        "caller": {
+          "caller": null,
+          "action_name": "test"
+        },
+        "action_name": "destroyer"
+      },
+      "operation_name": "destroy",
+      "target": "target::/left",
+      "occurrence": 1
+    },
+    "dependencies": [
+      {
+        "execution": {
+          "caller": {
+            "caller": null,
+            "action_name": "test"
+          },
+          "action_name": "destroyer"
+        },
+        "operation_name": "move",
+        "source": "left_holder",
+        "target": "target::/left",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": null,
+            "action_name": "test"
+          },
+          "action_name": "destroyer"
+        },
+        "operation_name": "destroy",
+        "target": "target::/left::/extra",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": null,
+              "action_name": "test"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "parent_destructor"
+        },
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/left",
         "occurrence": 1
       }
     ]

@@ -53,6 +53,7 @@ class OuterExecution:
         self.guarantees = OuterGuarantees()
         self.destruction_connections = destruction_connections
         self.execution_position_gw__action_middle: local.my_domain_com.my_lib.middle.MiddleExecution
+        self.destruction_position_position_gw__action_middle__position_trigger_pos: literal.Position
         self.join_for_move_position_gw__action_middle__position_out_to_position_out: literal.Join
         self.join_for_destroy_position_gw: literal.Join
         self.join_when_empty_position_gw__action_middle__position_out: literal.Join
@@ -136,13 +137,14 @@ class OuterExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.get_interface_position(
+        self.destruction_position_position_gw__action_middle__position_trigger_pos = self.action.get_interface_position(
             "position<gw>"
         ).particle.get_action(
             local.my_domain_com.my_lib.middle.Middle
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_gw__action_middle__position_trigger_pos.destroy_particle()
         self.destroy_position_gw()
 
     def move_position_gw__action_middle__position_out_to_position_out(self):

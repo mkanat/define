@@ -34,6 +34,7 @@ class MiddleExecution:
         self.action = action
         self.scheduler = scheduler
         self.execution_action_inner: local.my_domain_com.my_lib.inner.InnerExecution
+        self.destruction_position_action_inner__position_run: literal.Position
         self.execution_action_inner = local.my_domain_com.my_lib.inner.InnerExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.inner.Inner
@@ -53,8 +54,9 @@ class MiddleExecution:
         ).get_interface_position(
             "position<run>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_inner__position_run = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.inner.Inner
         ).get_interface_position(
             "position<run>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_inner__position_run.destroy_particle()

@@ -50,6 +50,7 @@ class MiddleExecution:
         self.guarantees = MiddleGuarantees()
         self.destruction_connections = destruction_connections
         self.execution_action_destroyer: local.my_domain_com.my_lib.destroyer.DestroyerExecution
+        self.destruction_position_position_target__global_position_middle_known: literal.Position
         self.join_for_move_position_target_to_action_destroyer__position_target: literal.Join
         self.join_for_empty_rule_position_target: literal.Join
         self.execution_action_destroyer = local.my_domain_com.my_lib.destroyer.DestroyerExecution(
@@ -81,11 +82,12 @@ class MiddleExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.middle_known.MiddleKnown
         ).create_particle()
-        self.action.get_interface_position(
+        self.destruction_position_position_target__global_position_middle_known = self.action.get_interface_position(
             "position<target>"
         ).particle.get_position(
             local.my_domain_com.my_lib.middle_known.MiddleKnown
-        ).destroy_particle()
+        )
+        self.destruction_position_position_target__global_position_middle_known.destroy_particle()
         self.move_position_target_to_action_destroyer__position_target()
 
     def move_position_target_to_action_destroyer__position_target(self):

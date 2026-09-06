@@ -69,6 +69,16 @@ class _RecordedContributedPosition:
     contributions: list[_RecordedDestructionContribution]
 
 
+@dataclass(frozen=True, slots=True)
+class DestructionFactDestroyInput:
+    """Particle state needed to record one simultaneous Destroy."""
+
+    destruction_fact: operation_graph_model.DestructionFact
+    target: ast.PositionReference
+    preceding_child_operations: operation_graph_model.PrecedingChildOperations
+    propagate_to_caller: bool
+
+
 def _most_recent_operation_on_position_or_parents(
     last_operations: Mapping[tuple[str, ...], operation_graph_model.LastOperationNode],
     key: tuple[str, ...],
@@ -278,6 +288,15 @@ class OperationGraph:
     ) -> operation_graph_model.OperationGraphDestruction:
         """Return the destruction recorded for one Destruction Fact."""
         return self._destructions[destruction_fact]
+
+    @property
+    def destroys_for_own_destruction_facts(
+        self,
+    ) -> Iterable[operation_graph_model.DestructionFactDestroyNode]:
+        """Destroy operations for Destruction Facts initiated by this action."""
+        for destruction_fact, destruction in self._destructions.items():
+            if destruction_fact.destroying_action == self.action:
+                yield from destruction.operations_by_position.values()
 
     def is_propagated_destruction_operation(
         self,
@@ -532,15 +551,35 @@ class OperationGraphBuilder:
             operation, child_operations
         )
 
-    def record_destruction_fact_destroy(
+    def record_destruction_fact_destroys(
         self,
-        destruction_fact: operation_graph_model.DestructionFact,
-        target: ast.PositionReference,
-        preceding_child_operations: operation_graph_model.PrecedingChildOperations,
-        *,
-        propagate_to_caller: bool,
+        destructions: Sequence[DestructionFactDestroyInput],
+    ) -> list[operation_graph_model.DestructionFactDestroyNode]:
+        """Record simultaneous Destroy operations from one graph-state snapshot."""
+        nodes = [
+            self._create_destruction_fact_destroy_node(destruction_input)
+            for destruction_input in destructions
+        ]
+
+        # Keep the positional index unchanged until every simultaneous Destroy
+        # has calculated its dependencies from the pre-destruction state.
+        for destruction_input, node in zip(destructions, nodes, strict=True):
+            self._last_operations_by_position.record(
+                node.target.canonical_chained_name_tuple, node
+            )
+            destruction = self._get_or_create_destruction(node.destruction_fact)
+            destruction.operations_by_position[node.destruction_position] = node
+            if destruction_input.propagate_to_caller:
+                destruction.is_propagated_to_caller = True
+        return nodes
+
+    def _create_destruction_fact_destroy_node(
+        self,
+        destruction_input: DestructionFactDestroyInput,
     ) -> operation_graph_model.DestructionFactDestroyNode:
-        """Record one cascade Destroy belonging to a Destruction Fact."""
+        """Create a Destroy without changing the pre-destruction Position indexes."""
+        destruction_fact = destruction_input.destruction_fact
+        target = destruction_input.target
         target_key = target.canonical_chained_name_tuple
         dependency_before_caller_contribution = typing.cast(
             "operation_graph_model.LastOperationNode",
@@ -550,18 +589,17 @@ class OperationGraphBuilder:
         )
         child_operations = (
             operation_graph_model.ParticleChildOperations.from_preceding_operations(
-                preceding_child_operations
+                destruction_input.preceding_child_operations
             )
+        )
+        depends_on = self._destroy_dependencies(
+            target, child_operations, dependency_before_caller_contribution
         )
         node = operation_graph_model.DestructionFactDestroyNode(
             node_id=len(self._nodes),
-            target=target,
-            depends_on=self._destroy_dependencies(
-                target,
-                child_operations,
-                dependency_before_caller_contribution,
-            ),
             destruction_fact=destruction_fact,
+            target=target,
+            depends_on=depends_on,
             destruction_position=target_key[
                 len(
                     destruction_fact.destroyed_position_in_destroyer.canonical_chained_name_tuple
@@ -573,15 +611,11 @@ class OperationGraphBuilder:
             # An empty relative position names the destroyed particle itself.
             # Preserve its child-operation dependencies so inserting caller-contributed
             # Destroys does not replace dependencies on the callee's child operations.
-            dependencies_after_caller_contribution=(
-                operation_graph_rules.empty_rule_dependencies_for(child_operations, ())
+            dependencies_after_caller_contribution=operation_graph_rules.empty_rule_dependencies_for(
+                child_operations, ()
             ),
         )
-        self._record_destroy_node(node)
-        destruction = self._get_or_create_destruction(destruction_fact)
-        destruction.operations_by_position[node.destruction_position] = node
-        if propagate_to_caller:
-            destruction.is_propagated_to_caller = True
+        self._nodes.append(node)
         return node
 
     def record_contributed_destruction_fragment(
@@ -1331,42 +1365,6 @@ class OperationGraphBuilder:
         self._last_operations_by_position.record(target_key, node)
         return node
 
-    def record_destroy(
-        self,
-        target: ast.PositionReference,
-        preceding_child_operations: operation_graph_model.PrecedingChildOperations,
-    ) -> operation_graph_model.DestroyNode:
-        """Record the destruction of one particle."""
-        key = target.canonical_chained_name_tuple
-        child_operations = (
-            operation_graph_model.ParticleChildOperations.from_preceding_operations(
-                preceding_child_operations
-            )
-        )
-        node = operation_graph_model.DestroyNode(
-            node_id=len(self._nodes),
-            target=target,
-            depends_on=self._destroy_dependencies(
-                target,
-                child_operations,
-                typing.cast(
-                    "operation_graph_model.LastOperationNode",
-                    self._last_operations_by_position.most_recent_on_position_or_parents(
-                        key
-                    ),
-                ),
-            ),
-        )
-        self._record_destroy_node(node)
-        return node
-
-    def _record_destroy_node(self, node: operation_graph_model.DestroyNode):
-        """Add a constructed Destroy operation to this graph."""
-        self._nodes.append(node)
-        self._last_operations_by_position.record(
-            node.target.canonical_chained_name_tuple, node
-        )
-
     def record_guarantees(
         self,
         execution: operation_graph_model.ActionExecution,
@@ -1513,17 +1511,12 @@ class OperationGraphs(
     """The operation dependency graphs of every validated action.
 
     Adding an operation graph while other threads read this collection is not
-    supported. Calls from multiple threads write distinct destruction keys,
-    while shared guarantee operations are published with CPython's internally
-    synchronized dictionary operations.
+    supported. Calls from multiple threads write distinct destruction keys.
     """
 
     def __init__(self):
         """Initialize an empty operation-graph collection."""
         super().__init__()
-        self._guarantee_resolutions: dict[
-            str, dict[tuple[str, ...], operation_graph_model.PositionOperationNode]
-        ] = {}
         self._resolved_callee_destroys: dict[
             operation_graph_model.CalleeDestroy,
             operation_graph_model.ResolvedCalleeDestroy,
@@ -1533,48 +1526,47 @@ class OperationGraphs(
         self, guarantee: operation_graph_model.GuaranteeNode
     ) -> GuaranteePath:
         """Resolve one guarantee to its Particle Operation through callee graphs."""
-        executions = (guarantee.execution, *guarantee.nested_executions)
-        action = executions[-1].callee_action_name
-        operation = self._resolve_guaranteed_operation(
-            action,
+        resolved = self._resolve_guarantee(
+            (guarantee.execution, *guarantee.nested_executions),
             guarantee.guarantee.guaranteed_position,
         )
-        return GuaranteePath(executions, operation, guarantee)
+        return GuaranteePath(resolved.executions, resolved.operation, guarantee)
 
     def resolve_destruction_contract_destructor_guarantee(
         self,
         guarantee: operation_graph_model.DestructionContractDestructorGuarantee,
     ) -> ResolvedGuarantee:
         """Resolve a contributed Destructor Guarantee to its Particle Operation."""
-        return ResolvedGuarantee(
+        return self._resolve_guarantee(
             (guarantee.destructor_execution,),
-            self._resolve_guaranteed_operation(
-                guarantee.destructor_execution.callee_action_name,
-                guarantee.verified_guarantee.guarantee.guaranteed_position,
-            ),
+            guarantee.verified_guarantee.guarantee.guaranteed_position,
         )
 
-    def _resolve_guaranteed_operation(
+    # This used to have a cache, but in benchmarking it saved only about 11ms in a 4
+    # second build, so it wasn't worth it.
+    def _resolve_guarantee(
         self,
-        action: ast.GlobalTypedName,
+        executions: tuple[operation_graph_model.ActionExecution, ...],
         position: tuple[str, ...],
-    ) -> operation_graph_model.PositionOperationNode:
-        # The get avoids allocating a candidate dictionary on cache hits;
-        # setdefault rechecks and publishes the candidate in one synchronized
-        # CPython dictionary operation when independent callers miss together.
-        action_resolutions = self._guarantee_resolutions.get(action.full_typed_name)
-        if action_resolutions is None:
-            action_resolutions = self._guarantee_resolutions.setdefault(
-                action.full_typed_name, {}
-            )
-        operation = action_resolutions.get(position)
-        if operation is None:
-            candidate = typing.cast(
-                "operation_graph_model.PositionOperationNode",
-                self[action].last_operation_on_position_or_parents(position),
-            )
-            operation = action_resolutions.setdefault(position, candidate)
-        return operation
+    ) -> ResolvedGuarantee:
+        execution_path = list(executions)
+        while True:
+            graph = self[execution_path[-1].callee_action_name]
+            operation = graph.last_operation_on_position_or_parents(position)
+            # This is a GuaranteeNode only when this action records a callee-produced
+            # Guarantee as its own, as Destructors do for Unchanged Guarantees.
+            # The supplied execution path therefore ends before the action that
+            # performs the Particle Operation.
+            if not isinstance(operation, operation_graph_model.GuaranteeNode):
+                return ResolvedGuarantee(
+                    tuple(execution_path),
+                    typing.cast(
+                        "operation_graph_model.PositionOperationNode", operation
+                    ),
+                )
+            execution_path.append(operation.execution)
+            execution_path.extend(operation.nested_executions)
+            position = operation.guarantee.guaranteed_position
 
     def _resolve_destruction_operation(
         self,

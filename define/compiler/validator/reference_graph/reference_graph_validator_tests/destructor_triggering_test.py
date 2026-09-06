@@ -98,8 +98,8 @@ def test_destroy_fires_multiple_destructors(
     result = validate_testdata_project_with_reference_graph()
     assert_no_errors(result.program_result)
     assert result.action_call_graph.edges() == [
-        (_TEST, _DESTRUCTOR_B),
         (_TEST, _DESTRUCTOR_A),
+        (_TEST, _DESTRUCTOR_B),
     ]
 
 

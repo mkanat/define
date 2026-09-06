@@ -44,12 +44,12 @@ class TestExecution:
             self.scheduler,
         )
         self.execution_action_act.join_when_empty_position_chain_dest__global_position_mid_dest__global_position_end_dest = literal.NO_JOIN
-        self.execution_action_act.join_for_empty_rule_position_chain_dest__global_position_mid_dest = literal.NO_JOIN
         self.execution_action_act.join_for_empty_rule_position_chain_dest = literal.NO_JOIN
+        self.execution_action_act.join_for_empty_rule_position_chain_dest__global_position_mid_dest = literal.NO_JOIN
         self.execution_action_act.join_for_empty_rule_position_trigger = literal.NO_JOIN
         self.execution_action_act.join_for_move_position_src_c_to_position_chain_dest__global_position_mid_dest__global_position_end_dest = self.scheduler.create_join(2)
-        self.execution_action_act.join_for_destroy_position_chain_dest__global_position_mid_dest = literal.NO_JOIN
         self.execution_action_act.join_for_destroy_position_chain_dest = literal.NO_JOIN
+        self.execution_action_act.join_for_destroy_position_chain_dest__global_position_mid_dest = literal.NO_JOIN
         self.execution_action_act.join_for_destroy_position_trigger = literal.NO_JOIN
 
     def on_action_parent_occupied(self):

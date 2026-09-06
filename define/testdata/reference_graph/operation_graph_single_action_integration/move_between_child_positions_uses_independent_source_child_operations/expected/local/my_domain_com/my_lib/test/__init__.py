@@ -35,8 +35,10 @@ class TestExecution:
             ),
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_box__global_position_destination: literal.Position
+        self.destruction_position_position_box__global_position_destination__global_position_first: literal.Position
+        self.destruction_position_position_box__global_position_destination__global_position_second: literal.Position
         self.join_for_move_position_box__global_position_origin_to_position_box__global_position_destination = self.scheduler.create_join(2)
-        self.join_for_destroy_position_box__global_position_destination = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
         self.create_position_box()
@@ -75,29 +77,32 @@ class TestExecution:
                 local.my_domain_com.my_lib.destination.Destination
             )
         )
-        self.scheduler.submit(self.destroy_position_box__global_position_destination__global_position_second)
-        self.destroy_position_box__global_position_destination__global_position_first()
-
-    def destroy_position_box__global_position_destination__global_position_second(self):
-        self.local_position_box.particle.get_position(
+        self.destruction_position_position_box__global_position_destination = self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.destination.Destination
-        ).particle.get_position(
-            local.my_domain_com.my_lib.second.Second
-        ).destroy_particle()
-        self.destroy_position_box__global_position_destination()
-
-    def destroy_position_box__global_position_destination__global_position_first(self):
-        self.local_position_box.particle.get_position(
+        )
+        self.destruction_position_position_box__global_position_destination__global_position_first = self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.destination.Destination
         ).particle.get_position(
             local.my_domain_com.my_lib.first.First
-        ).destroy_particle()
-        self.destroy_position_box__global_position_destination()
+        )
+        self.destruction_position_position_box__global_position_destination__global_position_second = self.local_position_box.particle.get_position(
+            local.my_domain_com.my_lib.destination.Destination
+        ).particle.get_position(
+            local.my_domain_com.my_lib.second.Second
+        )
+        self.scheduler.submit(self.destroy_position_box)
+        self.scheduler.submit(self.destroy_position_box__global_position_destination)
+        self.scheduler.submit(self.destroy_position_box__global_position_destination__global_position_first)
+        self.destroy_position_box__global_position_destination__global_position_second()
+
+    def destroy_position_box(self):
+        self.local_position_box.destroy_particle()
 
     def destroy_position_box__global_position_destination(self):
-        if not self.join_for_destroy_position_box__global_position_destination.arrive():
-            return
-        self.local_position_box.particle.get_position(
-            local.my_domain_com.my_lib.destination.Destination
-        ).destroy_particle()
-        self.local_position_box.destroy_particle()
+        self.destruction_position_position_box__global_position_destination.destroy_particle()
+
+    def destroy_position_box__global_position_destination__global_position_first(self):
+        self.destruction_position_position_box__global_position_destination__global_position_first.destroy_particle()
+
+    def destroy_position_box__global_position_destination__global_position_second(self):
+        self.destruction_position_position_box__global_position_destination__global_position_second.destroy_particle()

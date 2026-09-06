@@ -224,6 +224,7 @@ def _binding_hole_method_names(
         accepts_destruction_connections=False,
         destruction_connection_by_operation={},
         caller_resolved_joins=[],
+        destruction_positions_to_retain=[],
     )
     names = _action_names(plan)
     return {
@@ -244,6 +245,7 @@ def test_local_position_names():
         accepts_destruction_connections=False,
         destruction_connection_by_operation={},
         caller_resolved_joins=[],
+        destruction_positions_to_retain=[],
     )
     definition = _action_definition(("first", "second"))
 
@@ -326,6 +328,7 @@ def test_fragments_skip_a_normalized_source_suffix():
         accepts_destruction_connections=False,
         destruction_connection_by_operation={},
         caller_resolved_joins=[],
+        destruction_positions_to_retain=[],
     )
 
     names = _action_names(plan)
@@ -353,6 +356,7 @@ def test_fragment_names_preserve_external_universes_and_multiverse():
         accepts_destruction_connections=False,
         destruction_connection_by_operation={},
         caller_resolved_joins=[],
+        destruction_positions_to_retain=[],
     )
 
     names = _action_names(plan)
@@ -388,6 +392,7 @@ def test_repeated_action_execution_skips_a_source_suffix(
         accepts_destruction_connections=False,
         destruction_connection_by_operation={},
         caller_resolved_joins=[],
+        destruction_positions_to_retain=[],
     )
 
     names = _action_names(plan)
@@ -470,6 +475,7 @@ def test_destruction_connection_names_use_action_execution(
         accepts_destruction_connections=False,
         destruction_connection_by_operation={},
         caller_resolved_joins=[],
+        destruction_positions_to_retain=[],
     )
 
     names = _action_names(plan)
@@ -508,6 +514,7 @@ def test_continue_destroy_method_uses_destroy_fragment_name():
         accepts_destruction_connections=False,
         destruction_connection_by_operation={},
         caller_resolved_joins=[],
+        destruction_positions_to_retain=[],
     )
 
     names = _action_names(plan, definition=definition)

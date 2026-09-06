@@ -48,6 +48,7 @@ class InnerExecution:
         self.scheduler = scheduler
         self.guarantees = InnerGuarantees()
         self.destruction_connections = destruction_connections
+        self.destruction_position_position_input__global_position_data: literal.Position
         self.join_for_destroy_position_input__global_position_data: literal.Join
         self.join_for_destroy_position_input: literal.Join
         self.join_for_destroy_position_run: literal.Join
@@ -58,6 +59,11 @@ class InnerExecution:
     def accept_for_empty_rule_position_input__global_position_data(self):
         if not self.join_for_empty_rule_position_input__global_position_data.arrive():
             return
+        self.destruction_position_position_input__global_position_data = self.action.get_interface_position(
+            "position<input>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.data.Data
+        )
         self.destroy_position_input__global_position_data()
 
     def accept_for_empty_rule_position_input(self):
@@ -76,11 +82,7 @@ class InnerExecution:
         literal.continue_destruction(self.continue_destroy_position_input__global_position_data)
 
     def continue_destroy_position_input__global_position_data(self):
-        self.action.get_interface_position(
-            "position<input>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.data.Data
-        ).destroy_particle()
+        self.destruction_position_position_input__global_position_data.destroy_particle()
         self.destroy_position_input()
 
     def destroy_position_input(self):

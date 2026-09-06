@@ -33,6 +33,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_box__action_construct: local.my_domain_com.my_lib.construct.ConstructExecution
+        self.destruction_position_position_box__global_position_marker: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_box()
@@ -45,13 +46,24 @@ class TestExecution:
             ),
             self.scheduler,
         )
+        self.execution_position_box__action_construct.guarantees.global_position_marker.inits.append(
+            self.init_position_box__action_construct__global_position_marker
+        )
+        self.execution_position_box__action_construct.guarantees.global_position_marker.consumers.append(
+            self.destroy_position_box
+        )
         self.execution_position_box__action_construct.guarantees.global_position_marker.consumers.append(
             self.destroy_position_box__global_position_marker
         )
         self.execution_position_box__action_construct.accept_when_empty_global_position_marker()
 
-    def destroy_position_box__global_position_marker(self):
-        self.local_position_box.particle.get_position(
-            local.my_domain_com.my_lib.marker.Marker
-        ).destroy_particle()
+    def destroy_position_box(self):
         self.local_position_box.destroy_particle()
+
+    def destroy_position_box__global_position_marker(self):
+        self.destruction_position_position_box__global_position_marker.destroy_particle()
+
+    def init_position_box__action_construct__global_position_marker(self):
+        self.destruction_position_position_box__global_position_marker = self.local_position_box.particle.get_position(
+            local.my_domain_com.my_lib.marker.Marker
+        )

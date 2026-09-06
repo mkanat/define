@@ -40,12 +40,12 @@ class TestExecution:
             self.scheduler,
         )
         self.execution_action_runner.join_for_empty_rule_position_wrap__global_position_mid__global_position_leaf = literal.NO_JOIN
-        self.execution_action_runner.join_for_empty_rule_position_wrap__global_position_mid = literal.NO_JOIN
         self.execution_action_runner.join_for_empty_rule_position_wrap = literal.NO_JOIN
+        self.execution_action_runner.join_for_empty_rule_position_wrap__global_position_mid = literal.NO_JOIN
         self.execution_action_runner.join_for_empty_rule_position_run = literal.NO_JOIN
         self.execution_action_runner.join_for_destroy_position_wrap__global_position_mid__global_position_leaf = literal.NO_JOIN
-        self.execution_action_runner.join_for_destroy_position_wrap__global_position_mid = literal.NO_JOIN
         self.execution_action_runner.join_for_destroy_position_wrap = literal.NO_JOIN
+        self.execution_action_runner.join_for_destroy_position_wrap__global_position_mid = literal.NO_JOIN
         self.execution_action_runner.join_for_destroy_position_run = literal.NO_JOIN
 
     def on_action_parent_occupied(self):

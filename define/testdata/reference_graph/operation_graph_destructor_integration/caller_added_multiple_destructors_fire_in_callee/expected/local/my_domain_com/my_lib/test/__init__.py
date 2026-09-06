@@ -43,6 +43,7 @@ class TestExecution:
         )
         self.execution_position_box__action_callee: local.my_domain_com.my_lib.callee.CalleeExecution
         self.destruction_connection_position_box__action_callee: literal.DestructionConnection
+        self.destruction_position_position_box__action_callee__position_run: literal.Position
         self.join_for_move_position_carrier_to_position_box__action_callee__position_target = self.scheduler.create_join(2)
         self.join_for_destroy_position_box = self.scheduler.create_join(2)
 
@@ -99,17 +100,21 @@ class TestExecution:
         ).get_interface_position(
             "position<run>"
         ).create_particle()
-        self.local_position_box.particle.get_action(
+        self.destruction_position_position_box__action_callee__position_run = self.local_position_box.particle.get_action(
             local.my_domain_com.my_lib.callee.Callee
         ).get_interface_position(
             "position<run>"
-        ).destroy_particle()
-        self.destroy_position_box()
+        )
+        self.scheduler.submit(self.destroy_position_box)
+        self.destroy_position_box__action_callee__position_run()
 
     def destroy_position_box(self):
         if not self.join_for_destroy_position_box.arrive():
             return
         self.local_position_box.destroy_particle()
+
+    def destroy_position_box__action_callee__position_run(self):
+        self.destruction_position_position_box__action_callee__position_run.destroy_particle()
 
     def run_position_box__action_callee__position_target__action_destructor_b(self):
         execution = local.my_domain_com.my_lib.destructor_b.DestructorBExecution(

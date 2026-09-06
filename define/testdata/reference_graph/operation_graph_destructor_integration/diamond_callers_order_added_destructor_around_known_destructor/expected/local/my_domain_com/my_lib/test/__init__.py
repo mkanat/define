@@ -34,6 +34,8 @@ class TestExecution:
         self.scheduler = scheduler
         self.execution_action_caller_a: local.my_domain_com.my_lib.caller_a.CallerAExecution
         self.execution_action_caller_b: local.my_domain_com.my_lib.caller_b.CallerBExecution
+        self.destruction_position_action_caller_a__position_trigger_pos: literal.Position
+        self.destruction_position_action_caller_b__position_trigger_pos: literal.Position
         self.execution_action_caller_a = local.my_domain_com.my_lib.caller_a.CallerAExecution(
             self.scheduler,
         )
@@ -53,11 +55,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_caller_a__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.caller_a.CallerA
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_caller_a__position_trigger_pos.destroy_particle()
 
     def create_action_caller_b__position_trigger_pos(self):
         self.action.on_particle.get_action(
@@ -65,8 +68,9 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_caller_b__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.caller_b.CallerB
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_caller_b__position_trigger_pos.destroy_particle()

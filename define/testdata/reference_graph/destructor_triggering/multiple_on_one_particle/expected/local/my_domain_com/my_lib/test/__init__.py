@@ -33,23 +33,23 @@ class TestExecution:
             ),
             scheduler=self.scheduler,
         )
-        self.execution_position_box__action_destructor_b: local.my_domain_com.my_lib.destructor_b.DestructorBExecution
         self.execution_position_box__action_destructor_a: local.my_domain_com.my_lib.destructor_a.DestructorAExecution
+        self.execution_position_box__action_destructor_b: local.my_domain_com.my_lib.destructor_b.DestructorBExecution
 
     def on_action_parent_occupied(self):
         self.create_position_box()
 
     def create_position_box(self):
         self.local_position_box.create_particle()
-        self.execution_position_box__action_destructor_b = local.my_domain_com.my_lib.destructor_b.DestructorBExecution(
-            self.scheduler,
-        )
         self.execution_position_box__action_destructor_a = local.my_domain_com.my_lib.destructor_a.DestructorAExecution(
             self.scheduler,
         )
+        self.execution_position_box__action_destructor_b = local.my_domain_com.my_lib.destructor_b.DestructorBExecution(
+            self.scheduler,
+        )
         self.scheduler.submit(self.destroy_position_box)
-        self.scheduler.submit(self.execution_position_box__action_destructor_b.on_action_parent_occupied)
-        self.execution_position_box__action_destructor_a.on_action_parent_occupied()
+        self.scheduler.submit(self.execution_position_box__action_destructor_a.on_action_parent_occupied)
+        self.execution_position_box__action_destructor_b.on_action_parent_occupied()
 
     def destroy_position_box(self):
         self.local_position_box.destroy_particle()

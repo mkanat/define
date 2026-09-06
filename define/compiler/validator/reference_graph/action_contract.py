@@ -303,8 +303,8 @@ class DestructionContract:
 
 
 @dataclass(frozen=True, slots=True)
-class CascadeDestructor:
-    """One destructor in a destruction cascade, paired with the position it fires on."""
+class Destructor:
+    """One destructor paired with the position on which it triggers."""
 
     destructor: ast.GlobalTypedNameReference
     position: ast.PositionReference

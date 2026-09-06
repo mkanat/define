@@ -61,6 +61,9 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_action_destroyer: local.my_domain_com.my_lib.destroyer.DestroyerExecution
+        self.destruction_position_position_carrier__global_position_first: literal.Position
+        self.destruction_position_position_carrier__global_position_third: literal.Position
+        self.destruction_position_position_carrier__global_position_fifth: literal.Position
         self.join_for_move_position_carrier_to_action_destroyer__position_target = self.scheduler.create_join(3)
         self.execution_action_destroyer = local.my_domain_com.my_lib.destroyer.DestroyerExecution(
             self.action.on_particle.get_action(
@@ -96,9 +99,10 @@ class TestExecution:
             "carrier::/first",
             1,
         )
-        self.local_position_carrier.particle.get_position(
+        self.destruction_position_position_carrier__global_position_first = self.local_position_carrier.particle.get_position(
             local.my_domain_com.my_lib.first.First
-        ).destroy_particle()
+        )
+        self.destruction_position_position_carrier__global_position_first.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "carrier::/first",
@@ -115,9 +119,10 @@ class TestExecution:
             "carrier::/third",
             1,
         )
-        self.local_position_carrier.particle.get_position(
+        self.destruction_position_position_carrier__global_position_third = self.local_position_carrier.particle.get_position(
             local.my_domain_com.my_lib.third.Third
-        ).destroy_particle()
+        )
+        self.destruction_position_position_carrier__global_position_third.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "carrier::/third",
@@ -134,9 +139,10 @@ class TestExecution:
             "carrier::/fifth",
             1,
         )
-        self.local_position_carrier.particle.get_position(
+        self.destruction_position_position_carrier__global_position_fifth = self.local_position_carrier.particle.get_position(
             local.my_domain_com.my_lib.fifth.Fifth
-        ).destroy_particle()
+        )
+        self.destruction_position_position_carrier__global_position_fifth.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "carrier::/fifth",
@@ -163,7 +169,7 @@ class TestExecution:
         self.execution_action_destroyer.init_when_occupied_position_target()
         self.scheduler.submit(self.execution_action_destroyer.accept_when_empty_position_target__global_position_second)
         self.scheduler.submit(self.execution_action_destroyer.accept_when_empty_position_target__global_position_fourth)
-        self.scheduler.submit(self.execution_action_destroyer.accept_when_empty_position_target__global_position_fifth)
-        self.scheduler.submit(self.execution_action_destroyer.accept_when_empty_position_target__global_position_third)
         self.scheduler.submit(self.execution_action_destroyer.accept_when_empty_position_target__global_position_first)
+        self.scheduler.submit(self.execution_action_destroyer.accept_when_empty_position_target__global_position_third)
+        self.scheduler.submit(self.execution_action_destroyer.accept_when_empty_position_target__global_position_fifth)
         self.execution_action_destroyer.accept_when_empty_position_target__global_position_marker()

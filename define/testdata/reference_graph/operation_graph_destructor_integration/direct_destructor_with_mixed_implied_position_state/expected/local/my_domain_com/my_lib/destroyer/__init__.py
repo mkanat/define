@@ -5,9 +5,6 @@ from typing import final
 from define.runtime import literal
 
 import local.my_domain_com.my_lib.destructor
-import local.my_domain_com.my_lib.occupied_first
-import local.my_domain_com.my_lib.occupied_last
-import local.my_domain_com.my_lib.transitive
 
 
 class Destroyer(literal.Action):
@@ -79,50 +76,15 @@ class DestroyerExecution:
             ),
             self.scheduler,
         )
-        self.execution_position_target__action_destructor.guarantees.global_position_occupied_last.consumers.append(
-            self.destroy_position_target__global_position_occupied_last
-        )
-        self.execution_position_target__action_destructor.guarantees.global_position_occupied_first__global_position_transitive.consumers.append(
-            self.destroy_position_target__global_position_occupied_first__global_position_transitive
-        )
         self.execution_position_target__action_destructor.guarantees.global_position_empty.consumers.append(
             self.destroy_position_target
         )
-
-    def destroy_position_target__global_position_occupied_last(self):
-        literal.continue_destruction(self.continue_destroy_position_target__global_position_occupied_last)
-
-    def continue_destroy_position_target__global_position_occupied_last(self):
-        self.action.get_interface_position(
-            "position<target>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.occupied_last.OccupiedLast
-        ).destroy_particle()
-        self.destroy_position_target()
-
-    def destroy_position_target__global_position_occupied_first__global_position_transitive(self):
-        literal.continue_destruction(self.continue_destroy_position_target__global_position_occupied_first__global_position_transitive)
-
-    def continue_destroy_position_target__global_position_occupied_first__global_position_transitive(self):
-        self.action.get_interface_position(
-            "position<target>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.occupied_first.OccupiedFirst
-        ).particle.get_position(
-            local.my_domain_com.my_lib.transitive.Transitive
-        ).destroy_particle()
-        self.destroy_position_target__global_position_occupied_first()
-
-    def destroy_position_target__global_position_occupied_first(self):
-        literal.continue_destruction(self.continue_destroy_position_target__global_position_occupied_first)
-
-    def continue_destroy_position_target__global_position_occupied_first(self):
-        self.action.get_interface_position(
-            "position<target>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.occupied_first.OccupiedFirst
-        ).destroy_particle()
-        self.destroy_position_target()
+        self.execution_position_target__action_destructor.guarantees.global_position_occupied_last.consumers.append(
+            self.destroy_position_target
+        )
+        self.execution_position_target__action_destructor.guarantees.global_position_occupied_first__global_position_transitive.consumers.append(
+            self.destroy_position_target
+        )
 
     def destroy_position_target(self):
         if not self.join_for_destroy_position_target.arrive():

@@ -47,6 +47,7 @@ class DestroyerExecution:
             "position<keeper>",
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_run__global_position_child: literal.Position
         self.join_for_move_position_run__global_position_child_to_position_keeper: literal.Join
         self.join_for_destroy_position_run: literal.Join
         self.join_for_empty_rule_position_run__global_position_child: literal.Join
@@ -77,18 +78,13 @@ class DestroyerExecution:
                 local.my_domain_com.my_lib.child.Child
             )
         )
-        self.destroy_position_run__global_position_child()
-
-    def destroy_position_run__global_position_child(self):
-        literal.continue_destruction(self.continue_destroy_position_run__global_position_child)
-
-    def continue_destroy_position_run__global_position_child(self):
-        self.action.get_interface_position(
+        self.destruction_position_position_run__global_position_child = self.action.get_interface_position(
             "position<run>"
         ).particle.get_position(
             local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
-        self.destroy_position_run()
+        )
+        self.scheduler.submit(self.destroy_position_run)
+        self.destroy_position_run__global_position_child()
 
     def destroy_position_run(self):
         if not self.join_for_destroy_position_run.arrive():
@@ -102,3 +98,9 @@ class DestroyerExecution:
         self.guarantees.position_run.publish(
             self.scheduler,
         )
+
+    def destroy_position_run__global_position_child(self):
+        literal.continue_destruction(self.continue_destroy_position_run__global_position_child)
+
+    def continue_destroy_position_run__global_position_child(self):
+        self.destruction_position_position_run__global_position_child.destroy_particle()

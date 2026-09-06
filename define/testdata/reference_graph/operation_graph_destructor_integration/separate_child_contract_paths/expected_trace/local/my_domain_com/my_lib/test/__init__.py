@@ -77,14 +77,14 @@ class TestExecution:
         self.join_for_move_position_source_to_action_destroyer__position_target = self.scheduler.create_join(2)
         self.destruction_connection_action_destroyer = tracing.DestructionConnection(
             self.scheduler,
-            0,
-            self.run_action_destroyer__position_target__global_position_right__action_child_destructor,
-        )
-        self.destruction_connection_action_destroyer_2 = tracing.DestructionConnection(
-            self.scheduler,
             2,
             self.destroy_action_destroyer__position_target__global_position_left__global_position_extra,
             self.action_destroyer__position_target__action_parent_destructor__for_empty_rule_global_position_left,
+        )
+        self.destruction_connection_action_destroyer_2 = tracing.DestructionConnection(
+            self.scheduler,
+            0,
+            self.run_action_destroyer__position_target__global_position_right__action_child_destructor,
         )
         self.execution_action_destroyer = local.my_domain_com.my_lib.destroyer.DestroyerExecution(
             self.action.on_particle.get_action(
@@ -95,8 +95,8 @@ class TestExecution:
             "destroyer",
             destruction_connections=literal.DestructionConnections(
             {
-                local.my_domain_com.my_lib.destroyer.DestroyerExecution.continue_destroy_position_target__global_position_right: self.destruction_connection_action_destroyer,
-                local.my_domain_com.my_lib.destroyer.DestroyerExecution.continue_destroy_position_target__global_position_left: self.destruction_connection_action_destroyer_2,
+                local.my_domain_com.my_lib.destroyer.DestroyerExecution.continue_destroy_position_target__global_position_left: self.destruction_connection_action_destroyer,
+                local.my_domain_com.my_lib.destroyer.DestroyerExecution.continue_destroy_position_target__global_position_right: self.destruction_connection_action_destroyer_2,
             },
             ),
         )
@@ -213,6 +213,9 @@ class TestExecution:
         )
         self.execution_action_destroyer__position_target__action_parent_destructor.join_for_empty_rule_global_position_left = literal.NO_JOIN
         self.execution_action_destroyer__position_target__action_parent_destructor.join_for_move_global_position_left_to_position_holder = literal.NO_JOIN
+        self.execution_action_destroyer__position_target__action_parent_destructor.guarantees.global_position_left.consumers.append(
+            self.destruction_connection_action_destroyer.complete
+        )
         self.destruction_position_action_destroyer__position_target__global_position_left__global_position_extra = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.destroyer.Destroyer
         ).get_interface_position(
@@ -228,11 +231,11 @@ class TestExecution:
     def destroy_action_destroyer__position_target__global_position_left__global_position_extra(self):
         self.destruction_position_action_destroyer__position_target__global_position_left__global_position_extra.destroy_particle()
         self.scheduler.destroy_completed(
-            self.destruction_connection_action_destroyer_2.trace_execution,
+            self.destruction_connection_action_destroyer.trace_execution,
             "target::/left::/extra",
             1,
         )
-        self.destruction_connection_action_destroyer_2.complete()
+        self.destruction_connection_action_destroyer.complete()
 
     def action_destroyer__position_target__action_parent_destructor__for_empty_rule_global_position_left(self):
         self.execution_action_destroyer__position_target__action_parent_destructor.accept_for_empty_rule_global_position_left()
@@ -240,7 +243,7 @@ class TestExecution:
     def run_action_destroyer__position_target__global_position_right__action_child_destructor(self):
         execution = local.my_domain_com.my_lib.child_destructor.ChildDestructorExecution(
             self.scheduler,
-            self.destruction_connection_action_destroyer.trace_execution,
+            self.destruction_connection_action_destroyer_2.trace_execution,
             "child_destructor",
         )
         execution.on_action_parent_occupied()

@@ -95,9 +95,7 @@ class ActionNames:
     join_member_names: dict[action_plan.JoinTarget, str]
     continue_destroy_methods: dict[action_plan.ActionFragment, str]
     destruction_connections: dict[action_plan.DestructionConnection, str]
-    destruction_positions: dict[
-        operation_graph_model.DestructionFragmentDestroyNode, str
-    ]
+    destruction_positions: dict[operation_graph_model.DestructionFactDestroyNode, str]
     guarantees: dict[action_plan.ActionGuarantees, str]
     guarantee_consumption_init_method_names: dict[
         action_plan.GuaranteeConsumptionPlan, str
@@ -364,8 +362,7 @@ class ActionNameGenerator:
                 method_name = self._binding_hole_method_prefix(binding_hole) + base_name
             # TODO: I'm not sure this specialization is worth modifying the callee
             # API contract for.
-            elif len(inits.action_executions) == 1 and not inits.callee_binding_plans:
-                execution = inits.action_executions[0]
+            elif (execution := inits.sole_action_execution) is not None:
                 method_name = _INIT_PREFIX + self._typed_chain_identifier(
                     execution.action_chain
                 )
@@ -377,7 +374,7 @@ class ActionNameGenerator:
                 method_name,
             )
         for fanout in self._plan.binding_hole_fanouts.values():
-            if not fanout.inits.has_inits or not fanout.continuations:
+            if not fanout.inits.inits_action_executions or not fanout.continuations:
                 continue
             binding_hole = fanout.binding_hole
             binding_hole_names = names[binding_hole]
@@ -732,9 +729,9 @@ class ActionNameGenerator:
 
     def _destruction_position_names(
         self,
-    ) -> dict[operation_graph_model.DestructionFragmentDestroyNode, str]:
-        names: dict[operation_graph_model.DestructionFragmentDestroyNode, str] = {}
-        for operation in self._plan.destruction_connection_by_operation:
+    ) -> dict[operation_graph_model.DestructionFactDestroyNode, str]:
+        names: dict[operation_graph_model.DestructionFactDestroyNode, str] = {}
+        for operation in self._plan.destruction_positions_to_retain:
             target = self._typed_chain_identifier(
                 operation.target.canonical_chained_name_tuple
             )

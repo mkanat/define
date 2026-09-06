@@ -1,0 +1,22 @@
+# Both automatically destroyed particles have unmet Destructor requirements.
+# Their diagnostics are reported in source-location order: box_a, then box_b.
+define the potential action<my.domain.com:my_lib:/test> {
+    it happens when {
+        this particle is created.
+    } and it does {
+        define the position<box_a> {
+            it may only contain particles where {
+                it has the action</destructor_empty>.
+            }
+        }
+        define the position<box_b> {
+            it may only contain particles where {
+                it has the action</destructor_empty>.
+            }
+        }
+        create a particle in position<box_a>.
+        create a particle in position<box_a>::action</destructor_empty>::position<item>.
+        create a particle in position<box_b>.
+        create a particle in position<box_b>::action</destructor_empty>::position<item>.
+    }
+}

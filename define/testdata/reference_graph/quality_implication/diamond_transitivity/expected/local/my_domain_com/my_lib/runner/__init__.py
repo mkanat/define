@@ -61,6 +61,7 @@ class RunnerExecution:
         self.destruction_connections = destruction_connections
         self.execution_position_source__action_implier_one: local.my_domain_com.my_lib.implier_one.ImplierOneExecution
         self.execution_position_source__action_implier_two: local.my_domain_com.my_lib.implier_two.ImplierTwoExecution
+        self.destruction_position_position_dest__global_position_implied: literal.Position
         self.join_for_move_position_source_to_position_dest: literal.Join
         self.join_for_destroy_position_run: literal.Join
         self.join_when_empty_position_dest: literal.Join
@@ -128,11 +129,12 @@ class RunnerExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.implied.Implied
         ).create_particle()
-        self.action.get_interface_position(
+        self.destruction_position_position_dest__global_position_implied = self.action.get_interface_position(
             "position<dest>"
         ).particle.get_position(
             local.my_domain_com.my_lib.implied.Implied
-        ).destroy_particle()
+        )
+        self.destruction_position_position_dest__global_position_implied.destroy_particle()
         self.action.get_interface_position(
             "position<dest>"
         ).destroy_particle()

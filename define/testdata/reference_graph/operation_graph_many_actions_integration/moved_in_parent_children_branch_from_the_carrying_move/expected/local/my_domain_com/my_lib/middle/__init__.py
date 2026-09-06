@@ -58,9 +58,15 @@ class MiddleExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_gw__action_inner: local.my_domain_com.my_lib.inner.InnerExecution
+        self.destruction_position_position_gw__action_inner__position_run: literal.Position
+        self.destruction_position_position_gw__action_inner__position_input: literal.Position
+        self.destruction_position_position_gw__action_inner__position_input__global_position_parent: literal.Position
+        self.destruction_position_position_gw__action_inner__position_input__global_position_parent__global_position_a: literal.Position
+        self.destruction_position_position_gw__action_inner__position_input__global_position_parent__global_position_b: literal.Position
         self.join_for_move_position_iface_to_position_gw__action_inner__position_input: literal.Join
+        self.join_for_destroy_position_gw = self.scheduler.create_join(3)
+        self.join_for_destroy_position_gw__action_inner__position_input = self.scheduler.create_join(2)
         self.join_for_destroy_position_gw__action_inner__position_input__global_position_parent = self.scheduler.create_join(2)
-        self.join_for_destroy_position_gw = self.scheduler.create_join(2)
         self.join_for_empty_rule_position_iface: literal.Join
 
     def on_action_parent_occupied(self):
@@ -79,11 +85,35 @@ class MiddleExecution:
             ),
             self.scheduler,
         )
-        self.execution_position_gw__action_inner.guarantees.position_input__global_position_parent__global_position_b.consumers.append(
-            self.destroy_position_gw__action_inner__position_input__global_position_parent__global_position_b
+        self.execution_position_gw__action_inner.guarantees.position_input__global_position_parent__global_position_a.inits.append(
+            self.init_position_gw__action_inner__position_input__global_position_parent__global_position_a
+        )
+        self.execution_position_gw__action_inner.guarantees.position_input__global_position_parent__global_position_a.consumers.append(
+            self.destroy_position_gw
+        )
+        self.execution_position_gw__action_inner.guarantees.position_input__global_position_parent__global_position_a.consumers.append(
+            self.destroy_position_gw__action_inner__position_input
+        )
+        self.execution_position_gw__action_inner.guarantees.position_input__global_position_parent__global_position_a.consumers.append(
+            self.destroy_position_gw__action_inner__position_input__global_position_parent
         )
         self.execution_position_gw__action_inner.guarantees.position_input__global_position_parent__global_position_a.consumers.append(
             self.destroy_position_gw__action_inner__position_input__global_position_parent__global_position_a
+        )
+        self.execution_position_gw__action_inner.guarantees.position_input__global_position_parent__global_position_b.inits.append(
+            self.init_position_gw__action_inner__position_input__global_position_parent__global_position_b
+        )
+        self.execution_position_gw__action_inner.guarantees.position_input__global_position_parent__global_position_b.consumers.append(
+            self.destroy_position_gw
+        )
+        self.execution_position_gw__action_inner.guarantees.position_input__global_position_parent__global_position_b.consumers.append(
+            self.destroy_position_gw__action_inner__position_input
+        )
+        self.execution_position_gw__action_inner.guarantees.position_input__global_position_parent__global_position_b.consumers.append(
+            self.destroy_position_gw__action_inner__position_input__global_position_parent
+        )
+        self.execution_position_gw__action_inner.guarantees.position_input__global_position_parent__global_position_b.consumers.append(
+            self.destroy_position_gw__action_inner__position_input__global_position_parent__global_position_b
         )
         self.scheduler.submit(self.move_position_iface_to_position_gw__action_inner__position_input)
         self.create_position_gw__action_inner__position_run()
@@ -112,42 +142,35 @@ class MiddleExecution:
         ).get_interface_position(
             "position<run>"
         ).create_particle()
-        self.local_position_gw.particle.get_action(
+        self.destruction_position_position_gw__action_inner__position_run = self.local_position_gw.particle.get_action(
             local.my_domain_com.my_lib.inner.Inner
         ).get_interface_position(
             "position<run>"
-        ).destroy_particle()
-        self.destroy_position_gw()
+        )
+        self.scheduler.submit(self.destroy_position_gw)
+        self.destroy_position_gw__action_inner__position_run()
 
-    def destroy_position_gw__action_inner__position_input__global_position_parent__global_position_b(self):
-        literal.continue_destruction(self.continue_destroy_position_gw__action_inner__position_input__global_position_parent__global_position_b)
+    def destroy_position_gw(self):
+        if not self.join_for_destroy_position_gw.arrive():
+            return
+        literal.continue_destruction(self.continue_destroy_position_gw)
 
-    def continue_destroy_position_gw__action_inner__position_input__global_position_parent__global_position_b(self):
-        self.local_position_gw.particle.get_action(
-            local.my_domain_com.my_lib.inner.Inner
-        ).get_interface_position(
-            "position<input>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.parent.Parent
-        ).particle.get_position(
-            local.my_domain_com.my_lib.b.B
-        ).destroy_particle()
-        self.destroy_position_gw__action_inner__position_input__global_position_parent()
+    def continue_destroy_position_gw(self):
+        self.local_position_gw.destroy_particle()
 
-    def destroy_position_gw__action_inner__position_input__global_position_parent__global_position_a(self):
-        literal.continue_destruction(self.continue_destroy_position_gw__action_inner__position_input__global_position_parent__global_position_a)
+    def destroy_position_gw__action_inner__position_run(self):
+        literal.continue_destruction(self.continue_destroy_position_gw__action_inner__position_run)
 
-    def continue_destroy_position_gw__action_inner__position_input__global_position_parent__global_position_a(self):
-        self.local_position_gw.particle.get_action(
-            local.my_domain_com.my_lib.inner.Inner
-        ).get_interface_position(
-            "position<input>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.parent.Parent
-        ).particle.get_position(
-            local.my_domain_com.my_lib.a.A
-        ).destroy_particle()
-        self.destroy_position_gw__action_inner__position_input__global_position_parent()
+    def continue_destroy_position_gw__action_inner__position_run(self):
+        self.destruction_position_position_gw__action_inner__position_run.destroy_particle()
+
+    def destroy_position_gw__action_inner__position_input(self):
+        if not self.join_for_destroy_position_gw__action_inner__position_input.arrive():
+            return
+        literal.continue_destruction(self.continue_destroy_position_gw__action_inner__position_input)
+
+    def continue_destroy_position_gw__action_inner__position_input(self):
+        self.destruction_position_position_gw__action_inner__position_input.destroy_particle()
 
     def destroy_position_gw__action_inner__position_input__global_position_parent(self):
         if not self.join_for_destroy_position_gw__action_inner__position_input__global_position_parent.arrive():
@@ -155,27 +178,50 @@ class MiddleExecution:
         literal.continue_destruction(self.continue_destroy_position_gw__action_inner__position_input__global_position_parent)
 
     def continue_destroy_position_gw__action_inner__position_input__global_position_parent(self):
-        self.local_position_gw.particle.get_action(
+        self.destruction_position_position_gw__action_inner__position_input__global_position_parent.destroy_particle()
+
+    def destroy_position_gw__action_inner__position_input__global_position_parent__global_position_a(self):
+        literal.continue_destruction(self.continue_destroy_position_gw__action_inner__position_input__global_position_parent__global_position_a)
+
+    def continue_destroy_position_gw__action_inner__position_input__global_position_parent__global_position_a(self):
+        self.destruction_position_position_gw__action_inner__position_input__global_position_parent__global_position_a.destroy_particle()
+
+    def destroy_position_gw__action_inner__position_input__global_position_parent__global_position_b(self):
+        literal.continue_destruction(self.continue_destroy_position_gw__action_inner__position_input__global_position_parent__global_position_b)
+
+    def continue_destroy_position_gw__action_inner__position_input__global_position_parent__global_position_b(self):
+        self.destruction_position_position_gw__action_inner__position_input__global_position_parent__global_position_b.destroy_particle()
+
+    def init_position_gw__action_inner__position_input__global_position_parent__global_position_a(self):
+        self.destruction_position_position_gw__action_inner__position_input = self.local_position_gw.particle.get_action(
+            local.my_domain_com.my_lib.inner.Inner
+        ).get_interface_position(
+            "position<input>"
+        )
+        self.destruction_position_position_gw__action_inner__position_input__global_position_parent = self.local_position_gw.particle.get_action(
             local.my_domain_com.my_lib.inner.Inner
         ).get_interface_position(
             "position<input>"
         ).particle.get_position(
             local.my_domain_com.my_lib.parent.Parent
-        ).destroy_particle()
-        self.destroy_position_gw__action_inner__position_input()
-
-    def destroy_position_gw__action_inner__position_input(self):
-        literal.continue_destruction(self.continue_destroy_position_gw__action_inner__position_input)
-
-    def continue_destroy_position_gw__action_inner__position_input(self):
-        self.local_position_gw.particle.get_action(
+        )
+        self.destruction_position_position_gw__action_inner__position_input__global_position_parent__global_position_a = self.local_position_gw.particle.get_action(
             local.my_domain_com.my_lib.inner.Inner
         ).get_interface_position(
             "position<input>"
-        ).destroy_particle()
-        self.destroy_position_gw()
+        ).particle.get_position(
+            local.my_domain_com.my_lib.parent.Parent
+        ).particle.get_position(
+            local.my_domain_com.my_lib.a.A
+        )
 
-    def destroy_position_gw(self):
-        if not self.join_for_destroy_position_gw.arrive():
-            return
-        self.local_position_gw.destroy_particle()
+    def init_position_gw__action_inner__position_input__global_position_parent__global_position_b(self):
+        self.destruction_position_position_gw__action_inner__position_input__global_position_parent__global_position_b = self.local_position_gw.particle.get_action(
+            local.my_domain_com.my_lib.inner.Inner
+        ).get_interface_position(
+            "position<input>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.parent.Parent
+        ).particle.get_position(
+            local.my_domain_com.my_lib.b.B
+        )

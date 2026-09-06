@@ -34,6 +34,8 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_box__action_combiner: local.my_domain_com.my_lib.combiner.CombinerExecution
+        self.destruction_position_position_box__global_position_first_marker: literal.Position
+        self.destruction_position_position_box__global_position_second_marker: literal.Position
         self.join_for_destroy_position_box = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -47,28 +49,44 @@ class TestExecution:
             ),
             self.scheduler,
         )
-        self.execution_position_box__action_combiner.guarantees.global_position_second_marker.consumers.append(
-            self.destroy_position_box__global_position_second_marker
+        self.execution_position_box__action_combiner.guarantees.global_position_first_marker.inits.append(
+            self.init_position_box__action_combiner__global_position_first_marker
+        )
+        self.execution_position_box__action_combiner.guarantees.global_position_first_marker.consumers.append(
+            self.destroy_position_box
         )
         self.execution_position_box__action_combiner.guarantees.global_position_first_marker.consumers.append(
             self.destroy_position_box__global_position_first_marker
         )
+        self.execution_position_box__action_combiner.guarantees.global_position_second_marker.inits.append(
+            self.init_position_box__action_combiner__global_position_second_marker
+        )
+        self.execution_position_box__action_combiner.guarantees.global_position_second_marker.consumers.append(
+            self.destroy_position_box
+        )
+        self.execution_position_box__action_combiner.guarantees.global_position_second_marker.consumers.append(
+            self.destroy_position_box__global_position_second_marker
+        )
         self.scheduler.submit(self.execution_position_box__action_combiner.accept_when_empty_global_position_first_marker)
         self.execution_position_box__action_combiner.accept_when_empty_global_position_second_marker()
-
-    def destroy_position_box__global_position_second_marker(self):
-        self.local_position_box.particle.get_position(
-            local.my_domain_com.my_lib.second_marker.SecondMarker
-        ).destroy_particle()
-        self.destroy_position_box()
-
-    def destroy_position_box__global_position_first_marker(self):
-        self.local_position_box.particle.get_position(
-            local.my_domain_com.my_lib.first_marker.FirstMarker
-        ).destroy_particle()
-        self.destroy_position_box()
 
     def destroy_position_box(self):
         if not self.join_for_destroy_position_box.arrive():
             return
         self.local_position_box.destroy_particle()
+
+    def destroy_position_box__global_position_first_marker(self):
+        self.destruction_position_position_box__global_position_first_marker.destroy_particle()
+
+    def destroy_position_box__global_position_second_marker(self):
+        self.destruction_position_position_box__global_position_second_marker.destroy_particle()
+
+    def init_position_box__action_combiner__global_position_first_marker(self):
+        self.destruction_position_position_box__global_position_first_marker = self.local_position_box.particle.get_position(
+            local.my_domain_com.my_lib.first_marker.FirstMarker
+        )
+
+    def init_position_box__action_combiner__global_position_second_marker(self):
+        self.destruction_position_position_box__global_position_second_marker = self.local_position_box.particle.get_position(
+            local.my_domain_com.my_lib.second_marker.SecondMarker
+        )

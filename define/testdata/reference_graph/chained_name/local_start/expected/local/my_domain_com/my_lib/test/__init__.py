@@ -33,6 +33,9 @@ class TestExecution:
             ),
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_a__global_position_b: literal.Position
+        self.destruction_position_position_a__global_position_b__global_position_c: literal.Position
+        self.destruction_position_position_a__global_position_b__global_position_c__global_position_d: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_a()
@@ -54,19 +57,34 @@ class TestExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.d.D
         ).create_particle()
-        self.local_position_a.particle.get_position(
+        self.destruction_position_position_a__global_position_b = self.local_position_a.particle.get_position(
+            local.my_domain_com.my_lib.b.B
+        )
+        self.destruction_position_position_a__global_position_b__global_position_c = self.local_position_a.particle.get_position(
+            local.my_domain_com.my_lib.b.B
+        ).particle.get_position(
+            local.my_domain_com.my_lib.c.C
+        )
+        self.destruction_position_position_a__global_position_b__global_position_c__global_position_d = self.local_position_a.particle.get_position(
             local.my_domain_com.my_lib.b.B
         ).particle.get_position(
             local.my_domain_com.my_lib.c.C
         ).particle.get_position(
             local.my_domain_com.my_lib.d.D
-        ).destroy_particle()
-        self.local_position_a.particle.get_position(
-            local.my_domain_com.my_lib.b.B
-        ).particle.get_position(
-            local.my_domain_com.my_lib.c.C
-        ).destroy_particle()
-        self.local_position_a.particle.get_position(
-            local.my_domain_com.my_lib.b.B
-        ).destroy_particle()
+        )
+        self.scheduler.submit(self.destroy_position_a)
+        self.scheduler.submit(self.destroy_position_a__global_position_b)
+        self.scheduler.submit(self.destroy_position_a__global_position_b__global_position_c)
+        self.destroy_position_a__global_position_b__global_position_c__global_position_d()
+
+    def destroy_position_a(self):
         self.local_position_a.destroy_particle()
+
+    def destroy_position_a__global_position_b(self):
+        self.destruction_position_position_a__global_position_b.destroy_particle()
+
+    def destroy_position_a__global_position_b__global_position_c(self):
+        self.destruction_position_position_a__global_position_b__global_position_c.destroy_particle()
+
+    def destroy_position_a__global_position_b__global_position_c__global_position_d(self):
+        self.destruction_position_position_a__global_position_b__global_position_c__global_position_d.destroy_particle()

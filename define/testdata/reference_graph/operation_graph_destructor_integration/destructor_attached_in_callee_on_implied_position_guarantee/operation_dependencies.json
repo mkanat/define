@@ -209,7 +209,7 @@
           "action_name": "test"
         },
         "operation_name": "destroy",
-        "target": "box::/maker::run",
+        "target": "box::/child",
         "occurrence": 1
       },
       {
@@ -217,8 +217,8 @@
           "caller": null,
           "action_name": "test"
         },
-        "operation_name": "destroy",
-        "target": "box::/child",
+        "operation_name": "create",
+        "target": "box::/maker::run",
         "occurrence": 1
       }
     ]

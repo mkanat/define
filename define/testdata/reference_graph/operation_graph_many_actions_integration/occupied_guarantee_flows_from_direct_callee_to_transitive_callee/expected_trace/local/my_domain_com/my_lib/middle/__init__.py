@@ -43,6 +43,7 @@ class MiddleExecution:
         )
         self.destruction_connections = destruction_connections
         self.execution_action_empty_item: local.my_domain_com.my_lib.empty_item.EmptyItemExecution
+        self.destruction_position_action_empty_item__position_trigger_pos: literal.Position
         self.join_for_empty_rule_global_position_item: literal.Join
         self.execution_action_empty_item = local.my_domain_com.my_lib.empty_item.EmptyItemExecution(
             self.action.on_particle.get_action(
@@ -73,11 +74,12 @@ class MiddleExecution:
             "/empty_item::trigger_pos",
             1,
         )
-        self.action.on_particle.get_action(
+        self.destruction_position_action_empty_item__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.empty_item.EmptyItem
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_empty_item__position_trigger_pos.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "/empty_item::trigger_pos",

@@ -35,6 +35,9 @@ class TestExecution:
         )
         self.execution_position_box__action_maker: local.my_domain_com.my_lib.maker.MakerExecution
         self.execution_position_box__action_maker__position_result__action_destructor: local.my_domain_com.my_lib.destructor.DestructorExecution
+        self.destruction_position_position_box__action_maker__position_result: literal.Position
+        self.destruction_position_position_box__action_maker__position_result__global_position_marker: literal.Position
+        self.destruction_position_position_box__action_maker__position_run: literal.Position
         self.join_for_destroy_position_box = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -60,32 +63,28 @@ class TestExecution:
         ).get_interface_position(
             "position<run>"
         ).create_particle()
-        self.local_position_box.particle.get_action(
+        self.destruction_position_position_box__action_maker__position_run = self.local_position_box.particle.get_action(
             local.my_domain_com.my_lib.maker.Maker
         ).get_interface_position(
             "position<run>"
-        ).destroy_particle()
+        )
+        self.scheduler.submit(self.destroy_position_box)
+        self.destroy_position_box__action_maker__position_run()
+
+    def destroy_position_box__action_maker__position_result(self):
+        self.destruction_position_position_box__action_maker__position_result.destroy_particle()
         self.destroy_position_box()
 
     def destroy_position_box__action_maker__position_result__global_position_marker(self):
-        self.local_position_box.particle.get_action(
-            local.my_domain_com.my_lib.maker.Maker
-        ).get_interface_position(
-            "position<result>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.marker.Marker
-        ).destroy_particle()
-        self.local_position_box.particle.get_action(
-            local.my_domain_com.my_lib.maker.Maker
-        ).get_interface_position(
-            "position<result>"
-        ).destroy_particle()
-        self.destroy_position_box()
+        self.destruction_position_position_box__action_maker__position_result__global_position_marker.destroy_particle()
 
     def destroy_position_box(self):
         if not self.join_for_destroy_position_box.arrive():
             return
         self.local_position_box.destroy_particle()
+
+    def destroy_position_box__action_maker__position_run(self):
+        self.destruction_position_position_box__action_maker__position_run.destroy_particle()
 
     def init_position_box__action_maker__position_result(self):
         self.execution_position_box__action_maker__position_result__action_destructor = local.my_domain_com.my_lib.destructor.DestructorExecution(
@@ -100,11 +99,31 @@ class TestExecution:
         )
         self.execution_position_box__action_maker__position_result__action_destructor.join_for_empty_rule_global_position_marker = literal.NO_JOIN
         self.execution_position_box__action_maker__position_result__action_destructor.join_for_move_global_position_marker_to_position_holder = literal.NO_JOIN
+        self.execution_position_box__action_maker__position_result__action_destructor.guarantees.global_position_marker.inits.append(
+            self.init_position_box__action_maker__position_result__action_destructor__global_position_marker
+        )
+        self.execution_position_box__action_maker__position_result__action_destructor.guarantees.global_position_marker.consumers.append(
+            self.destroy_position_box__action_maker__position_result
+        )
         self.execution_position_box__action_maker__position_result__action_destructor.guarantees.global_position_marker.consumers.append(
             self.destroy_position_box__action_maker__position_result__global_position_marker
         )
         self.execution_position_box__action_maker.guarantees.position_result__global_position_marker.consumers.append(
             self.accept_guarantee_position_box__action_maker__position_result__action_destructor
+        )
+
+    def init_position_box__action_maker__position_result__action_destructor__global_position_marker(self):
+        self.destruction_position_position_box__action_maker__position_result = self.local_position_box.particle.get_action(
+            local.my_domain_com.my_lib.maker.Maker
+        ).get_interface_position(
+            "position<result>"
+        )
+        self.destruction_position_position_box__action_maker__position_result__global_position_marker = self.local_position_box.particle.get_action(
+            local.my_domain_com.my_lib.maker.Maker
+        ).get_interface_position(
+            "position<result>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.marker.Marker
         )
 
     def accept_guarantee_position_box__action_maker__position_result__action_destructor(self):

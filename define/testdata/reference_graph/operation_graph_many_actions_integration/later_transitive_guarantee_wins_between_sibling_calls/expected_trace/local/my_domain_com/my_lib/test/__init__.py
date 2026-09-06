@@ -49,6 +49,7 @@ class TestExecution:
         )
         self.guarantees = TestGuarantees()
         self.execution_action_run_both: local.my_domain_com.my_lib.run_both.RunBothExecution
+        self.destruction_position_action_run_both__position_trigger_pos: literal.Position
         self.execution_action_run_both = local.my_domain_com.my_lib.run_both.RunBothExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.run_both.RunBoth
@@ -79,11 +80,12 @@ class TestExecution:
             "/run_both::trigger_pos",
             1,
         )
-        self.action.on_particle.get_action(
+        self.destruction_position_action_run_both__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.run_both.RunBoth
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_run_both__position_trigger_pos.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "/run_both::trigger_pos",

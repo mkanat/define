@@ -5,7 +5,6 @@ from typing import final
 from define.runtime import literal
 
 import local.my_domain_com.my_lib.known_destructor
-import local.my_domain_com.my_lib.marker
 
 
 class Destroyer(literal.Action):
@@ -73,19 +72,8 @@ class DestroyerExecution:
             self.scheduler,
         )
         self.execution_position_target__action_known_destructor.guarantees.global_position_marker.consumers.append(
-            self.destroy_position_target__global_position_marker
+            self.destroy_position_target
         )
-
-    def destroy_position_target__global_position_marker(self):
-        literal.continue_destruction(self.continue_destroy_position_target__global_position_marker)
-
-    def continue_destroy_position_target__global_position_marker(self):
-        self.action.get_interface_position(
-            "position<target>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.marker.Marker
-        ).destroy_particle()
-        self.destroy_position_target()
 
     def destroy_position_target(self):
         if not self.join_for_destroy_position_target.arrive():

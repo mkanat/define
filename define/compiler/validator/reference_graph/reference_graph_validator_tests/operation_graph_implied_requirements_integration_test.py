@@ -66,7 +66,9 @@ def test_occupied_requirement_on_grandparent_of_position(
         "test.destroy(/triggered::input::/child)": [
             "triggered.destroy(input::/child::/grandchild)"
         ],
-        "test.destroy(/triggered::input)": ["test.destroy(/triggered::input::/child)"],
+        "test.destroy(/triggered::input)": [
+            "triggered.destroy(input::/child::/grandchild)"
+        ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 

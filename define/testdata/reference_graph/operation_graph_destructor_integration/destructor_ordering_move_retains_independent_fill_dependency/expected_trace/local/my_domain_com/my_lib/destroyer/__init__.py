@@ -62,6 +62,8 @@ class DestroyerExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_target__action_known_destructor: local.my_domain_com.my_lib.known_destructor.KnownDestructorExecution
+        self.destruction_position_position_target__global_position_destination: literal.Position
+        self.destruction_position_position_target__global_position_shared: literal.Position
         self.join_for_move_position_target__global_position_shared_to_position_holder: literal.Join
         self.join_for_destroy_position_target: literal.Join
         self.join_for_empty_rule_position_target__global_position_shared: literal.Join
@@ -93,6 +95,12 @@ class DestroyerExecution:
         )
         self.execution_position_target__action_known_destructor.join_for_empty_rule_global_position_shared = literal.NO_JOIN
         self.execution_position_target__action_known_destructor.join_for_move_global_position_shared_to_position_holder = literal.NO_JOIN
+        self.execution_position_target__action_known_destructor.guarantees.global_position_shared.inits.append(
+            self.init_position_target__action_known_destructor__global_position_shared
+        )
+        self.execution_position_target__action_known_destructor.guarantees.global_position_shared.consumers.append(
+            self.destroy_position_target
+        )
         self.execution_position_target__action_known_destructor.guarantees.global_position_shared.consumers.append(
             self.destroy_position_target__global_position_shared
         )
@@ -137,30 +145,15 @@ class DestroyerExecution:
             "target::/destination",
             1,
         )
-        self.action.get_interface_position(
+        self.destruction_position_position_target__global_position_destination = self.action.get_interface_position(
             "position<target>"
         ).particle.get_position(
             local.my_domain_com.my_lib.destination.Destination
-        ).destroy_particle()
+        )
+        self.destruction_position_position_target__global_position_destination.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "target::/destination",
-            1,
-        )
-        self.destroy_position_target()
-
-    def destroy_position_target__global_position_shared(self):
-        literal.continue_destruction(self.continue_destroy_position_target__global_position_shared)
-
-    def continue_destroy_position_target__global_position_shared(self):
-        self.action.get_interface_position(
-            "position<target>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.shared.Shared
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "target::/shared",
             1,
         )
         self.destroy_position_target()
@@ -181,4 +174,22 @@ class DestroyerExecution:
         )
         self.guarantees.position_target.publish(
             self.scheduler,
+        )
+
+    def destroy_position_target__global_position_shared(self):
+        literal.continue_destruction(self.continue_destroy_position_target__global_position_shared)
+
+    def continue_destroy_position_target__global_position_shared(self):
+        self.destruction_position_position_target__global_position_shared.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.trace_execution,
+            "target::/shared",
+            1,
+        )
+
+    def init_position_target__action_known_destructor__global_position_shared(self):
+        self.destruction_position_position_target__global_position_shared = self.action.get_interface_position(
+            "position<target>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.shared.Shared
         )

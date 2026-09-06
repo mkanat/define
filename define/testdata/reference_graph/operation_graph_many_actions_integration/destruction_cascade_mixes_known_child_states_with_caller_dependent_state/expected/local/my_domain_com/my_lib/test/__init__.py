@@ -52,6 +52,7 @@ class TestExecution:
         self.execution_action_destroyer: local.my_domain_com.my_lib.destroyer.DestroyerExecution
         self.destruction_connection_action_destroyer: literal.DestructionConnection
         self.destruction_position_action_destroyer__position_run__global_position_maybe_child: literal.Position
+        self.destruction_position_position_source__global_position_known_occupied: literal.Position
         self.join_for_move_position_source_to_action_destroyer__position_run = self.scheduler.create_join(3)
         self.join_when_empty_global_position_target: literal.Join
         self.join_when_empty_global_position_destination: literal.Join
@@ -104,9 +105,10 @@ class TestExecution:
         self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.known_occupied.KnownOccupied
         ).create_particle()
-        self.local_position_source.particle.get_position(
+        self.destruction_position_position_source__global_position_known_occupied = self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.known_occupied.KnownOccupied
-        ).destroy_particle()
+        )
+        self.destruction_position_position_source__global_position_known_occupied.destroy_particle()
         self.move_position_source_to_action_destroyer__position_run()
 
     def create_position_source__global_position_maybe_child(self):

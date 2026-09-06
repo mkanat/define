@@ -251,66 +251,6 @@
     "operation": {
       "execution": {
         "caller": {
-          "caller": null,
-          "action_name": "test"
-        },
-        "action_name": "destroyer"
-      },
-      "operation_name": "destroy",
-      "target": "target::/occupied_first::/transitive",
-      "occurrence": 1
-    },
-    "dependencies": [
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "destroyer"
-          },
-          "action_name": "destructor"
-        },
-        "operation_name": "move",
-        "source": "transitive_holder",
-        "target": "/occupied_first::/transitive",
-        "occurrence": 1
-      }
-    ]
-  },
-  {
-    "operation": {
-      "execution": {
-        "caller": {
-          "caller": null,
-          "action_name": "test"
-        },
-        "action_name": "destroyer"
-      },
-      "operation_name": "destroy",
-      "target": "target::/occupied_first",
-      "occurrence": 1
-    },
-    "dependencies": [
-      {
-        "execution": {
-          "caller": {
-            "caller": null,
-            "action_name": "test"
-          },
-          "action_name": "destroyer"
-        },
-        "operation_name": "destroy",
-        "target": "target::/occupied_first::/transitive",
-        "occurrence": 1
-      }
-    ]
-  },
-  {
-    "operation": {
-      "execution": {
-        "caller": {
           "caller": {
             "caller": null,
             "action_name": "test"
@@ -462,8 +402,130 @@
           "action_name": "destructor"
         },
         "operation_name": "move",
+        "source": "transitive_holder",
+        "target": "/occupied_first::/transitive",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": null,
+              "action_name": "test"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "destructor"
+        },
+        "operation_name": "destroy",
+        "target": "/empty",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": null,
+              "action_name": "test"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "destructor"
+        },
+        "operation_name": "move",
         "source": "last_holder",
         "target": "/occupied_last",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "operation": {
+      "execution": {
+        "caller": {
+          "caller": null,
+          "action_name": "test"
+        },
+        "action_name": "destroyer"
+      },
+      "operation_name": "destroy",
+      "target": "target::/occupied_first::/transitive",
+      "occurrence": 1
+    },
+    "dependencies": [
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": null,
+              "action_name": "test"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "destructor"
+        },
+        "operation_name": "move",
+        "source": "transitive_holder",
+        "target": "/occupied_first::/transitive",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": null,
+              "action_name": "test"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "destructor"
+        },
+        "operation_name": "destroy",
+        "target": "/empty",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": null,
+              "action_name": "test"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "destructor"
+        },
+        "operation_name": "move",
+        "source": "last_holder",
+        "target": "/occupied_last",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "operation": {
+      "execution": {
+        "caller": {
+          "caller": null,
+          "action_name": "test"
+        },
+        "action_name": "destroyer"
+      },
+      "operation_name": "destroy",
+      "target": "target::/occupied_first",
+      "occurrence": 1
+    },
+    "dependencies": [
+      {
+        "execution": {
+          "caller": {
+            "caller": null,
+            "action_name": "test"
+          },
+          "action_name": "destroyer"
+        },
+        "operation_name": "destroy",
+        "target": "target::/occupied_first::/transitive",
         "occurrence": 1
       }
     ]
@@ -485,13 +547,17 @@
       {
         "execution": {
           "caller": {
-            "caller": null,
-            "action_name": "test"
+            "caller": {
+              "caller": null,
+              "action_name": "test"
+            },
+            "action_name": "destroyer"
           },
-          "action_name": "destroyer"
+          "action_name": "destructor"
         },
-        "operation_name": "destroy",
-        "target": "target::/occupied_first",
+        "operation_name": "move",
+        "source": "transitive_holder",
+        "target": "/occupied_first::/transitive",
         "occurrence": 1
       },
       {
@@ -512,6 +578,22 @@
       {
         "execution": {
           "caller": {
+            "caller": {
+              "caller": null,
+              "action_name": "test"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "destructor"
+        },
+        "operation_name": "move",
+        "source": "last_holder",
+        "target": "/occupied_last",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
             "caller": null,
             "action_name": "test"
           },
@@ -519,6 +601,18 @@
         },
         "operation_name": "destroy",
         "target": "target::/occupied_last",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": null,
+            "action_name": "test"
+          },
+          "action_name": "destroyer"
+        },
+        "operation_name": "destroy",
+        "target": "target::/occupied_first",
         "occurrence": 1
       }
     ]

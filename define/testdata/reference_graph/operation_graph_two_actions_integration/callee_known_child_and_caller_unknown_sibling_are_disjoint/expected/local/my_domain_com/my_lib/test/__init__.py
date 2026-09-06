@@ -43,6 +43,7 @@ class TestExecution:
         self.execution_action_destroyer: local.my_domain_com.my_lib.destroyer.DestroyerExecution
         self.destruction_connection_action_destroyer: literal.DestructionConnection
         self.destruction_position_action_destroyer__position_parent__global_position_sibling: literal.Position
+        self.destruction_position_action_destroyer__position_trigger_pos: literal.Position
         self.join_for_move_position_source_to_action_destroyer__position_parent = self.scheduler.create_join(2)
         self.destruction_connection_action_destroyer = literal.DestructionConnection(
             self.scheduler,
@@ -111,11 +112,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_destroyer__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.destroyer.Destroyer
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_destroyer__position_trigger_pos.destroy_particle()
 
     def destroy_action_destroyer__position_parent__global_position_sibling(self):
         self.destruction_position_action_destroyer__position_parent__global_position_sibling.destroy_particle()

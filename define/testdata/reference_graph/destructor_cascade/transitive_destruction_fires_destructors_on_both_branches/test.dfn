@@ -1,0 +1,19 @@
+# Destroying the parent triggers the Destructors on both child particles and their children.
+define the potential action<my.domain.com:my_lib:/test> {
+    it happens when {
+        this particle is created.
+    } and it does {
+        define the position<box> {
+            it may only contain particles where {
+                it has the position</a_branch>.
+                it has the position</b_branch>.
+            }
+        }
+        create a particle in position<box>.
+        create a particle in position<box>::position</a_branch>.
+        create a particle in position<box>::position</a_branch>::position</a_leaf>.
+        create a particle in position<box>::position</b_branch>.
+        create a particle in position<box>::position</b_branch>::position</b_leaf>.
+        destroy the particle in position<box>.
+    }
+}

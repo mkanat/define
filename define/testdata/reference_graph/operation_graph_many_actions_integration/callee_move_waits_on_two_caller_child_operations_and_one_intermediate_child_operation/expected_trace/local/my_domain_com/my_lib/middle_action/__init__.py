@@ -49,6 +49,7 @@ class MiddleActionExecution:
         self.execution_action_inner: local.my_domain_com.my_lib.inner.InnerExecution
         self.destruction_connection_action_inner: tracing.DestructionConnection
         self.destruction_position_global_position_input__global_position_first: literal.Position
+        self.destruction_position_action_inner__position_trigger_pos: literal.Position
         self.join_for_empty_rule_global_position_input: literal.Join
         self.join_for_action_inner__for_empty_rule_global_position_input: literal.Join
         self.destruction_connection_action_inner = tracing.DestructionConnection(
@@ -109,11 +110,12 @@ class MiddleActionExecution:
             "/inner::trigger_pos",
             1,
         )
-        self.action.on_particle.get_action(
+        self.destruction_position_action_inner__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.inner.Inner
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_inner__position_trigger_pos.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "/inner::trigger_pos",

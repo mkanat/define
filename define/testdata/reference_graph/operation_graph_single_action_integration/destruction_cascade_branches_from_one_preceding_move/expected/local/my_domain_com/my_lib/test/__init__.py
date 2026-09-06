@@ -37,8 +37,9 @@ class TestExecution:
             "position<destination>",
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_destination__global_position_a: literal.Position
+        self.destruction_position_position_destination__global_position_b: literal.Position
         self.join_for_move_position_source_to_position_destination = self.scheduler.create_join(2)
-        self.join_for_destroy_position_destination = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
         self.create_position_source()
@@ -64,22 +65,21 @@ class TestExecution:
         if not self.join_for_move_position_source_to_position_destination.arrive():
             return
         self.local_position_source.move_particle_to(self.local_position_destination)
-        self.scheduler.submit(self.destroy_position_destination__global_position_b)
-        self.destroy_position_destination__global_position_a()
-
-    def destroy_position_destination__global_position_b(self):
-        self.local_position_destination.particle.get_position(
-            local.my_domain_com.my_lib.b.B
-        ).destroy_particle()
-        self.destroy_position_destination()
-
-    def destroy_position_destination__global_position_a(self):
-        self.local_position_destination.particle.get_position(
+        self.destruction_position_position_destination__global_position_a = self.local_position_destination.particle.get_position(
             local.my_domain_com.my_lib.a.A
-        ).destroy_particle()
-        self.destroy_position_destination()
+        )
+        self.destruction_position_position_destination__global_position_b = self.local_position_destination.particle.get_position(
+            local.my_domain_com.my_lib.b.B
+        )
+        self.scheduler.submit(self.destroy_position_destination)
+        self.scheduler.submit(self.destroy_position_destination__global_position_a)
+        self.destroy_position_destination__global_position_b()
 
     def destroy_position_destination(self):
-        if not self.join_for_destroy_position_destination.arrive():
-            return
         self.local_position_destination.destroy_particle()
+
+    def destroy_position_destination__global_position_a(self):
+        self.destruction_position_position_destination__global_position_a.destroy_particle()
+
+    def destroy_position_destination__global_position_b(self):
+        self.destruction_position_position_destination__global_position_b.destroy_particle()

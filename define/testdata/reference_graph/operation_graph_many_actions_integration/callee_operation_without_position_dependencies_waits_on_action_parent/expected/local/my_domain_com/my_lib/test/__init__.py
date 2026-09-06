@@ -39,6 +39,8 @@ class TestExecution:
         self.scheduler = scheduler
         self.guarantees = TestGuarantees()
         self.execution_global_position_box__action_worker: local.my_domain_com.my_lib.worker.WorkerExecution
+        self.destruction_position_global_position_box__action_worker__position_result: literal.Position
+        self.destruction_position_global_position_box__action_worker__position_trigger_pos: literal.Position
 
     def accept_when_empty_global_position_box(self):
         self.create_global_position_box()
@@ -54,6 +56,9 @@ class TestExecution:
                 local.my_domain_com.my_lib.worker.Worker
             ),
             self.scheduler,
+        )
+        self.execution_global_position_box__action_worker.guarantees.position_result.inits.append(
+            self.init_global_position_box__action_worker__position_result
         )
         self.execution_global_position_box__action_worker.guarantees.position_result.consumers.append(
             self.destroy_global_position_box__action_worker__position_result
@@ -72,19 +77,23 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_position(
+        self.destruction_position_global_position_box__action_worker__position_trigger_pos = self.action.on_particle.get_position(
             local.my_domain_com.my_lib.box.Box
         ).particle.get_action(
             local.my_domain_com.my_lib.worker.Worker
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_global_position_box__action_worker__position_trigger_pos.destroy_particle()
 
     def destroy_global_position_box__action_worker__position_result(self):
-        self.action.on_particle.get_position(
+        self.destruction_position_global_position_box__action_worker__position_result.destroy_particle()
+
+    def init_global_position_box__action_worker__position_result(self):
+        self.destruction_position_global_position_box__action_worker__position_result = self.action.on_particle.get_position(
             local.my_domain_com.my_lib.box.Box
         ).particle.get_action(
             local.my_domain_com.my_lib.worker.Worker
         ).get_interface_position(
             "position<result>"
-        ).destroy_particle()
+        )

@@ -24,7 +24,7 @@ class ActionStatementsGenerator:
     _interface_position_names: set[str]
     _local_position_names: dict[str, str]
     _destruction_position_names: dict[
-        operation_graph_model.DestructionFragmentDestroyNode, str
+        operation_graph_model.DestructionFactDestroyNode, str
     ]
     _destruction_connection_by_operation: dict[
         operation_graph_model.DestructionFragmentDestroyNode,
@@ -39,7 +39,7 @@ class ActionStatementsGenerator:
         converter: naming.NameConverter,
         local_position_names: dict[str, str],
         destruction_position_names: dict[
-            operation_graph_model.DestructionFragmentDestroyNode, str
+            operation_graph_model.DestructionFactDestroyNode, str
         ],
         destruction_connection_by_operation: dict[
             operation_graph_model.DestructionFragmentDestroyNode,
@@ -108,12 +108,13 @@ class ActionStatementsGenerator:
                 )
             case operation_graph_model.DestroyNode():
                 destruction_connection_name = None
-                if isinstance(
-                    node, operation_graph_model.DestructionFragmentDestroyNode
+                if (
+                    isinstance(
+                        node,
+                        operation_graph_model.DestructionFactDestroyNode,
+                    )
+                    and node in self._destruction_position_names
                 ):
-                    destruction_connection_name = self._destruction_connection_names[
-                        self._destruction_connection_by_operation[node]
-                    ]
                     position = template_context.PositionExpr(
                         local_position_member_name=self._destruction_position_names[
                             node
@@ -122,6 +123,12 @@ class ActionStatementsGenerator:
                     )
                 else:
                     position = self.build_position(node.target)
+                if isinstance(
+                    node, operation_graph_model.DestructionFragmentDestroyNode
+                ):
+                    destruction_connection_name = self._destruction_connection_names[
+                        self._destruction_connection_by_operation[node]
+                    ]
                 return template_context.ActionStatementContext(
                     kind=template_context.StatementKind.DESTROY_PARTICLE,
                     position=position,

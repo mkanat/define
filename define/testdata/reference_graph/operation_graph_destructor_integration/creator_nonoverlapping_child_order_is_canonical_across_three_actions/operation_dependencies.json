@@ -690,7 +690,7 @@
           },
           "action_name": "destroyer"
         },
-        "action_name": "fourth_destructor"
+        "action_name": "second_destructor"
       },
       "operation_name": "create",
       "target": "/marker",
@@ -708,86 +708,6 @@
         "operation_name": "move",
         "source": "target",
         "target": "/destroyer::target",
-        "occurrence": 1
-      }
-    ]
-  },
-  {
-    "operation": {
-      "execution": {
-        "caller": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "middle"
-          },
-          "action_name": "destroyer"
-        },
-        "action_name": "fourth_destructor"
-      },
-      "operation_name": "destroy",
-      "target": "/marker",
-      "occurrence": 1
-    },
-    "dependencies": [
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": {
-                "caller": null,
-                "action_name": "test"
-              },
-              "action_name": "middle"
-            },
-            "action_name": "destroyer"
-          },
-          "action_name": "fourth_destructor"
-        },
-        "operation_name": "create",
-        "target": "/marker",
-        "occurrence": 1
-      }
-    ]
-  },
-  {
-    "operation": {
-      "execution": {
-        "caller": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "middle"
-          },
-          "action_name": "destroyer"
-        },
-        "action_name": "second_destructor"
-      },
-      "operation_name": "create",
-      "target": "/marker",
-      "occurrence": 1
-    },
-    "dependencies": [
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": {
-                "caller": null,
-                "action_name": "test"
-              },
-              "action_name": "middle"
-            },
-            "action_name": "destroyer"
-          },
-          "action_name": "fourth_destructor"
-        },
-        "operation_name": "destroy",
-        "target": "/marker",
         "occurrence": 1
       }
     ]
@@ -825,6 +745,86 @@
             "action_name": "destroyer"
           },
           "action_name": "second_destructor"
+        },
+        "operation_name": "create",
+        "target": "/marker",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "operation": {
+      "execution": {
+        "caller": {
+          "caller": {
+            "caller": {
+              "caller": null,
+              "action_name": "test"
+            },
+            "action_name": "middle"
+          },
+          "action_name": "destroyer"
+        },
+        "action_name": "fourth_destructor"
+      },
+      "operation_name": "create",
+      "target": "/marker",
+      "occurrence": 1
+    },
+    "dependencies": [
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "second_destructor"
+        },
+        "operation_name": "destroy",
+        "target": "/marker",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "operation": {
+      "execution": {
+        "caller": {
+          "caller": {
+            "caller": {
+              "caller": null,
+              "action_name": "test"
+            },
+            "action_name": "middle"
+          },
+          "action_name": "destroyer"
+        },
+        "action_name": "fourth_destructor"
+      },
+      "operation_name": "destroy",
+      "target": "/marker",
+      "occurrence": 1
+    },
+    "dependencies": [
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "fourth_destructor"
         },
         "operation_name": "create",
         "target": "/marker",
@@ -950,30 +950,18 @@
         "execution": {
           "caller": {
             "caller": {
-              "caller": null,
-              "action_name": "test"
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
             },
-            "action_name": "middle"
+            "action_name": "destroyer"
           },
-          "action_name": "destroyer"
+          "action_name": "fourth_destructor"
         },
         "operation_name": "destroy",
-        "target": "target::/second",
-        "occurrence": 1
-      },
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "middle"
-          },
-          "action_name": "destroyer"
-        },
-        "operation_name": "destroy",
-        "target": "target::/fourth",
+        "target": "/marker",
         "occurrence": 1
       },
       {
@@ -990,8 +978,28 @@
           },
           "action_name": "second_destructor"
         },
-        "operation_name": "destroy",
-        "target": "/marker",
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/second",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "fourth_destructor"
+        },
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/fourth",
         "occurrence": 1
       }
     ]
@@ -1036,30 +1044,18 @@
         "execution": {
           "caller": {
             "caller": {
-              "caller": null,
-              "action_name": "test"
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
             },
-            "action_name": "middle"
+            "action_name": "destroyer"
           },
-          "action_name": "destroyer"
+          "action_name": "fourth_destructor"
         },
         "operation_name": "destroy",
-        "target": "target::/second",
-        "occurrence": 1
-      },
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "middle"
-          },
-          "action_name": "destroyer"
-        },
-        "operation_name": "destroy",
-        "target": "target::/fourth",
+        "target": "/marker",
         "occurrence": 1
       },
       {
@@ -1076,8 +1072,28 @@
           },
           "action_name": "second_destructor"
         },
-        "operation_name": "destroy",
-        "target": "/marker",
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/second",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "fourth_destructor"
+        },
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/fourth",
         "occurrence": 1
       }
     ]
@@ -1106,30 +1122,18 @@
         "execution": {
           "caller": {
             "caller": {
-              "caller": null,
-              "action_name": "test"
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
             },
-            "action_name": "middle"
+            "action_name": "destroyer"
           },
-          "action_name": "destroyer"
+          "action_name": "fourth_destructor"
         },
         "operation_name": "destroy",
-        "target": "target::/second",
-        "occurrence": 1
-      },
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "middle"
-          },
-          "action_name": "destroyer"
-        },
-        "operation_name": "destroy",
-        "target": "target::/fourth",
+        "target": "/marker",
         "occurrence": 1
       },
       {
@@ -1146,8 +1150,28 @@
           },
           "action_name": "second_destructor"
         },
-        "operation_name": "destroy",
-        "target": "/marker",
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/second",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "fourth_destructor"
+        },
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/fourth",
         "occurrence": 1
       }
     ]
@@ -1216,30 +1240,18 @@
         "execution": {
           "caller": {
             "caller": {
-              "caller": null,
-              "action_name": "test"
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
             },
-            "action_name": "middle"
+            "action_name": "destroyer"
           },
-          "action_name": "destroyer"
+          "action_name": "fourth_destructor"
         },
         "operation_name": "destroy",
-        "target": "target::/second",
-        "occurrence": 1
-      },
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "middle"
-          },
-          "action_name": "destroyer"
-        },
-        "operation_name": "destroy",
-        "target": "target::/fourth",
+        "target": "/marker",
         "occurrence": 1
       },
       {
@@ -1256,8 +1268,28 @@
           },
           "action_name": "second_destructor"
         },
-        "operation_name": "destroy",
-        "target": "/marker",
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/second",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "fourth_destructor"
+        },
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/fourth",
         "occurrence": 1
       }
     ]
@@ -1323,30 +1355,18 @@
         "execution": {
           "caller": {
             "caller": {
-              "caller": null,
-              "action_name": "test"
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
             },
-            "action_name": "middle"
+            "action_name": "destroyer"
           },
-          "action_name": "destroyer"
+          "action_name": "fourth_destructor"
         },
         "operation_name": "destroy",
-        "target": "target::/second",
-        "occurrence": 1
-      },
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "middle"
-          },
-          "action_name": "destroyer"
-        },
-        "operation_name": "destroy",
-        "target": "target::/fourth",
+        "target": "/marker",
         "occurrence": 1
       },
       {
@@ -1363,8 +1383,28 @@
           },
           "action_name": "second_destructor"
         },
-        "operation_name": "destroy",
-        "target": "/marker",
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/second",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "fourth_destructor"
+        },
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/fourth",
         "occurrence": 1
       }
     ]
@@ -1390,30 +1430,18 @@
         "execution": {
           "caller": {
             "caller": {
-              "caller": null,
-              "action_name": "test"
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
             },
-            "action_name": "middle"
+            "action_name": "destroyer"
           },
-          "action_name": "destroyer"
+          "action_name": "fourth_destructor"
         },
         "operation_name": "destroy",
-        "target": "target::/second",
-        "occurrence": 1
-      },
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "middle"
-          },
-          "action_name": "destroyer"
-        },
-        "operation_name": "destroy",
-        "target": "target::/fourth",
+        "target": "/marker",
         "occurrence": 1
       },
       {
@@ -1430,8 +1458,28 @@
           },
           "action_name": "second_destructor"
         },
-        "operation_name": "destroy",
-        "target": "/marker",
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/second",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "fourth_destructor"
+        },
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/fourth",
         "occurrence": 1
       }
     ]
@@ -1457,30 +1505,18 @@
         "execution": {
           "caller": {
             "caller": {
-              "caller": null,
-              "action_name": "test"
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
             },
-            "action_name": "middle"
+            "action_name": "destroyer"
           },
-          "action_name": "destroyer"
+          "action_name": "fourth_destructor"
         },
         "operation_name": "destroy",
-        "target": "target::/second",
-        "occurrence": 1
-      },
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "middle"
-          },
-          "action_name": "destroyer"
-        },
-        "operation_name": "destroy",
-        "target": "target::/fourth",
+        "target": "/marker",
         "occurrence": 1
       },
       {
@@ -1497,8 +1533,28 @@
           },
           "action_name": "second_destructor"
         },
-        "operation_name": "destroy",
-        "target": "/marker",
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/second",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "fourth_destructor"
+        },
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/fourth",
         "occurrence": 1
       }
     ]
@@ -1524,30 +1580,18 @@
         "execution": {
           "caller": {
             "caller": {
-              "caller": null,
-              "action_name": "test"
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
             },
-            "action_name": "middle"
+            "action_name": "destroyer"
           },
-          "action_name": "destroyer"
+          "action_name": "fourth_destructor"
         },
         "operation_name": "destroy",
-        "target": "target::/second",
-        "occurrence": 1
-      },
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "middle"
-          },
-          "action_name": "destroyer"
-        },
-        "operation_name": "destroy",
-        "target": "target::/fourth",
+        "target": "/marker",
         "occurrence": 1
       },
       {
@@ -1564,8 +1608,28 @@
           },
           "action_name": "second_destructor"
         },
-        "operation_name": "destroy",
-        "target": "/marker",
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/second",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "fourth_destructor"
+        },
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/fourth",
         "occurrence": 1
       },
       {
@@ -1638,30 +1702,18 @@
         "execution": {
           "caller": {
             "caller": {
-              "caller": null,
-              "action_name": "test"
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
             },
-            "action_name": "middle"
+            "action_name": "destroyer"
           },
-          "action_name": "destroyer"
+          "action_name": "fourth_destructor"
         },
         "operation_name": "destroy",
-        "target": "target::/second",
-        "occurrence": 1
-      },
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "middle"
-          },
-          "action_name": "destroyer"
-        },
-        "operation_name": "destroy",
-        "target": "target::/fourth",
+        "target": "/marker",
         "occurrence": 1
       },
       {
@@ -1678,8 +1730,28 @@
           },
           "action_name": "second_destructor"
         },
-        "operation_name": "destroy",
-        "target": "/marker",
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/second",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": {
+                "caller": null,
+                "action_name": "test"
+              },
+              "action_name": "middle"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "fourth_destructor"
+        },
+        "operation_name": "move",
+        "source": "holder",
+        "target": "/fourth",
         "occurrence": 1
       },
       {

@@ -33,6 +33,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_gateway__action_middle: local.my_domain_com.my_lib.middle.MiddleExecution
+        self.destruction_position_position_gateway__action_middle__position_trigger_pos: literal.Position
         self.join_for_destroy_position_gateway = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -76,11 +77,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_gateway.particle.get_action(
+        self.destruction_position_position_gateway__action_middle__position_trigger_pos = self.local_position_gateway.particle.get_action(
             local.my_domain_com.my_lib.middle.Middle
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_gateway__action_middle__position_trigger_pos.destroy_particle()
         self.destroy_position_gateway()
 
     def destroy_position_gateway(self):

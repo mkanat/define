@@ -49,6 +49,8 @@ class TestExecution:
         )
         self.execution_position_holder_first__action_first: local.my_domain_com.my_lib.first.FirstExecution
         self.execution_position_holder_second__action_second: local.my_domain_com.my_lib.second.SecondExecution
+        self.destruction_position_position_holder_first__action_first__position_trigger_pos: literal.Position
+        self.destruction_position_position_holder_second__action_second__position_trigger_pos: literal.Position
 
     def on_action_parent_occupied(self):
         self.scheduler.submit(self.create_position_holder_first)
@@ -80,11 +82,12 @@ class TestExecution:
             "holder_first::/first::trigger_pos",
             1,
         )
-        self.local_position_holder_first.particle.get_action(
+        self.destruction_position_position_holder_first__action_first__position_trigger_pos = self.local_position_holder_first.particle.get_action(
             local.my_domain_com.my_lib.first.First
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_holder_first__action_first__position_trigger_pos.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "holder_first::/first::trigger_pos",
@@ -123,11 +126,12 @@ class TestExecution:
             "holder_second::/second::trigger_pos",
             1,
         )
-        self.local_position_holder_second.particle.get_action(
+        self.destruction_position_position_holder_second__action_second__position_trigger_pos = self.local_position_holder_second.particle.get_action(
             local.my_domain_com.my_lib.second.Second
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_holder_second__action_second__position_trigger_pos.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "holder_second::/second::trigger_pos",

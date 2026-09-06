@@ -58,6 +58,7 @@ class MiddleExecution:
         self.guarantees = MiddleGuarantees()
         self.destruction_connections = destruction_connections
         self.execution_position_source__action_child: local.my_domain_com.my_lib.child.ChildExecution
+        self.destruction_position_position_holder__global_position_marker: literal.Position
         self.join_for_move_position_source_to_position_holder: literal.Join
         self.join_for_empty_rule_position_source: literal.Join
 
@@ -122,6 +123,11 @@ class MiddleExecution:
                 "position<holder>"
             )
         )
+        self.destruction_position_position_holder__global_position_marker = self.action.get_interface_position(
+            "position<holder>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.marker.Marker
+        )
         self.guarantees.position_source.publish(
             self.scheduler,
             self.destroy_position_holder__global_position_marker,
@@ -131,11 +137,7 @@ class MiddleExecution:
         literal.continue_destruction(self.continue_destroy_position_holder__global_position_marker)
 
     def continue_destroy_position_holder__global_position_marker(self):
-        self.action.get_interface_position(
-            "position<holder>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.marker.Marker
-        ).destroy_particle()
+        self.destruction_position_position_holder__global_position_marker.destroy_particle()
         self.destroy_position_holder()
 
     def destroy_position_holder(self):

@@ -85,7 +85,7 @@ def direct_destructor(
     definition: ast.QualityDefinition,
     full_caller_chain: ast.PositionReference,
     occupant: particle_info.ParticleInfo | None,
-    destructor: action_contract.CascadeDestructor,
+    destructor: action_contract.Destructor,
     auto_destruction_target: ast.PositionReference | None,
 ) -> diagnostics.InferredRequirementViolationDiagnostic:
     """Build the diagnostic for an unmet requirement of a destructor this body fires."""
@@ -156,7 +156,7 @@ def contract_destructor(
 ) -> diagnostics.InferredRequirementViolationDiagnostic:
     """Build the diagnostic for an unmet requirement of a destructor surfaced via a Destruction Contract."""
     enclosing_fqun = definition.typed_name.name_content.fqun
-    cascade_req = action_contract.PositionRequirement(
+    destruction_requirement = action_contract.PositionRequirement(
         required_state=propagated_requirement.required_state,
         position=propagated_requirement.position.in_caller(
             destruction_contract.destruction_fact.destroyed_position_in_destroyer
@@ -167,7 +167,8 @@ def contract_destructor(
     )
     position_name = resolved_position.source_form_in_universe(enclosing_fqun)
     required_empty = (
-        cascade_req.required_state == action_contract.PositionOccupancyState.EMPTY
+        destruction_requirement.required_state
+        == action_contract.PositionOccupancyState.EMPTY
     )
     fill_at = occupancy.filled_at if required_empty else None
     if required_empty and fill_at is None:
@@ -215,7 +216,7 @@ def contract_destructor(
         *_fill(position_name, fill_at),
         *destruction_contract.trigger_chain,
         *auto_step,
-        *cascade_req.propagation_chain(),
+        *destruction_requirement.propagation_chain(),
     ]
     return _diagnostic(
         location=trigger_step.location,

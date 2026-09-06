@@ -194,15 +194,6 @@
     "dependencies": [
       {
         "execution": {
-          "caller": null,
-          "action_name": "test"
-        },
-        "operation_name": "destroy",
-        "target": "box::/callee::run",
-        "occurrence": 1
-      },
-      {
-        "execution": {
           "caller": {
             "caller": null,
             "action_name": "test"
@@ -211,6 +202,15 @@
         },
         "operation_name": "destroy",
         "target": "target",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": null,
+          "action_name": "test"
+        },
+        "operation_name": "create",
+        "target": "box::/callee::run",
         "occurrence": 1
       }
     ]
@@ -312,7 +312,7 @@
           "caller": null,
           "action_name": "test"
         },
-        "operation_name": "destroy",
+        "operation_name": "create",
         "target": "later_box::/later::run",
         "occurrence": 1
       },

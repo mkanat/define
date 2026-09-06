@@ -35,6 +35,7 @@ class TestExecution:
         )
         self.execution_position_box__action_beep: local.my_domain_com.my_lib.beep.BeepExecution
         self.execution_position_box__action_destructor: local.my_domain_com.my_lib.destructor.DestructorExecution
+        self.destruction_position_position_box__action_beep__position_trigger: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_box()
@@ -57,9 +58,16 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger>"
         ).create_particle()
-        self.local_position_box.particle.get_action(
+        self.destruction_position_position_box__action_beep__position_trigger = self.local_position_box.particle.get_action(
             local.my_domain_com.my_lib.beep.Beep
         ).get_interface_position(
             "position<trigger>"
-        ).destroy_particle()
+        )
+        self.scheduler.submit(self.destroy_position_box)
+        self.destroy_position_box__action_beep__position_trigger()
+
+    def destroy_position_box(self):
         self.local_position_box.destroy_particle()
+
+    def destroy_position_box__action_beep__position_trigger(self):
+        self.destruction_position_position_box__action_beep__position_trigger.destroy_particle()

@@ -41,6 +41,7 @@ class TestExecution:
         self.scheduler = scheduler
         self.guarantees = TestGuarantees()
         self.execution_action_middle: local.my_domain_com.my_lib.middle.MiddleExecution
+        self.destruction_position_action_middle__position_trigger_pos: literal.Position
         self.execution_action_middle = local.my_domain_com.my_lib.middle.MiddleExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.middle.Middle
@@ -71,8 +72,9 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_middle__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.middle.Middle
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_middle__position_trigger_pos.destroy_particle()

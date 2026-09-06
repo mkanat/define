@@ -33,6 +33,8 @@ class TestExecution:
         )
         self.execution_position_holder__action_middle: local.my_domain_com.my_lib.middle.MiddleExecution
         self.execution_position_holder__action_middle_2: local.my_domain_com.my_lib.middle.MiddleExecution
+        self.destruction_position_position_holder__action_middle__position_trigger_pos: literal.Position
+        self.destruction_position_position_holder__action_middle__position_trigger_pos_2: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_holder()
@@ -55,19 +57,21 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_holder.particle.get_action(
+        self.destruction_position_position_holder__action_middle__position_trigger_pos = self.local_position_holder.particle.get_action(
             local.my_domain_com.my_lib.middle.Middle
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_holder__action_middle__position_trigger_pos.destroy_particle()
         self.local_position_holder.particle.get_action(
             local.my_domain_com.my_lib.middle.Middle
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_holder.particle.get_action(
+        self.destruction_position_position_holder__action_middle__position_trigger_pos_2 = self.local_position_holder.particle.get_action(
             local.my_domain_com.my_lib.middle.Middle
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_holder__action_middle__position_trigger_pos_2.destroy_particle()
         self.local_position_holder.destroy_particle()

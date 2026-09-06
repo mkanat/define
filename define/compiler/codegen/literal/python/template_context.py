@@ -101,6 +101,9 @@ class ActionStatementContext:
     to_position: PositionExpr | None = None
     operation_label: operation_graph_labeler.OperationLabel | None = None
     destruction_connection_name: str | None = None
+    destruction_positions_to_retain: list[DestructionPositionContext] = field(
+        default_factory=list
+    )
 
 
 @dataclass
@@ -155,7 +158,7 @@ class DestructionConnectionContext:
 
 @dataclass
 class DestructionPositionContext:
-    """A caller-known position used by a contributed Destroy."""
+    """A Position retained for a Destroy that may outlive its parent particle."""
 
     member_name: str
     position: PositionExpr
@@ -186,6 +189,7 @@ class InitContext:
     """Generated runtime-state init performed synchronously."""
 
     action_executions: list[TriggeredActionExecutionContext]
+    destruction_positions_to_retain: list[DestructionPositionContext]
     callee_binding_method_names: list[str]
 
 
@@ -288,6 +292,10 @@ class ActionExecutionContext:
 
     def __post_init__(self):
         """Determine whether this execution accesses its Action instance."""
+        for destruction_position in self.destruction_positions:
+            if destruction_position.position.local_position_member_name is None:
+                self.needs_action = True
+                return
         for fragment in self.fragments:
             for statement in fragment.statements:
                 if (

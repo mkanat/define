@@ -525,7 +525,7 @@
           },
           "action_name": "caller_b"
         },
-        "operation_name": "destroy",
+        "operation_name": "create",
         "target": "destroyer_particle::/destroyer::trigger_pos",
         "occurrence": 1
       },
@@ -600,7 +600,7 @@
           },
           "action_name": "caller_a"
         },
-        "operation_name": "destroy",
+        "operation_name": "create",
         "target": "destroyer_particle::/destroyer::trigger_pos",
         "occurrence": 1
       },

@@ -58,6 +58,7 @@ class RunnerExecution:
         self.guarantees = RunnerGuarantees()
         self.destruction_connections = destruction_connections
         self.execution_position_source__action_implier: local.my_domain_com.my_lib.implier.ImplierExecution
+        self.destruction_position_position_dest__global_position_transitive_implied: literal.Position
         self.join_for_move_position_source_to_position_dest: literal.Join
         self.join_for_destroy_position_run: literal.Join
         self.join_when_empty_position_dest: literal.Join
@@ -107,17 +108,18 @@ class RunnerExecution:
                 "position<dest>"
             )
         )
+        self.destruction_position_position_dest__global_position_transitive_implied = self.action.get_interface_position(
+            "position<dest>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.transitive_implied.TransitiveImplied
+        )
         self.guarantees.position_source.publish(
             self.scheduler,
             self.destroy_position_dest__global_position_transitive_implied,
         )
 
     def destroy_position_dest__global_position_transitive_implied(self):
-        self.action.get_interface_position(
-            "position<dest>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.transitive_implied.TransitiveImplied
-        ).destroy_particle()
+        self.destruction_position_position_dest__global_position_transitive_implied.destroy_particle()
         self.action.get_interface_position(
             "position<dest>"
         ).destroy_particle()

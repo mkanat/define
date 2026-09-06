@@ -46,6 +46,7 @@ class TestExecution:
         )
         self.execution_position_box__action_maker: local.my_domain_com.my_lib.maker.MakerExecution
         self.execution_position_held__action_destructor: local.my_domain_com.my_lib.destructor.DestructorExecution
+        self.destruction_position_position_box__action_maker__position_run: literal.Position
         self.join_for_destroy_position_box = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -85,17 +86,13 @@ class TestExecution:
             "box::/maker::run",
             1,
         )
-        self.local_position_box.particle.get_action(
+        self.destruction_position_position_box__action_maker__position_run = self.local_position_box.particle.get_action(
             local.my_domain_com.my_lib.maker.Maker
         ).get_interface_position(
             "position<run>"
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "box::/maker::run",
-            1,
         )
-        self.destroy_position_box()
+        self.scheduler.submit(self.destroy_position_box)
+        self.destroy_position_box__action_maker__position_run()
 
     def move_position_box__action_maker__position_result_to_position_held(self):
         self.local_position_box.particle.get_action(
@@ -133,5 +130,13 @@ class TestExecution:
         self.scheduler.destroy_completed(
             self.trace_execution,
             "box",
+            1,
+        )
+
+    def destroy_position_box__action_maker__position_run(self):
+        self.destruction_position_position_box__action_maker__position_run.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.trace_execution,
+            "box::/maker::run",
             1,
         )

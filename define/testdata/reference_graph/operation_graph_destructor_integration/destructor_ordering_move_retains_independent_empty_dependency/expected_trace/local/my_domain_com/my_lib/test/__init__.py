@@ -59,6 +59,7 @@ class TestExecution:
         self.destruction_connection_position_destroyer_particle__action_destroyer: tracing.DestructionConnection
         self.destruction_connection_position_destroyer_particle__action_destroyer_2: tracing.DestructionConnection
         self.execution_position_destroyer_particle__action_destroyer__position_target__action_extra_destructor: local.my_domain_com.my_lib.extra_destructor.ExtraDestructorExecution
+        self.destruction_position_position_destroyer_particle__action_destroyer__position_trigger_pos: literal.Position
         self.join_for_move_position_carrier_to_position_destroyer_particle__action_destroyer__position_target = self.scheduler.create_join(2)
         self.join_for_destroy_position_destroyer_particle = self.scheduler.create_join(2)
         self.join_for_position_destroyer_particle__action_destroyer__position_target__action_extra_destructor__for_empty_rule_global_position_origin: literal.Join
@@ -178,17 +179,13 @@ class TestExecution:
             "destroyer_particle::/destroyer::trigger_pos",
             1,
         )
-        self.local_position_destroyer_particle.particle.get_action(
+        self.destruction_position_position_destroyer_particle__action_destroyer__position_trigger_pos = self.local_position_destroyer_particle.particle.get_action(
             local.my_domain_com.my_lib.destroyer.Destroyer
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "destroyer_particle::/destroyer::trigger_pos",
-            1,
         )
-        self.destroy_position_destroyer_particle()
+        self.scheduler.submit(self.destroy_position_destroyer_particle)
+        self.destroy_position_destroyer_particle__action_destroyer__position_trigger_pos()
 
     def destroy_position_destroyer_particle(self):
         if not self.join_for_destroy_position_destroyer_particle.arrive():
@@ -197,6 +194,14 @@ class TestExecution:
         self.scheduler.destroy_completed(
             self.trace_execution,
             "destroyer_particle",
+            1,
+        )
+
+    def destroy_position_destroyer_particle__action_destroyer__position_trigger_pos(self):
+        self.destruction_position_position_destroyer_particle__action_destroyer__position_trigger_pos.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.trace_execution,
+            "destroyer_particle::/destroyer::trigger_pos",
             1,
         )
 

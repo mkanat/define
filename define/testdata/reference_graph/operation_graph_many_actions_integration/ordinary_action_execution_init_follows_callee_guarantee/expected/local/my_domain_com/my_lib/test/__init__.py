@@ -34,6 +34,7 @@ class TestExecution:
         )
         self.execution_position_box__action_carrier: local.my_domain_com.my_lib.carrier.CarrierExecution
         self.execution_position_box__action_carrier__position_result__action_worker: local.my_domain_com.my_lib.worker.WorkerExecution
+        self.destruction_position_position_box__action_carrier__position_result: literal.Position
         self.join_for_destroy_position_box = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -84,11 +85,7 @@ class TestExecution:
         self.execution_position_box__action_carrier__position_result__action_worker.accept_for_empty_rule_position_run()
 
     def destroy_position_box__action_carrier__position_result(self):
-        self.local_position_box.particle.get_action(
-            local.my_domain_com.my_lib.carrier.Carrier
-        ).get_interface_position(
-            "position<result>"
-        ).destroy_particle()
+        self.destruction_position_position_box__action_carrier__position_result.destroy_particle()
         self.destroy_position_box()
 
     def destroy_position_box(self):
@@ -109,6 +106,16 @@ class TestExecution:
         )
         self.execution_position_box__action_carrier__position_result__action_worker.join_for_empty_rule_position_run = literal.NO_JOIN
         self.execution_position_box__action_carrier__position_result__action_worker.join_for_destroy_position_run = literal.NO_JOIN
+        self.execution_position_box__action_carrier__position_result__action_worker.guarantees.position_run.inits.append(
+            self.init_position_box__action_carrier__position_result__action_worker__position_run
+        )
         self.execution_position_box__action_carrier__position_result__action_worker.guarantees.position_run.consumers.append(
             self.destroy_position_box__action_carrier__position_result
+        )
+
+    def init_position_box__action_carrier__position_result__action_worker__position_run(self):
+        self.destruction_position_position_box__action_carrier__position_result = self.local_position_box.particle.get_action(
+            local.my_domain_com.my_lib.carrier.Carrier
+        ).get_interface_position(
+            "position<result>"
         )

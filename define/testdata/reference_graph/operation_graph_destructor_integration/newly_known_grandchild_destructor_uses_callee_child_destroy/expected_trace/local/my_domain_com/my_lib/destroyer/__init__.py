@@ -53,6 +53,7 @@ class DestroyerExecution:
             "position<holder>",
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_run__global_position_known: literal.Position
         self.join_for_move_position_run__global_position_known_to_position_holder: literal.Join
         self.join_for_destroy_position_run: literal.Join
         self.join_for_empty_rule_position_run__global_position_known: literal.Join
@@ -95,23 +96,13 @@ class DestroyerExecution:
             "run::/known",
             1,
         )
-        self.destroy_position_run__global_position_known()
-
-    def destroy_position_run__global_position_known(self):
-        literal.continue_destruction(self.continue_destroy_position_run__global_position_known)
-
-    def continue_destroy_position_run__global_position_known(self):
-        self.action.get_interface_position(
+        self.destruction_position_position_run__global_position_known = self.action.get_interface_position(
             "position<run>"
         ).particle.get_position(
             local.my_domain_com.my_lib.known.Known
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "run::/known",
-            1,
         )
-        self.destroy_position_run()
+        self.scheduler.submit(self.destroy_position_run)
+        self.destroy_position_run__global_position_known()
 
     def destroy_position_run(self):
         if not self.join_for_destroy_position_run.arrive():
@@ -129,4 +120,15 @@ class DestroyerExecution:
         )
         self.guarantees.position_run.publish(
             self.scheduler,
+        )
+
+    def destroy_position_run__global_position_known(self):
+        literal.continue_destruction(self.continue_destroy_position_run__global_position_known)
+
+    def continue_destroy_position_run__global_position_known(self):
+        self.destruction_position_position_run__global_position_known.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.trace_execution,
+            "run::/known",
+            1,
         )

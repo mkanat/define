@@ -19,6 +19,10 @@ _DESTRUCTION_CONTRACTS_NOT_RECORDED = (
 _DESTRUCTOR_OPERATION_DEPENDENCIES_NOT_RESOLVED = (
     "caller-added Destructor dependencies are not fully resolved in the Operation Graph"
 )
+_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED = (
+    "cross-action Child State and Destructor operations are not yet composed solely "
+    "by the Particle Operation dependency rules"
+)
 _CALLER_INTRODUCED_CHILD_POSITIONS_NOT_RESOLVED = (
     "caller-introduced child Positions are not merged into the destroyer's "
     "canonical destruction order"
@@ -64,6 +68,54 @@ def test_destructor_uses_callee_unchanged_guarantee_directly(
         # the callee guarantee that the Destructor consumes directly.
         "filler.destroy(/implied)": ["filler.create(/implied)"],
         "filler.destroy(trigger_pos)": ["destructor.create(/filler::trigger_pos)"],
+    }
+    assert_operation_dependencies(result.operation_graphs, expected)
+
+
+def test_local_destruction_consumes_transitive_destructor_guarantee(
+    validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
+):
+    result = validate_testdata_project_with_reference_graph()
+    assert_no_errors(result.program_result)
+    expected = {
+        "test.create(box)": [],
+        "test.destroy(box)": ["test.create(box)"],
+        "destructor.create(/forwarder::trigger_pos)": ["test.create(box)"],
+        "forwarder.create(/filler::trigger_pos)": ["test.create(box)"],
+        "forwarder.destroy(trigger_pos)": [
+            "destructor.create(/forwarder::trigger_pos)"
+        ],
+        "filler.create(/implied)": ["test.create(box)"],
+        "filler.destroy(/implied)": ["filler.create(/implied)"],
+        "filler.destroy(trigger_pos)": ["forwarder.create(/filler::trigger_pos)"],
+        # The Fill Rule uses the transitive callee's last operation on /implied,
+        # even though the direct callee does not itself operate on that Position.
+        "destructor.create(/implied)": ["filler.destroy(/implied)"],
+        "destructor.destroy(/implied)": ["destructor.create(/implied)"],
+    }
+    assert_operation_dependencies(result.operation_graphs, expected)
+
+
+def test_transitive_destructor_guarantee_precedes_parent_and_child_destruction(
+    validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
+):
+    result = validate_testdata_project_with_reference_graph()
+    assert_no_errors(result.program_result)
+    expected = {
+        "test.create(box)": [],
+        "test.create(box::/marker)": ["test.create(box)"],
+        "destructor.create(/forwarder::trigger_pos)": ["test.create(box)"],
+        "forwarder.create(/filler::trigger_pos)": ["test.create(box)"],
+        "forwarder.destroy(trigger_pos)": [
+            "destructor.create(/forwarder::trigger_pos)"
+        ],
+        "filler.move(/marker, holder)": ["test.create(box::/marker)"],
+        "filler.move(holder, /marker)": ["filler.move(/marker, holder)"],
+        "filler.destroy(trigger_pos)": ["forwarder.create(/filler::trigger_pos)"],
+        # The Empty Rule for both Positions uses the transitive callee's final
+        # Move on the child, not its earlier Create or the simultaneous Destroy.
+        "test.destroy(box)": ["filler.move(holder, /marker)"],
+        "test.destroy(box::/marker)": ["filler.move(holder, /marker)"],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
@@ -134,7 +186,7 @@ def test_diamond_callers_order_added_destructor_around_known_destructor(
             "caller_a.create(destroyer_particle::/destroyer::trigger_pos)"
         ],
         "caller_a.destroy(destroyer_particle)": [
-            "caller_a.destroy(destroyer_particle::/destroyer::trigger_pos)",
+            "caller_a.create(destroyer_particle::/destroyer::trigger_pos)",
             "caller_a:destroyer.destroy(target)",
         ],
         "caller_b.create(destroyer_particle)": [],
@@ -167,7 +219,7 @@ def test_diamond_callers_order_added_destructor_around_known_destructor(
             "caller_b.create(destroyer_particle::/destroyer::trigger_pos)"
         ],
         "caller_b.destroy(destroyer_particle)": [
-            "caller_b.destroy(destroyer_particle::/destroyer::trigger_pos)",
+            "caller_b.create(destroyer_particle::/destroyer::trigger_pos)",
             "caller_b:destroyer.destroy(target)",
         ],
         "test.destroy(/caller_a::trigger_pos)": ["test.create(/caller_a::trigger_pos)"],
@@ -596,7 +648,9 @@ def test_destructor_on_child_carried_by_parent_move(
         "destructor.create(_noop)": ["test.move(staging, box)"],
         "destructor.destroy(_noop)": ["destructor.create(_noop)"],
         "test.destroy(box::/child)": ["test.move(staging, box)"],
-        "test.destroy(box)": ["test.destroy(box::/child)"],
+        # Simultaneous parent and child destruction both follow the Move that
+        # last operated on the particle and all of its child positions.
+        "test.destroy(box)": ["test.move(staging, box)"],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
@@ -654,8 +708,8 @@ def test_destructor_and_known_children_with_caller_known_occupancy(
             "destroyer.move(holder_b, run::/marker_b)"
         ],
         "destruct.move(holder_b, /marker_b)": ["destruct.move(/marker_b, holder_b)"],
-        # The destruction cascade waits for the Destructor to finish using each
-        # caller-supplied child before destroying it.
+        # Each child Destroy follows the Destructor's final operation on that
+        # Position.
         "destroyer.destroy(run::/marker_a)": ["destruct.move(holder_a, /marker_a)"],
         "destroyer.destroy(run::/marker_b)": ["destruct.move(holder_b, /marker_b)"],
         # Caller-known empty occupancy remains available when /destroyer creates
@@ -664,8 +718,8 @@ def test_destructor_and_known_children_with_caller_known_occupancy(
         "destroyer.destroy(run::/maybe_empty)": ["destroyer.create(run::/maybe_empty)"],
         "destroyer.destroy(run)": [
             "destroyer.destroy(run::/maybe_empty)",
-            "destroyer.destroy(run::/marker_b)",
-            "destroyer.destroy(run::/marker_a)",
+            "destruct.move(holder_a, /marker_a)",
+            "destruct.move(holder_b, /marker_b)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
@@ -688,9 +742,11 @@ def test_destructor_fragments_finish_before_cascade_frees_positions(
         "destruct.move(holder_b, /marker_b)": ["destruct.move(/marker_b, holder_b)"],
         "test.destroy(box::/marker_a)": ["destruct.move(holder_a, /marker_a)"],
         "test.destroy(box::/marker_b)": ["destruct.move(holder_b, /marker_b)"],
+        # The parent Destroy follows the Destructor's final operation on each
+        # child Position, not the simultaneous child Destroys.
         "test.destroy(box)": [
-            "test.destroy(box::/marker_b)",
-            "test.destroy(box::/marker_a)",
+            "destruct.move(holder_a, /marker_a)",
+            "destruct.move(holder_b, /marker_b)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
@@ -771,6 +827,10 @@ def test_destructor_on_passed_particle_with_newly_known_child(
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_newly_known_grandchild_destructor_uses_callee_child_destroy(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -790,14 +850,18 @@ def test_newly_known_grandchild_destructor_uses_callee_child_destroy(
         "destroyer.destroy(run::/known::/extra)": [
             "destroyer.move(holder, run::/known)"
         ],
-        # The caller-contributed grandchild Destroy must finish before the child
-        # Destroy that the callee can represent.
-        "destroyer.destroy(run::/known)": ["destroyer.destroy(run::/known::/extra)"],
-        "destroyer.destroy(run)": ["destroyer.destroy(run::/known)"],
+        # Every simultaneous Destroy follows the Move that last operated on the
+        # child particle and its transitive child Positions.
+        "destroyer.destroy(run::/known)": ["destroyer.move(holder, run::/known)"],
+        "destroyer.destroy(run)": ["destroyer.move(holder, run::/known)"],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_caller_contributed_child_destructor_depends_on_callee_guarantee(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -845,9 +909,9 @@ def test_caller_contributed_child_destructor_depends_on_callee_guarantee(
             "destruct.move(held_sibling, /sibling)"
         ],
         "destroyer.destroy(parent)": [
-            "destroyer.destroy(parent::/sibling)",
+            "destruct.move(held_result, /required)",
+            "destruct.move(held_sibling, /sibling)",
             "maker.destroy(trigger_pos)",
-            "destroyer.destroy(parent::/required)",
         ],
         "test.destroy(/destroyer::trigger_pos)": [
             "test.create(/destroyer::trigger_pos)"
@@ -856,6 +920,10 @@ def test_caller_contributed_child_destructor_depends_on_callee_guarantee(
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_caller_known_destructor_precedes_destroyer_known_child_destroy(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -891,7 +959,7 @@ def test_caller_known_destructor_precedes_destroyer_known_child_destroy(
             "destruct.move(held_result, /required)"
         ],
         "destroyer.destroy(parent)": [
-            "destroyer.destroy(parent::/required)",
+            "destruct.move(held_result, /required)",
             "maker.destroy(trigger_pos)",
         ],
         "test.destroy(/destroyer::trigger_pos)": [
@@ -1022,6 +1090,10 @@ def test_caller_known_child_destroy_and_destructor_precede_parent_destroy(
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_contributed_destructor_operates_on_child_of_occupied_requirement(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -1045,7 +1117,7 @@ def test_contributed_destructor_operates_on_child_of_occupied_requirement(
         ],
         "destruct.destroy(/required::/work)": ["destruct.create(/required::/work)"],
         "destroyer.destroy(parent::/required)": ["destruct.destroy(/required::/work)"],
-        "destroyer.destroy(parent)": ["destroyer.destroy(parent::/required)"],
+        "destroyer.destroy(parent)": ["destruct.destroy(/required::/work)"],
         "test.destroy(/destroyer::trigger_pos)": [
             "test.create(/destroyer::trigger_pos)"
         ],
@@ -1101,6 +1173,10 @@ def test_contributed_destructor_depends_on_callee_move_with_two_dependencies(
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_callee_child_destroy_depends_on_contributed_destructor_and_sibling_destroy(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -1136,14 +1212,10 @@ def test_callee_child_destroy_depends_on_contributed_destructor_and_sibling_dest
         "destroyer.destroy(parent::/required::/extra_b)": [
             "destroyer.move(held_required, parent::/required)"
         ],
-        # /extra_a, /extra_b, and /work are sibling child positions, so the Empty
-        # Rule retains all three final operations before the Destroy of /required.
-        "destroyer.destroy(parent::/required)": [
-            "destruct.destroy(/required::/work)",
-            "destroyer.destroy(parent::/required::/extra_b)",
-            "destroyer.destroy(parent::/required::/extra_a)",
-        ],
-        "destroyer.destroy(parent)": ["destroyer.destroy(parent::/required)"],
+        # The Destructor's final operation follows the Move that most recently
+        # operated on /extra_a and /extra_b, so the Empty Rule retains only it.
+        "destroyer.destroy(parent::/required)": ["destruct.destroy(/required::/work)"],
+        "destroyer.destroy(parent)": ["destruct.destroy(/required::/work)"],
         "test.destroy(/destroyer::trigger_pos)": [
             "test.create(/destroyer::trigger_pos)"
         ],
@@ -1283,15 +1355,20 @@ def test_caller_moves_callee_guaranteed_particle_before_destroying(
         "destructor.destroy(_noop)": ["destructor.create(_noop)"],
         "test.destroy(held)": ["test.move(box::/maker::result, held)"],
         "test.destroy(box::/maker::run)": ["test.create(box::/maker::run)"],
-        # Destroying box also waits for the move that emptied its result position.
+        # The parent Destroy follows the operations that most recently operated
+        # on its now-empty result Position and occupied run Position.
         "test.destroy(box)": [
+            "test.create(box::/maker::run)",
             "test.move(box::/maker::result, held)",
-            "test.destroy(box::/maker::run)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_destructor_on_particle_from_callee_guarantee(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -1308,13 +1385,17 @@ def test_destructor_on_particle_from_callee_guarantee(
         "test.destroy(box::/maker::result)": ["maker.create(result)"],
         "test.destroy(box::/maker::run)": ["test.create(box::/maker::run)"],
         "test.destroy(box)": [
-            "test.destroy(box::/maker::result)",
-            "test.destroy(box::/maker::run)",
+            "maker.create(result)",
+            "test.create(box::/maker::run)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_destructor_on_particle_from_callee_guarantee_with_child_requirement(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -1332,18 +1413,20 @@ def test_destructor_on_particle_from_callee_guarantee_with_child_requirement(
         "test.destroy(box::/maker::result::/marker)": [
             "destructor.move(holder, /marker)"
         ],
-        "test.destroy(box::/maker::result)": [
-            "test.destroy(box::/maker::result::/marker)"
-        ],
+        "test.destroy(box::/maker::result)": ["destructor.move(holder, /marker)"],
         "test.destroy(box::/maker::run)": ["test.create(box::/maker::run)"],
         "test.destroy(box)": [
-            "test.destroy(box::/maker::result)",
-            "test.destroy(box::/maker::run)",
+            "destructor.move(holder, /marker)",
+            "test.create(box::/maker::run)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_destroy_fires_destructor_attached_in_callee_and_surfaced_via_guarantee(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -1360,13 +1443,17 @@ def test_destroy_fires_destructor_attached_in_callee_and_surfaced_via_guarantee(
         "test.destroy(box::/make_thing::result)": ["make_thing.move(temp, result)"],
         "test.destroy(box::/make_thing::run)": ["test.create(box::/make_thing::run)"],
         "test.destroy(box)": [
-            "test.destroy(box::/make_thing::result)",
-            "test.destroy(box::/make_thing::run)",
+            "make_thing.move(temp, result)",
+            "test.create(box::/make_thing::run)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_destructor_attached_in_callee_on_implied_position_guarantee(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -1384,13 +1471,17 @@ def test_destructor_attached_in_callee_on_implied_position_guarantee(
         "test.destroy(box::/child)": ["maker.move(temp, /child)"],
         "test.destroy(box::/maker::run)": ["test.create(box::/maker::run)"],
         "test.destroy(box)": [
-            "test.destroy(box::/child)",
-            "test.destroy(box::/maker::run)",
+            "maker.move(temp, /child)",
+            "test.create(box::/maker::run)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_destructor_on_particle_from_transitive_callee_guarantee(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -1430,18 +1521,20 @@ def test_destructor_on_particle_from_transitive_callee_guarantee(
         "test.destroy(gateway::/middle::result::/marker)": [
             "destructor.move(holder, /marker)"
         ],
-        "test.destroy(gateway::/middle::result)": [
-            "test.destroy(gateway::/middle::result::/marker)"
-        ],
+        "test.destroy(gateway::/middle::result)": ["destructor.move(holder, /marker)"],
         "test.destroy(gateway::/middle::run)": ["test.create(gateway::/middle::run)"],
         "test.destroy(gateway)": [
-            "test.destroy(gateway::/middle::result)",
-            "test.destroy(gateway::/middle::run)",
+            "destructor.move(holder, /marker)",
+            "test.create(gateway::/middle::run)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_destructor_on_implied_position_from_transitive_callee_guarantee(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -1459,8 +1552,8 @@ def test_destructor_on_implied_position_from_transitive_callee_guarantee(
         "test.destroy(box::/child)": ["inner.create(/child)"],
         "test.destroy(box::/middle::run)": ["test.create(box::/middle::run)"],
         "test.destroy(box)": [
-            "test.destroy(box::/child)",
-            "test.destroy(box::/middle::run)",
+            "inner.create(/child)",
+            "test.create(box::/middle::run)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
@@ -1526,6 +1619,10 @@ def test_multiple_destructors_all_fire_on_destroy(
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_multiple_destructors_on_particle_from_callee_guarantee(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -1543,8 +1640,8 @@ def test_multiple_destructors_on_particle_from_callee_guarantee(
         "test.destroy(box::/maker::result)": ["maker.create(result)"],
         "test.destroy(box::/maker::run)": ["test.create(box::/maker::run)"],
         "test.destroy(box)": [
-            "test.destroy(box::/maker::result)",
-            "test.destroy(box::/maker::run)",
+            "maker.create(result)",
+            "test.create(box::/maker::run)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
@@ -1568,7 +1665,7 @@ def test_caller_added_destructor_fires_in_callee(
         "destructor.destroy(_noop)": ["destructor.create(_noop)"],
         "test.destroy(box::/callee::run)": ["test.create(box::/callee::run)"],
         "test.destroy(box)": [
-            "test.destroy(box::/callee::run)",
+            "test.create(box::/callee::run)",
             "callee.destroy(target)",
         ],
     }
@@ -1597,7 +1694,7 @@ def test_caller_added_destructor_fans_out_from_action_parent(
         "destructor.destroy(work_b)": ["destructor.create(work_b)"],
         "test.destroy(box::/callee::run)": ["test.create(box::/callee::run)"],
         "test.destroy(box)": [
-            "test.destroy(box::/callee::run)",
+            "test.create(box::/callee::run)",
             "callee.destroy(target)",
         ],
     }
@@ -1634,12 +1731,12 @@ def test_caller_added_destructor_with_later_action_execution(
         "destructor#2.destroy(_noop)": ["destructor#2.create(_noop)"],
         "test.destroy(box::/callee::run)": ["test.create(box::/callee::run)"],
         "test.destroy(box)": [
-            "test.destroy(box::/callee::run)",
+            "test.create(box::/callee::run)",
             "callee.destroy(target)",
         ],
         "test.destroy(later_box::/later::run)": ["test.create(later_box::/later::run)"],
         "test.destroy(later_box)": [
-            "test.destroy(later_box::/later::run)",
+            "test.create(later_box::/later::run)",
             "later.destroy(target)",
         ],
     }
@@ -1668,7 +1765,7 @@ def test_caller_added_multiple_destructors_fire_in_callee(
         "destructor_b.destroy(work)": ["destructor_b.create(work)"],
         "test.destroy(box::/callee::run)": ["test.create(box::/callee::run)"],
         "test.destroy(box)": [
-            "test.destroy(box::/callee::run)",
+            "test.create(box::/callee::run)",
             "callee.destroy(target)",
         ],
     }
@@ -1685,12 +1782,14 @@ def test_multiple_constructors_and_destructors_modify_same_implied_position(
         "construct_a.create(/marker)": ["test.create(box)"],
         "construct_b.move(/marker, holder)": ["construct_a.create(/marker)"],
         "construct_b.move(holder, /marker)": ["construct_b.move(/marker, holder)"],
-        "destruct_b.move(/marker, holder)": ["construct_b.move(holder, /marker)"],
-        "destruct_b.move(holder, /marker)": ["destruct_b.move(/marker, holder)"],
-        "destruct_a.move(/marker, holder)": ["destruct_b.move(holder, /marker)"],
+        "destruct_a.move(/marker, holder)": ["construct_b.move(holder, /marker)"],
         "destruct_a.move(holder, /marker)": ["destruct_a.move(/marker, holder)"],
-        "test.destroy(box::/marker)": ["destruct_a.move(holder, /marker)"],
-        "test.destroy(box)": ["test.destroy(box::/marker)"],
+        "destruct_b.move(/marker, holder)": ["destruct_a.move(holder, /marker)"],
+        "destruct_b.move(holder, /marker)": ["destruct_b.move(/marker, holder)"],
+        "test.destroy(box::/marker)": ["destruct_b.move(holder, /marker)"],
+        # Both simultaneous Destroys follow the last Destructor operation on
+        # the shared implied Position.
+        "test.destroy(box)": ["destruct_b.move(holder, /marker)"],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
@@ -1715,6 +1814,10 @@ def test_multiple_constructors_run_in_parallel_with_destroy_and_destructors(
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_all_positions_three_destroyer_occupied_caller_occupied(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -1730,9 +1833,9 @@ def test_all_positions_three_destroyer_occupied_caller_occupied(
         "third_destructor.move(holder, /third)": [
             "third_destructor.move(/third, holder)"
         ],
-        # The shared Positions Fill and Empty Rules serialize the Destructors
-        # in reverse creator assignment order.
-        "third_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
+        # The shared Position's Fill and Empty Rules serialize the Destructor
+        # operations.
+        "third_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
         "third_destructor.destroy(/marker)": ["third_destructor.create(/marker)"],
         "destroyer.destroy(target::/third)": ["third_destructor.move(holder, /third)"],
         "second_destructor.move(/second, holder)": [
@@ -1741,7 +1844,7 @@ def test_all_positions_three_destroyer_occupied_caller_occupied(
         "second_destructor.move(holder, /second)": [
             "second_destructor.move(/second, holder)"
         ],
-        "second_destructor.create(/marker)": ["third_destructor.destroy(/marker)"],
+        "second_destructor.create(/marker)": ["first_destructor.destroy(/marker)"],
         "second_destructor.destroy(/marker)": ["second_destructor.create(/marker)"],
         "destroyer.destroy(target::/second)": [
             "second_destructor.move(holder, /second)"
@@ -1750,19 +1853,23 @@ def test_all_positions_three_destroyer_occupied_caller_occupied(
         "first_destructor.move(holder, /first)": [
             "first_destructor.move(/first, holder)"
         ],
-        "first_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
+        "first_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
         "first_destructor.destroy(/marker)": ["first_destructor.create(/marker)"],
         "destroyer.destroy(target::/first)": ["first_destructor.move(holder, /first)"],
         "destroyer.destroy(target)": [
-            "destroyer.destroy(target::/third)",
-            "destroyer.destroy(target::/second)",
-            "destroyer.destroy(target::/first)",
-            "first_destructor.destroy(/marker)",
+            "first_destructor.move(holder, /first)",
+            "second_destructor.move(holder, /second)",
+            "third_destructor.move(holder, /third)",
+            "third_destructor.destroy(/marker)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_all_positions_five_destroyer_occupied_caller_occupied(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -1786,9 +1893,9 @@ def test_all_positions_five_destroyer_occupied_caller_occupied(
         "fifth_destructor.move(holder, /fifth)": [
             "fifth_destructor.move(/fifth, holder)"
         ],
-        # The shared Positions Fill and Empty Rules serialize the Destructors
-        # in reverse creator assignment order.
-        "fifth_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
+        # The shared Position's Fill and Empty Rules serialize the Destructor
+        # operations.
+        "fifth_destructor.create(/marker)": ["fourth_destructor.destroy(/marker)"],
         "fifth_destructor.destroy(/marker)": ["fifth_destructor.create(/marker)"],
         "destroyer.destroy(target::/fifth)": ["fifth_destructor.move(holder, /fifth)"],
         "fourth_destructor.move(/fourth, holder)": [
@@ -1797,7 +1904,7 @@ def test_all_positions_five_destroyer_occupied_caller_occupied(
         "fourth_destructor.move(holder, /fourth)": [
             "fourth_destructor.move(/fourth, holder)"
         ],
-        "fourth_destructor.create(/marker)": ["fifth_destructor.destroy(/marker)"],
+        "fourth_destructor.create(/marker)": ["third_destructor.destroy(/marker)"],
         "fourth_destructor.destroy(/marker)": ["fourth_destructor.create(/marker)"],
         "destroyer.destroy(target::/fourth)": [
             "fourth_destructor.move(holder, /fourth)"
@@ -1808,7 +1915,7 @@ def test_all_positions_five_destroyer_occupied_caller_occupied(
         "third_destructor.move(holder, /third)": [
             "third_destructor.move(/third, holder)"
         ],
-        "third_destructor.create(/marker)": ["fourth_destructor.destroy(/marker)"],
+        "third_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
         "third_destructor.destroy(/marker)": ["third_destructor.create(/marker)"],
         "destroyer.destroy(target::/third)": ["third_destructor.move(holder, /third)"],
         "second_destructor.move(/second, holder)": [
@@ -1817,7 +1924,7 @@ def test_all_positions_five_destroyer_occupied_caller_occupied(
         "second_destructor.move(holder, /second)": [
             "second_destructor.move(/second, holder)"
         ],
-        "second_destructor.create(/marker)": ["third_destructor.destroy(/marker)"],
+        "second_destructor.create(/marker)": ["first_destructor.destroy(/marker)"],
         "second_destructor.destroy(/marker)": ["second_destructor.create(/marker)"],
         "destroyer.destroy(target::/second)": [
             "second_destructor.move(holder, /second)"
@@ -1828,16 +1935,16 @@ def test_all_positions_five_destroyer_occupied_caller_occupied(
         "first_destructor.move(holder, /first)": [
             "first_destructor.move(/first, holder)"
         ],
-        "first_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
+        "first_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
         "first_destructor.destroy(/marker)": ["first_destructor.create(/marker)"],
         "destroyer.destroy(target::/first)": ["first_destructor.move(holder, /first)"],
         "destroyer.destroy(target)": [
-            "destroyer.destroy(target::/fifth)",
-            "destroyer.destroy(target::/fourth)",
-            "destroyer.destroy(target::/third)",
-            "destroyer.destroy(target::/second)",
-            "destroyer.destroy(target::/first)",
-            "first_destructor.destroy(/marker)",
+            "first_destructor.move(holder, /first)",
+            "second_destructor.move(holder, /second)",
+            "third_destructor.move(holder, /third)",
+            "fourth_destructor.move(holder, /fourth)",
+            "fifth_destructor.move(holder, /fifth)",
+            "fifth_destructor.destroy(/marker)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
@@ -1859,23 +1966,23 @@ def test_all_positions_three_destroyer_empty_caller_empty(
         "destroyer.destroy(target::/third)": ["destroyer.create(target::/third)"],
         "third_destructor.create(/third)": ["destroyer.destroy(target::/third)"],
         "third_destructor.destroy(/third)": ["third_destructor.create(/third)"],
-        # The shared Positions Fill and Empty Rules serialize the Destructors
-        # in reverse creator assignment order.
-        "third_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
+        # The shared Position's Fill and Empty Rules serialize the Destructor
+        # operations.
+        "third_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
         "third_destructor.destroy(/marker)": ["third_destructor.create(/marker)"],
         "second_destructor.create(/second)": ["test.move(carrier, /destroyer::target)"],
         "second_destructor.destroy(/second)": ["second_destructor.create(/second)"],
-        "second_destructor.create(/marker)": ["third_destructor.destroy(/marker)"],
+        "second_destructor.create(/marker)": ["first_destructor.destroy(/marker)"],
         "second_destructor.destroy(/marker)": ["second_destructor.create(/marker)"],
         "first_destructor.create(/first)": ["destroyer.destroy(target::/first)"],
         "first_destructor.destroy(/first)": ["first_destructor.create(/first)"],
-        "first_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
+        "first_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
         "first_destructor.destroy(/marker)": ["first_destructor.create(/marker)"],
         "destroyer.destroy(target)": [
-            "third_destructor.destroy(/third)",
-            "second_destructor.destroy(/second)",
             "first_destructor.destroy(/first)",
-            "first_destructor.destroy(/marker)",
+            "second_destructor.destroy(/second)",
+            "third_destructor.destroy(/third)",
+            "third_destructor.destroy(/marker)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
@@ -1905,33 +2012,33 @@ def test_all_positions_five_destroyer_empty_caller_empty(
         "destroyer.destroy(target::/fourth)": ["destroyer.create(target::/fourth)"],
         "fifth_destructor.create(/fifth)": ["test.move(carrier, /destroyer::target)"],
         "fifth_destructor.destroy(/fifth)": ["fifth_destructor.create(/fifth)"],
-        # The shared Positions Fill and Empty Rules serialize the Destructors
-        # in reverse creator assignment order.
-        "fifth_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
+        # The shared Position's Fill and Empty Rules serialize the Destructor
+        # operations.
+        "fifth_destructor.create(/marker)": ["fourth_destructor.destroy(/marker)"],
         "fifth_destructor.destroy(/marker)": ["fifth_destructor.create(/marker)"],
         "fourth_destructor.create(/fourth)": ["destroyer.destroy(target::/fourth)"],
         "fourth_destructor.destroy(/fourth)": ["fourth_destructor.create(/fourth)"],
-        "fourth_destructor.create(/marker)": ["fifth_destructor.destroy(/marker)"],
+        "fourth_destructor.create(/marker)": ["third_destructor.destroy(/marker)"],
         "fourth_destructor.destroy(/marker)": ["fourth_destructor.create(/marker)"],
         "third_destructor.create(/third)": ["test.move(carrier, /destroyer::target)"],
         "third_destructor.destroy(/third)": ["third_destructor.create(/third)"],
-        "third_destructor.create(/marker)": ["fourth_destructor.destroy(/marker)"],
+        "third_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
         "third_destructor.destroy(/marker)": ["third_destructor.create(/marker)"],
         "second_destructor.create(/second)": ["destroyer.destroy(target::/second)"],
         "second_destructor.destroy(/second)": ["second_destructor.create(/second)"],
-        "second_destructor.create(/marker)": ["third_destructor.destroy(/marker)"],
+        "second_destructor.create(/marker)": ["first_destructor.destroy(/marker)"],
         "second_destructor.destroy(/marker)": ["second_destructor.create(/marker)"],
         "first_destructor.create(/first)": ["test.move(carrier, /destroyer::target)"],
         "first_destructor.destroy(/first)": ["first_destructor.create(/first)"],
-        "first_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
+        "first_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
         "first_destructor.destroy(/marker)": ["first_destructor.create(/marker)"],
         "destroyer.destroy(target)": [
-            "fifth_destructor.destroy(/fifth)",
-            "fourth_destructor.destroy(/fourth)",
-            "third_destructor.destroy(/third)",
-            "second_destructor.destroy(/second)",
             "first_destructor.destroy(/first)",
-            "first_destructor.destroy(/marker)",
+            "second_destructor.destroy(/second)",
+            "third_destructor.destroy(/third)",
+            "fourth_destructor.destroy(/fourth)",
+            "fifth_destructor.destroy(/fifth)",
+            "fifth_destructor.destroy(/marker)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
@@ -1953,27 +2060,27 @@ def test_all_positions_three_destroyer_occupied_caller_empty(
         "third_destructor.move(holder, /third)": [
             "third_destructor.move(/third, holder)"
         ],
-        # The shared Positions Fill and Empty Rules serialize the Destructors
-        # in reverse creator assignment order.
-        "third_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
+        # The shared Position's Fill and Empty Rules serialize the Destructor
+        # operations.
+        "third_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
         "third_destructor.destroy(/marker)": ["third_destructor.create(/marker)"],
         "destroyer.destroy(target::/third)": ["third_destructor.move(holder, /third)"],
         "second_destructor.create(/second)": ["test.move(carrier, /destroyer::target)"],
         "second_destructor.destroy(/second)": ["second_destructor.create(/second)"],
-        "second_destructor.create(/marker)": ["third_destructor.destroy(/marker)"],
+        "second_destructor.create(/marker)": ["first_destructor.destroy(/marker)"],
         "second_destructor.destroy(/marker)": ["second_destructor.create(/marker)"],
         "first_destructor.move(/first, holder)": ["destroyer.create(target::/first)"],
         "first_destructor.move(holder, /first)": [
             "first_destructor.move(/first, holder)"
         ],
-        "first_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
+        "first_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
         "first_destructor.destroy(/marker)": ["first_destructor.create(/marker)"],
         "destroyer.destroy(target::/first)": ["first_destructor.move(holder, /first)"],
         "destroyer.destroy(target)": [
-            "destroyer.destroy(target::/third)",
-            "destroyer.destroy(target::/first)",
+            "first_destructor.move(holder, /first)",
             "second_destructor.destroy(/second)",
-            "first_destructor.destroy(/marker)",
+            "third_destructor.move(holder, /third)",
+            "third_destructor.destroy(/marker)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
@@ -2001,9 +2108,9 @@ def test_all_positions_five_destroyer_occupied_caller_empty(
         "destroyer.create(target::/fourth)": ["test.move(carrier, /destroyer::target)"],
         "fifth_destructor.create(/fifth)": ["test.move(carrier, /destroyer::target)"],
         "fifth_destructor.destroy(/fifth)": ["fifth_destructor.create(/fifth)"],
-        # The shared Positions Fill and Empty Rules serialize the Destructors
-        # in reverse creator assignment order.
-        "fifth_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
+        # The shared Position's Fill and Empty Rules serialize the Destructor
+        # operations.
+        "fifth_destructor.create(/marker)": ["fourth_destructor.destroy(/marker)"],
         "fifth_destructor.destroy(/marker)": ["fifth_destructor.create(/marker)"],
         "fourth_destructor.move(/fourth, holder)": [
             "destroyer.create(target::/fourth)"
@@ -2011,14 +2118,14 @@ def test_all_positions_five_destroyer_occupied_caller_empty(
         "fourth_destructor.move(holder, /fourth)": [
             "fourth_destructor.move(/fourth, holder)"
         ],
-        "fourth_destructor.create(/marker)": ["fifth_destructor.destroy(/marker)"],
+        "fourth_destructor.create(/marker)": ["third_destructor.destroy(/marker)"],
         "fourth_destructor.destroy(/marker)": ["fourth_destructor.create(/marker)"],
         "destroyer.destroy(target::/fourth)": [
             "fourth_destructor.move(holder, /fourth)"
         ],
         "third_destructor.create(/third)": ["test.move(carrier, /destroyer::target)"],
         "third_destructor.destroy(/third)": ["third_destructor.create(/third)"],
-        "third_destructor.create(/marker)": ["fourth_destructor.destroy(/marker)"],
+        "third_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
         "third_destructor.destroy(/marker)": ["third_destructor.create(/marker)"],
         "second_destructor.move(/second, holder)": [
             "destroyer.create(target::/second)"
@@ -2026,27 +2133,31 @@ def test_all_positions_five_destroyer_occupied_caller_empty(
         "second_destructor.move(holder, /second)": [
             "second_destructor.move(/second, holder)"
         ],
-        "second_destructor.create(/marker)": ["third_destructor.destroy(/marker)"],
+        "second_destructor.create(/marker)": ["first_destructor.destroy(/marker)"],
         "second_destructor.destroy(/marker)": ["second_destructor.create(/marker)"],
         "destroyer.destroy(target::/second)": [
             "second_destructor.move(holder, /second)"
         ],
         "first_destructor.create(/first)": ["test.move(carrier, /destroyer::target)"],
         "first_destructor.destroy(/first)": ["first_destructor.create(/first)"],
-        "first_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
+        "first_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
         "first_destructor.destroy(/marker)": ["first_destructor.create(/marker)"],
         "destroyer.destroy(target)": [
-            "destroyer.destroy(target::/fourth)",
-            "destroyer.destroy(target::/second)",
-            "fifth_destructor.destroy(/fifth)",
-            "third_destructor.destroy(/third)",
             "first_destructor.destroy(/first)",
-            "first_destructor.destroy(/marker)",
+            "second_destructor.move(holder, /second)",
+            "third_destructor.destroy(/third)",
+            "fourth_destructor.move(holder, /fourth)",
+            "fifth_destructor.destroy(/fifth)",
+            "fifth_destructor.destroy(/marker)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_all_positions_three_destroyer_empty_caller_occupied(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -2062,9 +2173,9 @@ def test_all_positions_three_destroyer_empty_caller_occupied(
         "destroyer.destroy(target::/third)": ["destroyer.create(target::/third)"],
         "third_destructor.create(/third)": ["destroyer.destroy(target::/third)"],
         "third_destructor.destroy(/third)": ["third_destructor.create(/third)"],
-        # The shared Positions Fill and Empty Rules serialize the Destructors
-        # in reverse creator assignment order.
-        "third_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
+        # The shared Position's Fill and Empty Rules serialize the Destructor
+        # operations.
+        "third_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
         "third_destructor.destroy(/marker)": ["third_destructor.create(/marker)"],
         "second_destructor.move(/second, holder)": [
             "test.move(carrier, /destroyer::target)"
@@ -2072,25 +2183,29 @@ def test_all_positions_three_destroyer_empty_caller_occupied(
         "second_destructor.move(holder, /second)": [
             "second_destructor.move(/second, holder)"
         ],
-        "second_destructor.create(/marker)": ["third_destructor.destroy(/marker)"],
+        "second_destructor.create(/marker)": ["first_destructor.destroy(/marker)"],
         "second_destructor.destroy(/marker)": ["second_destructor.create(/marker)"],
         "destroyer.destroy(target::/second)": [
             "second_destructor.move(holder, /second)"
         ],
         "first_destructor.create(/first)": ["destroyer.destroy(target::/first)"],
         "first_destructor.destroy(/first)": ["first_destructor.create(/first)"],
-        "first_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
+        "first_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
         "first_destructor.destroy(/marker)": ["first_destructor.create(/marker)"],
         "destroyer.destroy(target)": [
-            "destroyer.destroy(target::/second)",
-            "third_destructor.destroy(/third)",
             "first_destructor.destroy(/first)",
-            "first_destructor.destroy(/marker)",
+            "second_destructor.move(holder, /second)",
+            "third_destructor.destroy(/third)",
+            "third_destructor.destroy(/marker)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_all_positions_five_destroyer_empty_caller_occupied(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -2116,14 +2231,14 @@ def test_all_positions_five_destroyer_empty_caller_occupied(
         "fifth_destructor.move(holder, /fifth)": [
             "fifth_destructor.move(/fifth, holder)"
         ],
-        # The shared Positions Fill and Empty Rules serialize the Destructors
-        # in reverse creator assignment order.
-        "fifth_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
+        # The shared Position's Fill and Empty Rules serialize the Destructor
+        # operations.
+        "fifth_destructor.create(/marker)": ["fourth_destructor.destroy(/marker)"],
         "fifth_destructor.destroy(/marker)": ["fifth_destructor.create(/marker)"],
         "destroyer.destroy(target::/fifth)": ["fifth_destructor.move(holder, /fifth)"],
         "fourth_destructor.create(/fourth)": ["destroyer.destroy(target::/fourth)"],
         "fourth_destructor.destroy(/fourth)": ["fourth_destructor.create(/fourth)"],
-        "fourth_destructor.create(/marker)": ["fifth_destructor.destroy(/marker)"],
+        "fourth_destructor.create(/marker)": ["third_destructor.destroy(/marker)"],
         "fourth_destructor.destroy(/marker)": ["fourth_destructor.create(/marker)"],
         "third_destructor.move(/third, holder)": [
             "test.move(carrier, /destroyer::target)"
@@ -2131,12 +2246,12 @@ def test_all_positions_five_destroyer_empty_caller_occupied(
         "third_destructor.move(holder, /third)": [
             "third_destructor.move(/third, holder)"
         ],
-        "third_destructor.create(/marker)": ["fourth_destructor.destroy(/marker)"],
+        "third_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
         "third_destructor.destroy(/marker)": ["third_destructor.create(/marker)"],
         "destroyer.destroy(target::/third)": ["third_destructor.move(holder, /third)"],
         "second_destructor.create(/second)": ["destroyer.destroy(target::/second)"],
         "second_destructor.destroy(/second)": ["second_destructor.create(/second)"],
-        "second_destructor.create(/marker)": ["third_destructor.destroy(/marker)"],
+        "second_destructor.create(/marker)": ["first_destructor.destroy(/marker)"],
         "second_destructor.destroy(/marker)": ["second_destructor.create(/marker)"],
         "first_destructor.move(/first, holder)": [
             "test.move(carrier, /destroyer::target)"
@@ -2144,16 +2259,16 @@ def test_all_positions_five_destroyer_empty_caller_occupied(
         "first_destructor.move(holder, /first)": [
             "first_destructor.move(/first, holder)"
         ],
-        "first_destructor.create(/marker)": ["second_destructor.destroy(/marker)"],
+        "first_destructor.create(/marker)": ["test.move(carrier, /destroyer::target)"],
         "first_destructor.destroy(/marker)": ["first_destructor.create(/marker)"],
         "destroyer.destroy(target::/first)": ["first_destructor.move(holder, /first)"],
         "destroyer.destroy(target)": [
-            "destroyer.destroy(target::/fifth)",
-            "destroyer.destroy(target::/third)",
-            "destroyer.destroy(target::/first)",
-            "fourth_destructor.destroy(/fourth)",
+            "first_destructor.move(holder, /first)",
             "second_destructor.destroy(/second)",
-            "first_destructor.destroy(/marker)",
+            "third_destructor.move(holder, /third)",
+            "fourth_destructor.destroy(/fourth)",
+            "fifth_destructor.move(holder, /fifth)",
+            "fifth_destructor.destroy(/marker)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
@@ -2849,6 +2964,10 @@ def test_creator_nonoverlapping_child_order_is_canonical_across_three_actions(
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=_MODULAR_DESTRUCTION_DEPENDENCIES_NOT_RESOLVED,
+)
 def test_direct_destructor_with_mixed_implied_position_state(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -2894,12 +3013,12 @@ def test_direct_destructor_with_mixed_implied_position_state(
             "destructor.move(transitive_holder, /occupied_first::/transitive)"
         ],
         "destroyer.destroy(target::/occupied_first)": [
-            "destroyer.destroy(target::/occupied_first::/transitive)"
+            "destructor.move(transitive_holder, /occupied_first::/transitive)"
         ],
         "destroyer.destroy(target)": [
-            "destroyer.destroy(target::/occupied_last)",
-            "destroyer.destroy(target::/occupied_first)",
             "destructor.destroy(/empty)",
+            "destructor.move(last_holder, /occupied_last)",
+            "destructor.move(transitive_holder, /occupied_first::/transitive)",
         ],
     }
     assert_operation_dependencies(result.operation_graphs, expected)

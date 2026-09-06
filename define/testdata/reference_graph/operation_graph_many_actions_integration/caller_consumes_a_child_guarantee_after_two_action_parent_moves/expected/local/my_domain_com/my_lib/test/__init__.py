@@ -38,6 +38,9 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_gateway__action_middle: local.my_domain_com.my_lib.middle.MiddleExecution
+        self.destruction_position_position_gateway__action_middle__position_holder: literal.Position
+        self.destruction_position_position_gateway__action_middle__position_holder__global_position_marker: literal.Position
+        self.destruction_position_position_gateway__action_middle__position_trigger_pos: literal.Position
         self.join_for_destroy_position_gateway__action_middle__position_holder = self.scheduler.create_join(2)
         self.join_for_destroy_position_gateway = self.scheduler.create_join(3)
 
@@ -56,6 +59,9 @@ class TestExecution:
         self.execution_position_gateway__action_middle.join_when_empty_position_holder = literal.NO_JOIN
         self.execution_position_gateway__action_middle.join_for_move_position_source_to_position_intermediate = self.scheduler.create_join(3)
         self.execution_position_gateway__action_middle.join_for_move_position_intermediate_to_position_holder = literal.NO_JOIN
+        self.execution_position_gateway__action_middle.guarantees.position_intermediate__move__position_holder.inits.append(
+            self.init_position_gateway__action_middle__position_intermediate__move__position_holder
+        )
         self.execution_position_gateway__action_middle.guarantees.position_intermediate__move__position_holder.consumers.append(
             self.move_position_gateway__action_middle__position_holder__global_position_result_to_position_result
         )
@@ -87,6 +93,12 @@ class TestExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.marker.Marker
         ).create_particle()
+        self.destruction_position_position_gateway__action_middle__position_holder = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.middle.Middle
+        ).get_interface_position(
+            "position<holder>"
+        )
+        self.scheduler.submit(self.destroy_position_gateway__action_middle__position_holder)
         self.execution_position_gateway__action_middle.accept_for_empty_rule_position_source()
 
     def create_position_gateway__action_middle__position_trigger_pos(self):
@@ -95,11 +107,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_gateway.particle.get_action(
+        self.destruction_position_position_gateway__action_middle__position_trigger_pos = self.local_position_gateway.particle.get_action(
             local.my_domain_com.my_lib.middle.Middle
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_gateway__action_middle__position_trigger_pos.destroy_particle()
         self.destroy_position_gateway()
 
     def move_position_gateway__action_middle__position_holder__global_position_result_to_position_result(self):
@@ -113,30 +126,28 @@ class TestExecution:
         self.scheduler.submit(self.destroy_position_gateway__action_middle__position_holder)
         self.destroy_position_result()
 
-    def destroy_position_gateway__action_middle__position_holder__global_position_marker(self):
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.middle.Middle
-        ).get_interface_position(
-            "position<holder>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.marker.Marker
-        ).destroy_particle()
-        self.destroy_position_gateway__action_middle__position_holder()
-
     def destroy_position_gateway__action_middle__position_holder(self):
         if not self.join_for_destroy_position_gateway__action_middle__position_holder.arrive():
             return
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.middle.Middle
-        ).get_interface_position(
-            "position<holder>"
-        ).destroy_particle()
+        self.destruction_position_position_gateway__action_middle__position_holder.destroy_particle()
         self.destroy_position_gateway()
+
+    def destroy_position_gateway__action_middle__position_holder__global_position_marker(self):
+        self.destruction_position_position_gateway__action_middle__position_holder__global_position_marker.destroy_particle()
+
+    def destroy_position_result(self):
+        self.local_position_result.destroy_particle()
 
     def destroy_position_gateway(self):
         if not self.join_for_destroy_position_gateway.arrive():
             return
         self.local_position_gateway.destroy_particle()
 
-    def destroy_position_result(self):
-        self.local_position_result.destroy_particle()
+    def init_position_gateway__action_middle__position_intermediate__move__position_holder(self):
+        self.destruction_position_position_gateway__action_middle__position_holder__global_position_marker = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.middle.Middle
+        ).get_interface_position(
+            "position<holder>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.marker.Marker
+        )

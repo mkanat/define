@@ -51,8 +51,9 @@ class DestroyerExecution:
         self.scheduler = scheduler
         self.guarantees = DestroyerGuarantees()
         self.destruction_connections = destruction_connections
-        self.execution_position_target__action_fourth_destructor: local.my_domain_com.my_lib.fourth_destructor.FourthDestructorExecution
         self.execution_position_target__action_second_destructor: local.my_domain_com.my_lib.second_destructor.SecondDestructorExecution
+        self.execution_position_target__action_fourth_destructor: local.my_domain_com.my_lib.fourth_destructor.FourthDestructorExecution
+        self.destruction_position_position_target__global_position_marker: literal.Position
         self.join_for_destroy_position_target: literal.Join
         self.join_for_empty_rule_position_target: literal.Join
 
@@ -65,17 +66,6 @@ class DestroyerExecution:
         self.destroy_position_target()
 
     def init_when_occupied_position_target(self):
-        self.execution_position_target__action_fourth_destructor = local.my_domain_com.my_lib.fourth_destructor.FourthDestructorExecution(
-            self.action.get_interface_position(
-                "position<target>"
-            ).particle.get_action(
-                local.my_domain_com.my_lib.fourth_destructor.FourthDestructor
-            ),
-            self.scheduler,
-        )
-        self.execution_position_target__action_fourth_destructor.guarantees.global_position_marker.consumers.append(
-            self.accept_guarantee_position_target__action_second_destructor
-        )
         self.execution_position_target__action_second_destructor = local.my_domain_com.my_lib.second_destructor.SecondDestructorExecution(
             self.action.get_interface_position(
                 "position<target>"
@@ -85,6 +75,17 @@ class DestroyerExecution:
             self.scheduler,
         )
         self.execution_position_target__action_second_destructor.guarantees.global_position_marker.consumers.append(
+            self.accept_guarantee_position_target__action_fourth_destructor
+        )
+        self.execution_position_target__action_fourth_destructor = local.my_domain_com.my_lib.fourth_destructor.FourthDestructorExecution(
+            self.action.get_interface_position(
+                "position<target>"
+            ).particle.get_action(
+                local.my_domain_com.my_lib.fourth_destructor.FourthDestructor
+            ),
+            self.scheduler,
+        )
+        self.execution_position_target__action_fourth_destructor.guarantees.global_position_marker.consumers.append(
             self.destroy_position_target
         )
 
@@ -94,12 +95,13 @@ class DestroyerExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.marker.Marker
         ).create_particle()
-        self.action.get_interface_position(
+        self.destruction_position_position_target__global_position_marker = self.action.get_interface_position(
             "position<target>"
         ).particle.get_position(
             local.my_domain_com.my_lib.marker.Marker
-        ).destroy_particle()
-        self.execution_position_target__action_fourth_destructor.accept_when_empty_global_position_marker()
+        )
+        self.destruction_position_position_target__global_position_marker.destroy_particle()
+        self.execution_position_target__action_second_destructor.accept_when_empty_global_position_marker()
 
     def destroy_position_target(self):
         if not self.join_for_destroy_position_target.arrive():
@@ -114,5 +116,5 @@ class DestroyerExecution:
             self.scheduler,
         )
 
-    def accept_guarantee_position_target__action_second_destructor(self):
-        self.execution_position_target__action_second_destructor.accept_when_empty_global_position_marker()
+    def accept_guarantee_position_target__action_fourth_destructor(self):
+        self.execution_position_target__action_fourth_destructor.accept_when_empty_global_position_marker()

@@ -33,6 +33,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_box__action_other: local.my_domain_com.my_lib.other.OtherExecution
+        self.destruction_position_position_box__global_position_filled: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_box()
@@ -45,13 +46,24 @@ class TestExecution:
             ),
             self.scheduler,
         )
+        self.execution_position_box__action_other.guarantees.global_position_filled.inits.append(
+            self.init_position_box__action_other__global_position_filled
+        )
+        self.execution_position_box__action_other.guarantees.global_position_filled.consumers.append(
+            self.destroy_position_box
+        )
         self.execution_position_box__action_other.guarantees.global_position_filled.consumers.append(
             self.destroy_position_box__global_position_filled
         )
         self.execution_position_box__action_other.accept_when_empty_global_position_filled()
 
-    def destroy_position_box__global_position_filled(self):
-        self.local_position_box.particle.get_position(
-            local.my_domain_com.my_lib.filled.Filled
-        ).destroy_particle()
+    def destroy_position_box(self):
         self.local_position_box.destroy_particle()
+
+    def destroy_position_box__global_position_filled(self):
+        self.destruction_position_position_box__global_position_filled.destroy_particle()
+
+    def init_position_box__action_other__global_position_filled(self):
+        self.destruction_position_position_box__global_position_filled = self.local_position_box.particle.get_position(
+            local.my_domain_com.my_lib.filled.Filled
+        )

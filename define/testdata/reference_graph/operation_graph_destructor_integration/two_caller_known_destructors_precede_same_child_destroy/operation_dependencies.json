@@ -507,7 +507,8 @@
           },
           "action_name": "destroyer"
         },
-        "operation_name": "destroy",
+        "operation_name": "move",
+        "source": "held_required",
         "target": "parent::/required",
         "occurrence": 1
       }
@@ -550,7 +551,8 @@
           },
           "action_name": "destroyer"
         },
-        "operation_name": "destroy",
+        "operation_name": "move",
+        "source": "held_required",
         "target": "parent::/required",
         "occurrence": 1
       },

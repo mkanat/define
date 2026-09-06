@@ -45,6 +45,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_action_middle: local.my_domain_com.my_lib.middle.MiddleExecution
+        self.destruction_position_position_source__global_position_maybe_empty: literal.Position
         self.join_for_move_position_source_to_action_middle__position_run = self.scheduler.create_join(3)
         self.execution_action_middle = local.my_domain_com.my_lib.middle.MiddleExecution(
             self.action.on_particle.get_action(
@@ -84,9 +85,10 @@ class TestExecution:
         self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.maybe_empty.MaybeEmpty
         ).create_particle()
-        self.local_position_source.particle.get_position(
+        self.destruction_position_position_source__global_position_maybe_empty = self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.maybe_empty.MaybeEmpty
-        ).destroy_particle()
+        )
+        self.destruction_position_position_source__global_position_maybe_empty.destroy_particle()
         self.move_position_source_to_action_middle__position_run()
 
     def move_position_source_to_action_middle__position_run(self):

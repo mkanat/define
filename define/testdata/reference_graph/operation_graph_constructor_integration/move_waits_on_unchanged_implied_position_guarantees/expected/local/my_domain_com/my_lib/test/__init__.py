@@ -43,6 +43,7 @@ class TestExecution:
         )
         self.execution_position_source__action_construct_a: local.my_domain_com.my_lib.construct_a.ConstructAExecution
         self.execution_position_source__action_construct_b: local.my_domain_com.my_lib.construct_b.ConstructBExecution
+        self.destruction_position_position_dest__global_position_marker: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_source()
@@ -74,9 +75,10 @@ class TestExecution:
         self.local_position_dest.particle.get_position(
             local.my_domain_com.my_lib.marker.Marker
         ).create_particle()
-        self.local_position_dest.particle.get_position(
+        self.destruction_position_position_dest__global_position_marker = self.local_position_dest.particle.get_position(
             local.my_domain_com.my_lib.marker.Marker
-        ).destroy_particle()
+        )
+        self.destruction_position_position_dest__global_position_marker.destroy_particle()
         self.local_position_dest.destroy_particle()
 
     def accept_guarantee_position_source__action_construct_b(self):

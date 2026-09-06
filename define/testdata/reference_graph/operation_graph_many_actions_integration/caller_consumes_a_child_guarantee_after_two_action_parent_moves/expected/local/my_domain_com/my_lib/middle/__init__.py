@@ -63,6 +63,7 @@ class MiddleExecution:
         self.scheduler = scheduler
         self.guarantees = MiddleGuarantees()
         self.execution_position_source__action_child: local.my_domain_com.my_lib.child.ChildExecution
+        self.destruction_position_position_holder__action_child__position_trigger_pos: literal.Position
         self.join_for_move_position_source_to_position_intermediate: literal.Join
         self.join_for_move_position_intermediate_to_position_holder: literal.Join
         self.join_for_empty_rule_position_source: literal.Join
@@ -147,16 +148,17 @@ class MiddleExecution:
                 "position<holder>"
             )
         )
+        self.destruction_position_position_holder__action_child__position_trigger_pos = self.action.get_interface_position(
+            "position<holder>"
+        ).particle.get_action(
+            local.my_domain_com.my_lib.child.Child
+        ).get_interface_position(
+            "position<trigger_pos>"
+        )
         self.guarantees.position_intermediate__move__position_holder.publish(
             self.scheduler,
             self.destroy_position_holder__action_child__position_trigger_pos,
         )
 
     def destroy_position_holder__action_child__position_trigger_pos(self):
-        self.action.get_interface_position(
-            "position<holder>"
-        ).particle.get_action(
-            local.my_domain_com.my_lib.child.Child
-        ).get_interface_position(
-            "position<trigger_pos>"
-        ).destroy_particle()
+        self.destruction_position_position_holder__action_child__position_trigger_pos.destroy_particle()

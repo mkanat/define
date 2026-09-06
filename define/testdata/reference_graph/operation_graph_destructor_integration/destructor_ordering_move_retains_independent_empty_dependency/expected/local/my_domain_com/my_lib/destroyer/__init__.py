@@ -56,6 +56,8 @@ class DestroyerExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_target__action_known_destructor: local.my_domain_com.my_lib.known_destructor.KnownDestructorExecution
+        self.destruction_position_position_target__global_position_destination: literal.Position
+        self.destruction_position_position_target__global_position_origin: literal.Position
         self.join_for_move_position_target__global_position_origin_to_position_holder: literal.Join
         self.join_for_destroy_position_target: literal.Join
         self.join_for_empty_rule_position_target__global_position_origin: literal.Join
@@ -102,6 +104,12 @@ class DestroyerExecution:
                 local.my_domain_com.my_lib.origin.Origin
             )
         )
+        self.destruction_position_position_target__global_position_origin = self.action.get_interface_position(
+            "position<target>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.origin.Origin
+        )
+        self.scheduler.submit(self.destroy_position_target)
         self.destroy_position_target__global_position_origin()
 
     def create_position_target__global_position_destination(self):
@@ -110,23 +118,13 @@ class DestroyerExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.destination.Destination
         ).create_particle()
-        self.action.get_interface_position(
+        self.destruction_position_position_target__global_position_destination = self.action.get_interface_position(
             "position<target>"
         ).particle.get_position(
             local.my_domain_com.my_lib.destination.Destination
-        ).destroy_particle()
+        )
+        self.destruction_position_position_target__global_position_destination.destroy_particle()
         self.execution_position_target__action_known_destructor.accept_when_empty_global_position_destination()
-
-    def destroy_position_target__global_position_origin(self):
-        literal.continue_destruction(self.continue_destroy_position_target__global_position_origin)
-
-    def continue_destroy_position_target__global_position_origin(self):
-        self.action.get_interface_position(
-            "position<target>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.origin.Origin
-        ).destroy_particle()
-        self.destroy_position_target()
 
     def destroy_position_target(self):
         if not self.join_for_destroy_position_target.arrive():
@@ -140,3 +138,9 @@ class DestroyerExecution:
         self.guarantees.position_target.publish(
             self.scheduler,
         )
+
+    def destroy_position_target__global_position_origin(self):
+        literal.continue_destruction(self.continue_destroy_position_target__global_position_origin)
+
+    def continue_destroy_position_target__global_position_origin(self):
+        self.destruction_position_position_target__global_position_origin.destroy_particle()

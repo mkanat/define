@@ -63,6 +63,9 @@ class DestroyerExecution:
             ),
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_held_required__global_position_left: literal.Position
+        self.destruction_position_position_held_required__global_position_right: literal.Position
+        self.destruction_position_position_parent__global_position_required: literal.Position
         self.join_for_move_position_parent__global_position_required_to_position_held_required: literal.Join
         self.join_for_move_position_held_required_to_position_parent__global_position_required = self.scheduler.create_join(2)
         self.join_for_destroy_position_parent: literal.Join
@@ -105,9 +108,10 @@ class DestroyerExecution:
             "held_required::/left",
             1,
         )
-        self.local_position_held_required.particle.get_position(
+        self.destruction_position_position_held_required__global_position_left = self.local_position_held_required.particle.get_position(
             local.my_domain_com.my_lib.left.Left
-        ).destroy_particle()
+        )
+        self.destruction_position_position_held_required__global_position_left.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "held_required::/left",
@@ -124,9 +128,10 @@ class DestroyerExecution:
             "held_required::/right",
             1,
         )
-        self.local_position_held_required.particle.get_position(
+        self.destruction_position_position_held_required__global_position_right = self.local_position_held_required.particle.get_position(
             local.my_domain_com.my_lib.right.Right
-        ).destroy_particle()
+        )
+        self.destruction_position_position_held_required__global_position_right.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "held_required::/right",
@@ -150,23 +155,13 @@ class DestroyerExecution:
             "parent::/required",
             1,
         )
-        self.destroy_position_parent__global_position_required()
-
-    def destroy_position_parent__global_position_required(self):
-        literal.continue_destruction(self.continue_destroy_position_parent__global_position_required)
-
-    def continue_destroy_position_parent__global_position_required(self):
-        self.action.get_interface_position(
+        self.destruction_position_position_parent__global_position_required = self.action.get_interface_position(
             "position<parent>"
         ).particle.get_position(
             local.my_domain_com.my_lib.required.Required
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "parent::/required",
-            1,
         )
-        self.destroy_position_parent()
+        self.scheduler.submit(self.destroy_position_parent)
+        self.destroy_position_parent__global_position_required()
 
     def destroy_position_parent(self):
         if not self.join_for_destroy_position_parent.arrive():
@@ -184,4 +179,15 @@ class DestroyerExecution:
         )
         self.guarantees.position_parent.publish(
             self.scheduler,
+        )
+
+    def destroy_position_parent__global_position_required(self):
+        literal.continue_destruction(self.continue_destroy_position_parent__global_position_required)
+
+    def continue_destroy_position_parent__global_position_required(self):
+        self.destruction_position_position_parent__global_position_required.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.trace_execution,
+            "parent::/required",
+            1,
         )

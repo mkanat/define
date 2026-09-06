@@ -44,12 +44,27 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_action_destroyer: local.my_domain_com.my_lib.destroyer.DestroyerExecution
+        self.destruction_connection_action_destroyer: literal.DestructionConnection
+        self.destruction_position_action_destroyer__position_target__global_position_occupied_last: literal.Position
+        self.destruction_position_action_destroyer__position_target__global_position_occupied_first__global_position_transitive: literal.Position
+        self.destruction_position_action_destroyer__position_target__global_position_occupied_first: literal.Position
         self.join_for_move_position_source_to_action_destroyer__position_target = self.scheduler.create_join(2)
+        self.destruction_connection_action_destroyer = literal.DestructionConnection(
+            self.scheduler,
+            2,
+            self.destroy_action_destroyer__position_target__global_position_occupied_last,
+            self.destroy_action_destroyer__position_target__global_position_occupied_first__global_position_transitive,
+        )
         self.execution_action_destroyer = local.my_domain_com.my_lib.destroyer.DestroyerExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.destroyer.Destroyer
             ),
             self.scheduler,
+            destruction_connections=literal.DestructionConnections(
+            {
+                local.my_domain_com.my_lib.destroyer.DestroyerExecution.continue_destroy_position_target: self.destruction_connection_action_destroyer,
+            },
+            ),
         )
         self.execution_action_destroyer.join_for_empty_rule_position_target__global_position_occupied_last = literal.NO_JOIN
         self.execution_action_destroyer.join_for_empty_rule_position_target__global_position_occupied_first = literal.NO_JOIN
@@ -91,6 +106,29 @@ class TestExecution:
                 "position<target>"
             )
         )
+        self.destruction_position_action_destroyer__position_target__global_position_occupied_last = self.action.on_particle.get_action(
+            local.my_domain_com.my_lib.destroyer.Destroyer
+        ).get_interface_position(
+            "position<target>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.occupied_last.OccupiedLast
+        )
+        self.destruction_position_action_destroyer__position_target__global_position_occupied_first__global_position_transitive = self.action.on_particle.get_action(
+            local.my_domain_com.my_lib.destroyer.Destroyer
+        ).get_interface_position(
+            "position<target>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.occupied_first.OccupiedFirst
+        ).particle.get_position(
+            local.my_domain_com.my_lib.transitive.Transitive
+        )
+        self.destruction_position_action_destroyer__position_target__global_position_occupied_first = self.action.on_particle.get_action(
+            local.my_domain_com.my_lib.destroyer.Destroyer
+        ).get_interface_position(
+            "position<target>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.occupied_first.OccupiedFirst
+        )
         self.execution_action_destroyer.init_position_target__action_destructor()
         self.execution_action_destroyer.execution_position_target__action_destructor.join_for_empty_rule_global_position_occupied_first = literal.NO_JOIN
         self.execution_action_destroyer.execution_position_target__action_destructor.join_for_empty_rule_global_position_occupied_last = literal.NO_JOIN
@@ -99,3 +137,12 @@ class TestExecution:
         self.scheduler.submit(self.execution_action_destroyer.accept_when_empty_position_target__global_position_empty)
         self.scheduler.submit(self.execution_action_destroyer.accept_for_empty_rule_position_target__global_position_occupied_last)
         self.execution_action_destroyer.accept_for_empty_rule_position_target__global_position_occupied_first()
+
+    def destroy_action_destroyer__position_target__global_position_occupied_last(self):
+        self.destruction_position_action_destroyer__position_target__global_position_occupied_last.destroy_particle()
+        self.destruction_connection_action_destroyer.complete()
+
+    def destroy_action_destroyer__position_target__global_position_occupied_first__global_position_transitive(self):
+        self.destruction_position_action_destroyer__position_target__global_position_occupied_first__global_position_transitive.destroy_particle()
+        self.destruction_position_action_destroyer__position_target__global_position_occupied_first.destroy_particle()
+        self.destruction_connection_action_destroyer.complete()

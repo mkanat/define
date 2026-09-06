@@ -33,6 +33,8 @@ class TestExecution:
         self.action = action
         self.scheduler = scheduler
         self.execution_action_triggered: local.my_domain_com.my_lib.triggered.TriggeredExecution
+        self.destruction_position_action_triggered__position_input: literal.Position
+        self.destruction_position_action_triggered__position_input__global_position_child: literal.Position
         self.execution_action_triggered = local.my_domain_com.my_lib.triggered.TriggeredExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.triggered.Triggered
@@ -43,6 +45,12 @@ class TestExecution:
         self.execution_action_triggered.join_for_empty_rule_position_run = literal.NO_JOIN
         self.execution_action_triggered.join_for_destroy_position_input__global_position_child__global_position_grandchild = literal.NO_JOIN
         self.execution_action_triggered.join_for_destroy_position_run = literal.NO_JOIN
+        self.execution_action_triggered.guarantees.position_input__global_position_child__global_position_grandchild.inits.append(
+            self.init_action_triggered__position_input__global_position_child__global_position_grandchild
+        )
+        self.execution_action_triggered.guarantees.position_input__global_position_child__global_position_grandchild.consumers.append(
+            self.destroy_action_triggered__position_input
+        )
         self.execution_action_triggered.guarantees.position_input__global_position_child__global_position_grandchild.consumers.append(
             self.destroy_action_triggered__position_input__global_position_child
         )
@@ -83,16 +91,22 @@ class TestExecution:
         ).create_particle()
         self.execution_action_triggered.accept_for_empty_rule_position_run()
 
+    def destroy_action_triggered__position_input(self):
+        self.destruction_position_action_triggered__position_input.destroy_particle()
+
     def destroy_action_triggered__position_input__global_position_child(self):
-        self.action.on_particle.get_action(
+        self.destruction_position_action_triggered__position_input__global_position_child.destroy_particle()
+
+    def init_action_triggered__position_input__global_position_child__global_position_grandchild(self):
+        self.destruction_position_action_triggered__position_input = self.action.on_particle.get_action(
+            local.my_domain_com.my_lib.triggered.Triggered
+        ).get_interface_position(
+            "position<input>"
+        )
+        self.destruction_position_action_triggered__position_input__global_position_child = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.triggered.Triggered
         ).get_interface_position(
             "position<input>"
         ).particle.get_position(
             local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
-        self.action.on_particle.get_action(
-            local.my_domain_com.my_lib.triggered.Triggered
-        ).get_interface_position(
-            "position<input>"
-        ).destroy_particle()
+        )

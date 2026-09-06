@@ -39,6 +39,7 @@ class OuterExecution:
         self.scheduler = scheduler
         self.destruction_connections = destruction_connections
         self.execution_action_middle: local.my_domain_com.my_lib.middle.MiddleExecution
+        self.destruction_position_action_middle__position_trigger_pos: literal.Position
         self.join_for_destroy_global_position_slot: literal.Join
         self.join_for_empty_rule_global_position_slot: literal.Join
         self.execution_action_middle = local.my_domain_com.my_lib.middle.MiddleExecution(
@@ -74,8 +75,9 @@ class OuterExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_middle__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.middle.Middle
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_middle__position_trigger_pos.destroy_particle()

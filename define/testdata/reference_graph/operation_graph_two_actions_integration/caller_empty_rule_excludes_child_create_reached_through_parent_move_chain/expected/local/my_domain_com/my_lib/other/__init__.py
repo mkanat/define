@@ -52,6 +52,7 @@ class OtherExecution:
         self.scheduler = scheduler
         self.guarantees = OtherGuarantees()
         self.destruction_connections = destruction_connections
+        self.destruction_position_position_output__global_position_item: literal.Position
         self.join_for_move_global_position_input_to_position_output: literal.Join
         self.join_for_empty_rule_global_position_input: literal.Join
 
@@ -70,6 +71,11 @@ class OtherExecution:
                 "position<output>"
             )
         )
+        self.destruction_position_position_output__global_position_item = self.action.get_interface_position(
+            "position<output>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.item.Item
+        )
         self.guarantees.global_position_input.publish(
             self.scheduler,
             self.destroy_position_output__global_position_item,
@@ -79,11 +85,7 @@ class OtherExecution:
         literal.continue_destruction(self.continue_destroy_position_output__global_position_item)
 
     def continue_destroy_position_output__global_position_item(self):
-        self.action.get_interface_position(
-            "position<output>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.item.Item
-        ).destroy_particle()
+        self.destruction_position_position_output__global_position_item.destroy_particle()
         self.destroy_position_output()
 
     def destroy_position_output(self):

@@ -42,8 +42,10 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_box__action_maker: local.my_domain_com.my_lib.maker.MakerExecution
-        self.execution_position_box__action_maker__position_result__action_destruct_b: local.my_domain_com.my_lib.destruct_b.DestructBExecution
         self.execution_position_box__action_maker__position_result__action_destruct_a: local.my_domain_com.my_lib.destruct_a.DestructAExecution
+        self.execution_position_box__action_maker__position_result__action_destruct_b: local.my_domain_com.my_lib.destruct_b.DestructBExecution
+        self.destruction_position_position_box__action_maker__position_result: literal.Position
+        self.destruction_position_position_box__action_maker__position_run: literal.Position
         self.join_for_destroy_position_box = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -84,24 +86,16 @@ class TestExecution:
             "box::/maker::run",
             1,
         )
-        self.local_position_box.particle.get_action(
+        self.destruction_position_position_box__action_maker__position_run = self.local_position_box.particle.get_action(
             local.my_domain_com.my_lib.maker.Maker
         ).get_interface_position(
             "position<run>"
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "box::/maker::run",
-            1,
         )
-        self.destroy_position_box()
+        self.scheduler.submit(self.destroy_position_box)
+        self.destroy_position_box__action_maker__position_run()
 
     def destroy_position_box__action_maker__position_result(self):
-        self.local_position_box.particle.get_action(
-            local.my_domain_com.my_lib.maker.Maker
-        ).get_interface_position(
-            "position<result>"
-        ).destroy_particle()
+        self.destruction_position_position_box__action_maker__position_result.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "box::/maker::result",
@@ -119,14 +113,19 @@ class TestExecution:
             1,
         )
 
-    def init_position_box__action_maker__position_result(self):
-        self.execution_position_box__action_maker__position_result__action_destruct_b = local.my_domain_com.my_lib.destruct_b.DestructBExecution(
-            self.scheduler,
+    def destroy_position_box__action_maker__position_run(self):
+        self.destruction_position_position_box__action_maker__position_run.destroy_particle()
+        self.scheduler.destroy_completed(
             self.trace_execution,
-            "destruct_b",
+            "box::/maker::run",
+            1,
         )
-        self.execution_position_box__action_maker.guarantees.position_result.consumers.append(
-            self.accept_guarantee_position_box__action_maker__position_result__action_destruct_b
+
+    def init_position_box__action_maker__position_result(self):
+        self.destruction_position_position_box__action_maker__position_result = self.local_position_box.particle.get_action(
+            local.my_domain_com.my_lib.maker.Maker
+        ).get_interface_position(
+            "position<result>"
         )
         self.execution_position_box__action_maker__position_result__action_destruct_a = local.my_domain_com.my_lib.destruct_a.DestructAExecution(
             self.scheduler,
@@ -136,9 +135,17 @@ class TestExecution:
         self.execution_position_box__action_maker.guarantees.position_result.consumers.append(
             self.accept_guarantee_position_box__action_maker__position_result__action_destruct_a
         )
-
-    def accept_guarantee_position_box__action_maker__position_result__action_destruct_b(self):
-        self.execution_position_box__action_maker__position_result__action_destruct_b.on_action_parent_occupied()
+        self.execution_position_box__action_maker__position_result__action_destruct_b = local.my_domain_com.my_lib.destruct_b.DestructBExecution(
+            self.scheduler,
+            self.trace_execution,
+            "destruct_b",
+        )
+        self.execution_position_box__action_maker.guarantees.position_result.consumers.append(
+            self.accept_guarantee_position_box__action_maker__position_result__action_destruct_b
+        )
 
     def accept_guarantee_position_box__action_maker__position_result__action_destruct_a(self):
         self.execution_position_box__action_maker__position_result__action_destruct_a.on_action_parent_occupied()
+
+    def accept_guarantee_position_box__action_maker__position_result__action_destruct_b(self):
+        self.execution_position_box__action_maker__position_result__action_destruct_b.on_action_parent_occupied()

@@ -38,6 +38,8 @@ class TestExecution:
             ),
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_box__global_position_child: literal.Position
+        self.destruction_position_position_box__global_position_child_2: literal.Position
         self.join_for_move_position_source_to_position_box = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -49,9 +51,10 @@ class TestExecution:
         self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.child.Child
         ).create_particle()
-        self.local_position_box.particle.get_position(
+        self.destruction_position_position_box__global_position_child = self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
+        )
+        self.destruction_position_position_box__global_position_child.destroy_particle()
         self.local_position_box.destroy_particle()
         self.move_position_source_to_position_box()
 
@@ -66,7 +69,8 @@ class TestExecution:
         if not self.join_for_move_position_source_to_position_box.arrive():
             return
         self.local_position_source.move_particle_to(self.local_position_box)
-        self.local_position_box.particle.get_position(
+        self.destruction_position_position_box__global_position_child_2 = self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
+        )
+        self.destruction_position_position_box__global_position_child_2.destroy_particle()
         self.local_position_box.destroy_particle()

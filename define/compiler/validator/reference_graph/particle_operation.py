@@ -12,7 +12,6 @@ if typing.TYPE_CHECKING:
 
     from define.compiler import ast
     from define.compiler.validator.reference_graph import (
-        operation_graph_model,
         particle_tracker,
         quality_assignment,
     )
@@ -57,6 +56,9 @@ class Destroy(Operation):
     """Destroy the particle in a position."""
 
 
+# TODO: Refactor this class to only validate operations; callers should perform
+# ParticleTracker state updates. Rename the module to particle_operation_validator,
+# the class to ParticleOperationValidator, and the validation methods to validate_*.
 class ParticleOperationExecutor:
     """Creates, destroys, and moves particles, including enforcing the rules on doing so."""
 
@@ -164,58 +166,40 @@ class ParticleOperationExecutor:
         self._tracker.move(op.source, op.target)
         return []
 
-    def execute_destroy[BeforeDestroyResultT](
+    def execute_destroy(
         self,
         op: Destroy,
-        before_destroy: Callable[[], BeforeDestroyResultT],
-        *,
-        destruction_fact: operation_graph_model.DestructionFact,
-    ) -> tuple[
-        list[diagnostics.Diagnostic],
-        BeforeDestroyResultT | None,
-    ]:
+        destroy: Callable[[], None],
+    ) -> list[diagnostics.Diagnostic]:
         """Execute the Destroy operation.
 
-        ``before_destroy`` runs only on the success path, immediately before the
-        particle is removed. Destructors must fire while the particle
-        still exists, so the caller passes their firing in here.
+        ``destroy`` runs only on the success path after the statement has been
+        validated. It performs the complete simultaneous transitive destruction.
         """
-        # TODO: Revisit the executor's responsibility for Particle Operations.
-        # The validator expands and executes destruction-cascade children, while
-        # this method validates the statement and executes only its final explicit
-        # destruction. That ownership split forces the validator to exclude the
-        # last cascade target from ``before_destroy``.
         parent_diags = self._check_parents_occupied(op.target)
         if parent_diags:
             self._tracker.mark_error(op.target)
-            return parent_diags, None
+            return parent_diags
         if not self._tracker.is_occupied(op.target):
             self._tracker.mark_error(op.target)
             from_action = op.target.get_last_action()
             if from_action is not None:
                 emptied_by = self._tracker.get_emptied_by(op.target)
-                return (
-                    [
-                        diagnostics.DestroyInEmptyInterfacePositionDiagnostic(
-                            location=op.target.location,
-                            position_name=op.target.source_chained_name,
-                            inferred_at=emptied_by.location if emptied_by else None,
-                        )
-                    ],
-                    None,
-                )
-            return (
-                [
-                    diagnostics.DestroyInEmptyPositionDiagnostic(
+                return [
+                    diagnostics.DestroyInEmptyInterfacePositionDiagnostic(
                         location=op.target.location,
                         position_name=op.target.source_chained_name,
+                        inferred_at=emptied_by.location if emptied_by else None,
                     )
-                ],
-                None,
-            )
-        before_destroy_result = before_destroy()
-        self._tracker.destroy_explicit(op.target, destruction_fact)
-        return [], before_destroy_result
+                ]
+            return [
+                diagnostics.DestroyInEmptyPositionDiagnostic(
+                    location=op.target.location,
+                    position_name=op.target.source_chained_name,
+                )
+            ]
+        destroy()
+        return []
 
     def _check_parents_occupied(
         self, target: ast.PositionReference

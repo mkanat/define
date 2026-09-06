@@ -290,29 +290,6 @@
   {
     "operation": {
       "execution": {
-        "caller": null,
-        "action_name": "test"
-      },
-      "operation_name": "destroy",
-      "target": "result",
-      "occurrence": 1
-    },
-    "dependencies": [
-      {
-        "execution": {
-          "caller": null,
-          "action_name": "test"
-        },
-        "operation_name": "move",
-        "source": "box::/outer::out",
-        "target": "result",
-        "occurrence": 1
-      }
-    ]
-  },
-  {
-    "operation": {
-      "execution": {
         "caller": {
           "caller": {
             "caller": null,
@@ -503,6 +480,16 @@
       },
       {
         "execution": {
+          "caller": null,
+          "action_name": "test"
+        },
+        "operation_name": "move",
+        "source": "box::/outer::out",
+        "target": "result",
+        "occurrence": 1
+      },
+      {
+        "execution": {
           "caller": {
             "caller": null,
             "action_name": "test"
@@ -512,7 +499,20 @@
         "operation_name": "destroy",
         "target": "gw",
         "occurrence": 1
+      }
+    ]
+  },
+  {
+    "operation": {
+      "execution": {
+        "caller": null,
+        "action_name": "test"
       },
+      "operation_name": "destroy",
+      "target": "result",
+      "occurrence": 1
+    },
+    "dependencies": [
       {
         "execution": {
           "caller": null,

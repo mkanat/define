@@ -1,0 +1,18 @@
+# A later Move selects the parent Destroy rather than its simultaneous child Destroy.
+define the potential action<my.domain.com:my_lib:/test> {
+    it happens when {
+        this particle is created.
+    } and it does {
+        define the position<box> {
+            it may only contain particles where {
+                it has the position</child>.
+            }
+        }
+        define the position<destination>.
+        create a particle in position<box>.
+        create a particle in position<box>::position</child>.
+        create a particle in position<box>::position</child>::position</leaf>.
+        destroy the particle in position<box>::position</child>.
+        move the particle in position<box> to position<destination>.
+    }
+}

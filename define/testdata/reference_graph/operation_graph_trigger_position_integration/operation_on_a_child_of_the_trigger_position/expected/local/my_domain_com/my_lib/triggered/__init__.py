@@ -43,12 +43,18 @@ class TriggeredExecution:
         self.scheduler = scheduler
         self.guarantees = TriggeredGuarantees()
         self.destruction_connections = destruction_connections
+        self.destruction_position_position_run__global_position_child: literal.Position
         self.join_for_destroy_position_run__global_position_child: literal.Join
         self.join_for_empty_rule_position_run__global_position_child: literal.Join
 
     def accept_for_empty_rule_position_run__global_position_child(self):
         if not self.join_for_empty_rule_position_run__global_position_child.arrive():
             return
+        self.destruction_position_position_run__global_position_child = self.action.get_interface_position(
+            "position<run>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.child.Child
+        )
         self.destroy_position_run__global_position_child()
 
     def destroy_position_run__global_position_child(self):
@@ -57,11 +63,7 @@ class TriggeredExecution:
         literal.continue_destruction(self.continue_destroy_position_run__global_position_child)
 
     def continue_destroy_position_run__global_position_child(self):
-        self.action.get_interface_position(
-            "position<run>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
+        self.destruction_position_position_run__global_position_child.destroy_particle()
         self.guarantees.position_run__global_position_child.publish(
             self.scheduler,
         )

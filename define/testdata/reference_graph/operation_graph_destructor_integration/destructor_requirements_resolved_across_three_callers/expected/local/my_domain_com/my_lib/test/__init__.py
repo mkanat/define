@@ -48,6 +48,8 @@ class TestExecution:
         self.execution_action_middle: local.my_domain_com.my_lib.middle.MiddleExecution
         self.destruction_connection_action_middle: literal.DestructionConnection
         self.destruction_position_action_middle__position_target__global_position_creator_known: literal.Position
+        self.destruction_position_position_source__global_position_callee_known: literal.Position
+        self.destruction_position_position_source__global_position_middle_known: literal.Position
         self.join_for_move_position_source_to_action_middle__position_target = self.scheduler.create_join(3)
         self.destruction_connection_action_middle = literal.DestructionConnection(
             self.scheduler,
@@ -82,18 +84,20 @@ class TestExecution:
         self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.callee_known.CalleeKnown
         ).create_particle()
-        self.local_position_source.particle.get_position(
+        self.destruction_position_position_source__global_position_callee_known = self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.callee_known.CalleeKnown
-        ).destroy_particle()
+        )
+        self.destruction_position_position_source__global_position_callee_known.destroy_particle()
         self.move_position_source_to_action_middle__position_target()
 
     def create_position_source__global_position_middle_known(self):
         self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.middle_known.MiddleKnown
         ).create_particle()
-        self.local_position_source.particle.get_position(
+        self.destruction_position_position_source__global_position_middle_known = self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.middle_known.MiddleKnown
-        ).destroy_particle()
+        )
+        self.destruction_position_position_source__global_position_middle_known.destroy_particle()
         self.move_position_source_to_action_middle__position_target()
 
     def create_position_source__global_position_creator_known(self):

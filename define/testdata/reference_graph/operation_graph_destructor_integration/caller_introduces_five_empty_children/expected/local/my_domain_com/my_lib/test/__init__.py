@@ -57,6 +57,9 @@ class TestExecution:
         self.execution_action_destroyer__position_target__action_fifth_destructor: local.my_domain_com.my_lib.fifth_destructor.FifthDestructorExecution
         self.execution_action_destroyer__position_target__action_third_destructor: local.my_domain_com.my_lib.third_destructor.ThirdDestructorExecution
         self.execution_action_destroyer__position_target__action_first_destructor: local.my_domain_com.my_lib.first_destructor.FirstDestructorExecution
+        self.destruction_position_position_carrier__global_position_first: literal.Position
+        self.destruction_position_position_carrier__global_position_third: literal.Position
+        self.destruction_position_position_carrier__global_position_fifth: literal.Position
         self.join_for_move_position_carrier_to_action_destroyer__position_target = self.scheduler.create_join(3)
         self.destruction_connection_action_destroyer = literal.DestructionConnection(
             self.scheduler,
@@ -95,27 +98,30 @@ class TestExecution:
         self.local_position_carrier.particle.get_position(
             local.my_domain_com.my_lib.first.First
         ).create_particle()
-        self.local_position_carrier.particle.get_position(
+        self.destruction_position_position_carrier__global_position_first = self.local_position_carrier.particle.get_position(
             local.my_domain_com.my_lib.first.First
-        ).destroy_particle()
+        )
+        self.destruction_position_position_carrier__global_position_first.destroy_particle()
         self.move_position_carrier_to_action_destroyer__position_target()
 
     def create_position_carrier__global_position_third(self):
         self.local_position_carrier.particle.get_position(
             local.my_domain_com.my_lib.third.Third
         ).create_particle()
-        self.local_position_carrier.particle.get_position(
+        self.destruction_position_position_carrier__global_position_third = self.local_position_carrier.particle.get_position(
             local.my_domain_com.my_lib.third.Third
-        ).destroy_particle()
+        )
+        self.destruction_position_position_carrier__global_position_third.destroy_particle()
         self.move_position_carrier_to_action_destroyer__position_target()
 
     def create_position_carrier__global_position_fifth(self):
         self.local_position_carrier.particle.get_position(
             local.my_domain_com.my_lib.fifth.Fifth
         ).create_particle()
-        self.local_position_carrier.particle.get_position(
+        self.destruction_position_position_carrier__global_position_fifth = self.local_position_carrier.particle.get_position(
             local.my_domain_com.my_lib.fifth.Fifth
-        ).destroy_particle()
+        )
+        self.destruction_position_position_carrier__global_position_fifth.destroy_particle()
         self.move_position_carrier_to_action_destroyer__position_target()
 
     def move_position_carrier_to_action_destroyer__position_target(self):

@@ -38,6 +38,7 @@ class TestExecution:
             ),
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_dest__global_position_child: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_src()
@@ -48,7 +49,8 @@ class TestExecution:
             local.my_domain_com.my_lib.child.Child
         ).create_particle()
         self.local_position_src.move_particle_to(self.local_position_dest)
-        self.local_position_dest.particle.get_position(
+        self.destruction_position_position_dest__global_position_child = self.local_position_dest.particle.get_position(
             local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
+        )
+        self.destruction_position_position_dest__global_position_child.destroy_particle()
         self.local_position_dest.destroy_particle()

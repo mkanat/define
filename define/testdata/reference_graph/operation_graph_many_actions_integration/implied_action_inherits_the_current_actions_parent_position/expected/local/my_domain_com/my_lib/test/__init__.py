@@ -33,6 +33,8 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_local__global_position_parent__action_middle: local.my_domain_com.my_lib.middle.MiddleExecution
+        self.destruction_position_position_local__global_position_parent__action_middle__position_trigger_pos: literal.Position
+        self.destruction_position_position_local__global_position_parent: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_local()
@@ -61,14 +63,22 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_local.particle.get_position(
+        self.destruction_position_position_local__global_position_parent__action_middle__position_trigger_pos = self.local_position_local.particle.get_position(
             local.my_domain_com.my_lib.parent.Parent
         ).particle.get_action(
             local.my_domain_com.my_lib.middle.Middle
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
-        self.local_position_local.particle.get_position(
+        )
+        self.destruction_position_position_local__global_position_parent__action_middle__position_trigger_pos.destroy_particle()
+        self.destruction_position_position_local__global_position_parent = self.local_position_local.particle.get_position(
             local.my_domain_com.my_lib.parent.Parent
-        ).destroy_particle()
+        )
+        self.scheduler.submit(self.destroy_position_local)
+        self.destroy_position_local__global_position_parent()
+
+    def destroy_position_local(self):
         self.local_position_local.destroy_particle()
+
+    def destroy_position_local__global_position_parent(self):
+        self.destruction_position_position_local__global_position_parent.destroy_particle()

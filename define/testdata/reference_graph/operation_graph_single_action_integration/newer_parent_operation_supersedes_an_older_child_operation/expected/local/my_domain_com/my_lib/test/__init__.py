@@ -38,6 +38,8 @@ class TestExecution:
             ),
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_holder__global_position_target: literal.Position
+        self.destruction_position_position_holder__global_position_target__global_position_deep: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_box()
@@ -60,12 +62,23 @@ class TestExecution:
             )
         )
         self.local_position_box.move_particle_to(self.local_position_holder)
-        self.local_position_holder.particle.get_position(
+        self.destruction_position_position_holder__global_position_target = self.local_position_holder.particle.get_position(
+            local.my_domain_com.my_lib.target.Target
+        )
+        self.destruction_position_position_holder__global_position_target__global_position_deep = self.local_position_holder.particle.get_position(
             local.my_domain_com.my_lib.target.Target
         ).particle.get_position(
             local.my_domain_com.my_lib.deep.Deep
-        ).destroy_particle()
-        self.local_position_holder.particle.get_position(
-            local.my_domain_com.my_lib.target.Target
-        ).destroy_particle()
+        )
+        self.scheduler.submit(self.destroy_position_holder)
+        self.scheduler.submit(self.destroy_position_holder__global_position_target)
+        self.destroy_position_holder__global_position_target__global_position_deep()
+
+    def destroy_position_holder(self):
         self.local_position_holder.destroy_particle()
+
+    def destroy_position_holder__global_position_target(self):
+        self.destruction_position_position_holder__global_position_target.destroy_particle()
+
+    def destroy_position_holder__global_position_target__global_position_deep(self):
+        self.destruction_position_position_holder__global_position_target__global_position_deep.destroy_particle()

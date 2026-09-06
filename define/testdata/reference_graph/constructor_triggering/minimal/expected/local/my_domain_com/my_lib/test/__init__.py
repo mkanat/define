@@ -32,6 +32,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_box__action_constructor: local.my_domain_com.my_lib.constructor.ConstructorExecution
+        self.destruction_position_position_box__action_constructor__position_output: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_box()
@@ -44,15 +45,21 @@ class TestExecution:
             ),
             self.scheduler,
         )
+        self.execution_position_box__action_constructor.guarantees.position_output.inits.append(
+            self.init_position_box__action_constructor__position_output
+        )
         self.execution_position_box__action_constructor.guarantees.position_output.consumers.append(
             self.destroy_position_box__action_constructor__position_output
         )
         self.execution_position_box__action_constructor.accept_when_empty_position_output()
 
     def destroy_position_box__action_constructor__position_output(self):
-        self.local_position_box.particle.get_action(
+        self.destruction_position_position_box__action_constructor__position_output.destroy_particle()
+        self.local_position_box.destroy_particle()
+
+    def init_position_box__action_constructor__position_output(self):
+        self.destruction_position_position_box__action_constructor__position_output = self.local_position_box.particle.get_action(
             local.my_domain_com.my_lib.constructor.Constructor
         ).get_interface_position(
             "position<output>"
-        ).destroy_particle()
-        self.local_position_box.destroy_particle()
+        )

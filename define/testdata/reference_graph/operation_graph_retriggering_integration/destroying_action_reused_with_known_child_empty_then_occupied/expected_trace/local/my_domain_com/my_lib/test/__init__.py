@@ -61,6 +61,7 @@ class TestExecution:
         self.execution_action_destroyer_2: local.my_domain_com.my_lib.destroyer.DestroyerExecution
         self.destruction_connection_action_destroyer_2: tracing.DestructionConnection
         self.destruction_position_action_destroyer__position_run__global_position_child: literal.Position
+        self.destruction_position_position_first__global_position_child: literal.Position
         self.join_for_move_position_second_to_action_destroyer__position_run = self.scheduler.create_join(2)
         self.join_when_empty_global_position_target: literal.Join
         self.join_for_accept_guarantee_action_destroyer = self.scheduler.create_join(2)
@@ -124,9 +125,10 @@ class TestExecution:
             "first::/child",
             1,
         )
-        self.local_position_first.particle.get_position(
+        self.destruction_position_position_first__global_position_child = self.local_position_first.particle.get_position(
             local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
+        )
+        self.destruction_position_position_first__global_position_child.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "first::/child",

@@ -39,6 +39,7 @@ class TestExecution:
             "position<crate>",
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_crate__global_position_child: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_box()
@@ -50,7 +51,14 @@ class TestExecution:
         ).create_particle()
         self.local_position_box.move_particle_to(self.local_position_basket)
         self.local_position_basket.move_particle_to(self.local_position_crate)
-        self.local_position_crate.particle.get_position(
+        self.destruction_position_position_crate__global_position_child = self.local_position_crate.particle.get_position(
             local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
+        )
+        self.scheduler.submit(self.destroy_position_crate)
+        self.destroy_position_crate__global_position_child()
+
+    def destroy_position_crate(self):
         self.local_position_crate.destroy_particle()
+
+    def destroy_position_crate__global_position_child(self):
+        self.destruction_position_position_crate__global_position_child.destroy_particle()

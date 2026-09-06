@@ -33,6 +33,8 @@ class TestExecution:
         )
         self.execution_position_gateway__action_other: local.my_domain_com.my_lib.other.OtherExecution
         self.execution_position_gateway__action_other_2: local.my_domain_com.my_lib.other.OtherExecution
+        self.destruction_position_position_gateway__action_other__position_dest: literal.Position
+        self.destruction_position_position_gateway__action_other__position_dest_2: literal.Position
         self.join_for_destroy_position_gateway = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -50,6 +52,9 @@ class TestExecution:
         self.execution_position_gateway__action_other.join_for_empty_rule_position_trigger_pos = literal.NO_JOIN
         self.execution_position_gateway__action_other.join_for_move_position_src_to_position_dest = literal.NO_JOIN
         self.execution_position_gateway__action_other.join_for_destroy_position_trigger_pos = literal.NO_JOIN
+        self.execution_position_gateway__action_other.guarantees.position_dest.inits.append(
+            self.init_position_gateway__action_other__position_dest
+        )
         self.execution_position_gateway__action_other.guarantees.position_dest.consumers.append(
             self.destroy_position_gateway__action_other__position_dest
         )
@@ -66,6 +71,9 @@ class TestExecution:
         self.execution_position_gateway__action_other_2.join_for_empty_rule_position_trigger_pos = literal.NO_JOIN
         self.execution_position_gateway__action_other_2.join_for_move_position_src_to_position_dest = self.scheduler.create_join(2)
         self.execution_position_gateway__action_other_2.join_for_destroy_position_trigger_pos = literal.NO_JOIN
+        self.execution_position_gateway__action_other_2.guarantees.position_dest.inits.append(
+            self.init_position_gateway__action_other__position_dest_2
+        )
         self.execution_position_gateway__action_other_2.guarantees.position_dest.consumers.append(
             self.destroy_position_gateway__action_other__position_dest_2
         )
@@ -85,11 +93,7 @@ class TestExecution:
         self.execution_position_gateway__action_other.accept_for_empty_rule_position_trigger_pos()
 
     def destroy_position_gateway__action_other__position_dest(self):
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.other.Other
-        ).get_interface_position(
-            "position<dest>"
-        ).destroy_particle()
+        self.destruction_position_position_gateway__action_other__position_dest.destroy_particle()
         self.execution_position_gateway__action_other_2.accept_when_empty_position_dest()
 
     def create_position_gateway__action_other__position_trigger_pos_2(self):
@@ -101,14 +105,24 @@ class TestExecution:
         self.execution_position_gateway__action_other_2.accept_for_empty_rule_position_trigger_pos()
 
     def destroy_position_gateway__action_other__position_dest_2(self):
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.other.Other
-        ).get_interface_position(
-            "position<dest>"
-        ).destroy_particle()
+        self.destruction_position_position_gateway__action_other__position_dest_2.destroy_particle()
         self.destroy_position_gateway()
 
     def destroy_position_gateway(self):
         if not self.join_for_destroy_position_gateway.arrive():
             return
         self.local_position_gateway.destroy_particle()
+
+    def init_position_gateway__action_other__position_dest(self):
+        self.destruction_position_position_gateway__action_other__position_dest = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.other.Other
+        ).get_interface_position(
+            "position<dest>"
+        )
+
+    def init_position_gateway__action_other__position_dest_2(self):
+        self.destruction_position_position_gateway__action_other__position_dest_2 = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.other.Other
+        ).get_interface_position(
+            "position<dest>"
+        )

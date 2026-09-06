@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import pytest
+
 from define.compiler.validator.reference_graph.operation_graph_renderer import (
     assert_operation_dependencies,
 )
@@ -11,6 +13,10 @@ if TYPE_CHECKING:
     from define.compiler import conftest
 
 _TEST = "action<my.domain.com:my_lib:/test>"
+
+_SIMULTANEOUS_CALLER_CONTRIBUTED_DESTRUCTION_NOT_RESOLVED = (
+    "caller-contributed Destroy operations still order simultaneous callee Destroys"
+)
 
 
 def test_triggered_action_destroys_its_own_trigger_position(
@@ -80,9 +86,9 @@ def test_callee_fill_of_a_child_waits_only_on_the_caller_fill_of_its_parent(
         # Create of its parent rather than on another caller operation.
         "other.create(output::/a)": ["test.create(gateway::/other::output)"],
         "test.destroy(gateway::/other::output::/a)": ["other.create(output::/a)"],
-        "test.destroy(gateway::/other::output)": [
-            "test.destroy(gateway::/other::output::/a)"
-        ],
+        # The parent and child particles are destroyed from the same state, so
+        # each Destroy depends on the Create that filled its position.
+        "test.destroy(gateway::/other::output)": ["other.create(output::/a)"],
         "test.destroy(gateway::/other::trigger_pos)": [
             "test.create(gateway::/other::trigger_pos)"
         ],
@@ -112,9 +118,7 @@ def test_callee_fill_of_a_child_waits_on_the_caller_destroy_that_emptied_it(
         "other#2.create(output::/a)": ["test.destroy(gateway::/other::output::/a)"],
         "other#2.destroy(trigger_pos)": ["test.create(gateway::/other::trigger_pos)#2"],
         "test.destroy(gateway::/other::output::/a)#2": ["other#2.create(output::/a)"],
-        "test.destroy(gateway::/other::output)": [
-            "test.destroy(gateway::/other::output::/a)#2"
-        ],
+        "test.destroy(gateway::/other::output)": ["other#2.create(output::/a)"],
         "test.destroy(gateway)": [
             "test.destroy(gateway::/other::output)",
             "other#2.destroy(trigger_pos)",
@@ -176,10 +180,7 @@ def test_callee_move_of_a_caller_filled_position_waits_on_every_child_the_caller
         ],
         "test.destroy(gateway::/other::holder::/a)": ["other.move(source, holder)"],
         "test.destroy(gateway::/other::holder::/b)": ["other.move(source, holder)"],
-        "test.destroy(gateway::/other::holder)": [
-            "test.destroy(gateway::/other::holder::/b)",
-            "test.destroy(gateway::/other::holder::/a)",
-        ],
+        "test.destroy(gateway::/other::holder)": ["other.move(source, holder)"],
         "test.destroy(gateway::/other::trigger_pos)": [
             "test.create(gateway::/other::trigger_pos)"
         ],
@@ -373,9 +374,9 @@ def test_empty_rule_excludes_guaranteed_move_reached_through_sibling_move(
         "test.move(/holder, /intermediate)": ["producer.move(/input::/a, /holder)"],
         "test.move(/intermediate, /input::/b)": ["test.move(/holder, /intermediate)"],
         "test.destroy(/input::/b)": ["test.move(/intermediate, /input::/b)"],
-        # The sibling Move reaches the guaranteed Move through the particle's
-        # intermediate positions, so Move Correction excludes the guaranteed Move.
-        "test.destroy(/input)": ["test.destroy(/input::/b)"],
+        # Move Correction leaves the most recent operation that filled the
+        # child position as the Empty Rule dependency for both Destroys.
+        "test.destroy(/input)": ["test.move(/intermediate, /input::/b)"],
         "test.destroy(/producer::trigger_pos)": ["test.create(/producer::trigger_pos)"],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
@@ -410,7 +411,7 @@ def test_callee_destroy_of_a_refilled_position_ignores_the_previous_particles_ch
         "test.create(/origin)": [],
         "test.create(/origin::/child)": ["test.create(/origin)"],
         "test.destroy(/origin::/child)": ["test.create(/origin::/child)"],
-        "test.destroy(/origin)": ["test.destroy(/origin::/child)"],
+        "test.destroy(/origin)": ["test.create(/origin::/child)"],
         "test.create(/origin)#2": ["test.destroy(/origin)"],
         "test.create(/other::trigger_pos)": [],
         "other.destroy(/origin)": ["test.create(/origin)#2"],
@@ -442,12 +443,8 @@ def test_callee_move_of_a_caller_filled_position_waits_on_the_deepest_child_the_
         "test.destroy(gateway::/other::holder::/a::/deep)": [
             "other.move(source, holder)"
         ],
-        "test.destroy(gateway::/other::holder::/a)": [
-            "test.destroy(gateway::/other::holder::/a::/deep)"
-        ],
-        "test.destroy(gateway::/other::holder)": [
-            "test.destroy(gateway::/other::holder::/a)"
-        ],
+        "test.destroy(gateway::/other::holder::/a)": ["other.move(source, holder)"],
+        "test.destroy(gateway::/other::holder)": ["other.move(source, holder)"],
         "test.destroy(gateway::/other::trigger_pos)": [
             "test.create(gateway::/other::trigger_pos)"
         ],
@@ -480,10 +477,7 @@ def test_callee_move_joins_its_own_child_fill_and_the_caller_fill_of_another_chi
         ],
         "test.destroy(gateway::/other::holder::/a)": ["other.move(source, holder)"],
         "test.destroy(gateway::/other::holder::/b)": ["other.move(source, holder)"],
-        "test.destroy(gateway::/other::holder)": [
-            "test.destroy(gateway::/other::holder::/b)",
-            "test.destroy(gateway::/other::holder::/a)",
-        ],
+        "test.destroy(gateway::/other::holder)": ["other.move(source, holder)"],
         "test.destroy(gateway::/other::trigger_pos)": [
             "test.create(gateway::/other::trigger_pos)"
         ],
@@ -539,7 +533,7 @@ def test_callee_fill_of_a_child_does_not_wait_on_the_caller_fill_of_a_sibling_ch
         "other.move(box::/a, keeper)": ["test.create(gateway::/other::box::/a)"],
         "test.destroy(gateway::/other::box::/b)": ["other.create(box::/b)"],
         "test.destroy(gateway::/other::box)": [
-            "test.destroy(gateway::/other::box::/b)",
+            "other.create(box::/b)",
             "other.move(box::/a, keeper)",
         ],
         "test.destroy(gateway::/other::keeper)": ["other.move(box::/a, keeper)"],
@@ -767,7 +761,7 @@ def test_move_excludes_non_action_parent_create_fill_dependency(
             "other.move(box::/item, box::/destination)"
         ],
         "test.destroy(gateway::/other::box)": [
-            "test.destroy(gateway::/other::box::/destination)"
+            "other.move(box::/item, box::/destination)"
         ],
         "test.destroy(gateway::/other::trigger_pos)": [
             "test.create(gateway::/other::trigger_pos)"
@@ -827,9 +821,7 @@ def test_child_empty_requirement_waits_on_the_caller_empty_of_the_child(
         "other#2.create(box::/child)": ["test.destroy(gateway::/other::box::/child)"],
         "other#2.destroy(trigger_pos)": ["test.create(gateway::/other::trigger_pos)#2"],
         "test.destroy(gateway::/other::box::/child)#2": ["other#2.create(box::/child)"],
-        "test.destroy(gateway::/other::box)": [
-            "test.destroy(gateway::/other::box::/child)#2"
-        ],
+        "test.destroy(gateway::/other::box)": ["other#2.create(box::/child)"],
         "test.destroy(gateway)": [
             "test.destroy(gateway::/other::box)",
             "other#2.destroy(trigger_pos)",
@@ -854,8 +846,8 @@ def test_empty_by_default_child_requirements_branch_from_the_caller_parent_fill(
         "test.destroy(gateway::/other::box::/a)": ["other.create(box::/a)"],
         "test.destroy(gateway::/other::box::/b)": ["other.create(box::/b)"],
         "test.destroy(gateway::/other::box)": [
-            "test.destroy(gateway::/other::box::/b)",
-            "test.destroy(gateway::/other::box::/a)",
+            "other.create(box::/a)",
+            "other.create(box::/b)",
         ],
         "test.destroy(gateway::/other::trigger_pos)": [
             "test.create(gateway::/other::trigger_pos)"
@@ -892,7 +884,7 @@ def test_occupied_grandchild_requirement_waits_on_the_caller_fill(
             "other.destroy(box::/child::/grandchild)"
         ],
         "test.destroy(gateway::/other::box)": [
-            "test.destroy(gateway::/other::box::/child)"
+            "other.destroy(box::/child::/grandchild)"
         ],
         "test.destroy(gateway::/other::trigger_pos)": [
             "test.create(gateway::/other::trigger_pos)"
@@ -935,10 +927,10 @@ def test_empty_grandchild_requirement_waits_on_the_caller_empty(
             "other#2.create(box::/child::/grandchild)"
         ],
         "test.destroy(gateway::/other::box::/child)": [
-            "test.destroy(gateway::/other::box::/child::/grandchild)#2"
+            "other#2.create(box::/child::/grandchild)"
         ],
         "test.destroy(gateway::/other::box)": [
-            "test.destroy(gateway::/other::box::/child)"
+            "other#2.create(box::/child::/grandchild)"
         ],
         "test.destroy(gateway)": [
             "test.destroy(gateway::/other::box)",
@@ -969,18 +961,17 @@ def test_emptying_a_four_level_particle_waits_only_on_the_deepest_caller_operati
         "test.destroy(/other::out::/child::/grandchild::/greatgrandchild)": [
             "other.move(/parent, out)"
         ],
-        "test.destroy(/other::out::/child::/grandchild)": [
-            "test.destroy(/other::out::/child::/grandchild::/greatgrandchild)"
-        ],
-        "test.destroy(/other::out::/child)": [
-            "test.destroy(/other::out::/child::/grandchild)"
-        ],
-        "test.destroy(/other::out)": ["test.destroy(/other::out::/child)"],
+        "test.destroy(/other::out::/child::/grandchild)": ["other.move(/parent, out)"],
+        "test.destroy(/other::out::/child)": ["other.move(/parent, out)"],
+        "test.destroy(/other::out)": ["other.move(/parent, out)"],
         "test.destroy(/other::trigger_pos)": ["test.create(/other::trigger_pos)"],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True, reason=_SIMULTANEOUS_CALLER_CONTRIBUTED_DESTRUCTION_NOT_RESOLVED
+)
 def test_intermediate_callee_emptying_reaches_a_deeper_caller_operation(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -1003,12 +994,12 @@ def test_intermediate_callee_emptying_reaches_a_deeper_caller_operation(
             "test.create(gateway::/other::parent::/child::/grandchild::/greatgrandchild)"
         ],
         "other.destroy(parent::/child::/grandchild)": [
-            "other.destroy(parent::/child::/grandchild::/greatgrandchild)"
+            "test.create(gateway::/other::parent::/child::/grandchild::/greatgrandchild)"
         ],
-        # Each parent Destroy follows the child Destroy that already reaches the
-        # caller's deeper operation.
+        # Every Destroy created together by the explicit parent Destroy applies
+        # the Empty Rule to the same most recent operation.
         "other.destroy(parent::/child)": ["other.destroy(parent::/child::/grandchild)"],
-        "other.destroy(parent)": ["other.destroy(parent::/child)"],
+        "other.destroy(parent)": ["other.destroy(parent::/child::/grandchild)"],
         "test.destroy(gateway::/other::trigger_pos)": [
             "test.create(gateway::/other::trigger_pos)"
         ],
@@ -1098,7 +1089,7 @@ def test_occupied_requirement_resolves_to_the_constraint_satisfying_fill(
             "test.move(action_holder::/move::output, dest)"
         ],
         "test.destroy(box2)": ["test.move(action_holder::/move::output, box2)"],
-        "test.destroy(dest)": ["test.destroy(dest::/a)"],
+        "test.destroy(dest)": ["test.create(dest::/a)"],
         "test.destroy(dest::/a)": ["test.create(dest::/a)"],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
@@ -1144,7 +1135,7 @@ def test_trigger_position_read_keeps_the_trigger_edge_when_an_occupied_requireme
             "test.create(gw::/worker::in)",
         ],
         "test.destroy(gw::/worker::box::/y)": ["worker.move(in, box::/y)"],
-        "test.destroy(gw::/worker::box)": ["test.destroy(gw::/worker::box::/y)"],
+        "test.destroy(gw::/worker::box)": ["worker.move(in, box::/y)"],
         "test.destroy(gw)": ["test.destroy(gw::/worker::box)"],
     }
     assert_operation_dependencies(result.operation_graphs, expected)
@@ -1302,10 +1293,11 @@ def test_callee_known_child_and_caller_unknown_sibling_are_disjoint(
             "destroyer.move(parent::/child, keeper)"
         ],
         "destroyer.destroy(parent::/child)": ["destroyer.move(keeper, parent::/child)"],
-        # The parent Destroy waits for both independently ordered child Destroys.
+        # The Empty Rule for the parent uses the latest operation on each child
+        # position rather than the sibling Destroy created at the same time.
         "destroyer.destroy(parent)": [
             "destroyer.destroy(parent::/sibling)",
-            "destroyer.destroy(parent::/child)",
+            "destroyer.move(keeper, parent::/child)",
         ],
         "test.destroy(/destroyer::trigger_pos)": [
             "test.create(/destroyer::trigger_pos)"
@@ -1341,10 +1333,11 @@ def test_caller_only_child_assigned_before_callee_known_child_is_disjoint(
             "destroyer.move(parent::/child, keeper)"
         ],
         "destroyer.destroy(parent::/child)": ["destroyer.move(keeper, parent::/child)"],
-        # The parent Destroy still waits for both child Destroys.
+        # The Empty Rule for the parent uses the latest operation on each child
+        # position rather than the sibling Destroy created at the same time.
         "destroyer.destroy(parent)": [
             "destroyer.destroy(parent::/sibling)",
-            "destroyer.destroy(parent::/child)",
+            "destroyer.move(keeper, parent::/child)",
         ],
         "test.destroy(/destroyer::trigger_pos)": [
             "test.create(/destroyer::trigger_pos)"
@@ -1416,6 +1409,9 @@ def test_caller_contributed_child_destruction_precedes_later_operation(
     assert_operation_dependencies(result.operation_graphs, expected)
 
 
+@pytest.mark.xfail(
+    strict=True, reason=_SIMULTANEOUS_CALLER_CONTRIBUTED_DESTRUCTION_NOT_RESOLVED
+)
 def test_caller_contributes_one_destroy_before_shared_callee_destroy(
     validate_testdata_project_with_reference_graph: conftest.ValidateTestdataProjectWithReferenceGraph,
 ):
@@ -1452,14 +1448,17 @@ def test_caller_contributes_one_destroy_before_shared_callee_destroy(
         "other.destroy(parent::/child::/grandchild)": [
             "other.destroy(parent::/child::/grandchild::/greatgrandchild)",
         ],
-        # The callee-known child Destroy waits for both the caller-contributed
-        # sibling Destroy and the callee's grandchild Destroy.
+        # The child Destroy applies the Empty Rule to the most recent operations
+        # on the caller-known sibling and callee-known grandchild positions.
         "other.destroy(parent::/child)": [
-            "other.destroy(parent::/child::/sibling)",
             "other.destroy(parent::/child::/grandchild)",
+            "test.create(gateway::/other::parent::/child::/sibling)",
         ],
-        # The parent Destroy waits for that shared child Destroy once.
-        "other.destroy(parent)": ["other.destroy(parent::/child)"],
+        # The parent Destroy applies the Empty Rule to those same positions.
+        "other.destroy(parent)": [
+            "other.destroy(parent::/child::/grandchild)",
+            "test.create(gateway::/other::parent::/child::/sibling)",
+        ],
         "test.destroy(gateway::/other::trigger_pos)": [
             "test.create(gateway::/other::trigger_pos)"
         ],

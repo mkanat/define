@@ -34,6 +34,9 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_gateway__action_other: local.my_domain_com.my_lib.other.OtherExecution
+        self.destruction_position_position_gateway__action_other__position_box: literal.Position
+        self.destruction_position_position_gateway__action_other__position_box__global_position_child: literal.Position
+        self.destruction_position_position_gateway__action_other__position_trigger_pos: literal.Position
         self.join_for_destroy_position_gateway = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -49,6 +52,12 @@ class TestExecution:
         )
         self.execution_position_gateway__action_other.join_for_empty_rule_position_box__global_position_child__global_position_grandchild = literal.NO_JOIN
         self.execution_position_gateway__action_other.join_for_destroy_position_box__global_position_child__global_position_grandchild = literal.NO_JOIN
+        self.execution_position_gateway__action_other.guarantees.position_box__global_position_child__global_position_grandchild.inits.append(
+            self.init_position_gateway__action_other__position_box__global_position_child__global_position_grandchild
+        )
+        self.execution_position_gateway__action_other.guarantees.position_box__global_position_child__global_position_grandchild.consumers.append(
+            self.destroy_position_gateway__action_other__position_box
+        )
         self.execution_position_gateway__action_other.guarantees.position_box__global_position_child__global_position_grandchild.consumers.append(
             self.destroy_position_gateway__action_other__position_box__global_position_child
         )
@@ -85,29 +94,36 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_gateway.particle.get_action(
+        self.destruction_position_position_gateway__action_other__position_trigger_pos = self.local_position_gateway.particle.get_action(
             local.my_domain_com.my_lib.other.Other
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_gateway__action_other__position_trigger_pos.destroy_particle()
+        self.destroy_position_gateway()
+
+    def destroy_position_gateway__action_other__position_box(self):
+        self.destruction_position_position_gateway__action_other__position_box.destroy_particle()
         self.destroy_position_gateway()
 
     def destroy_position_gateway__action_other__position_box__global_position_child(self):
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.other.Other
-        ).get_interface_position(
-            "position<box>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.other.Other
-        ).get_interface_position(
-            "position<box>"
-        ).destroy_particle()
-        self.destroy_position_gateway()
+        self.destruction_position_position_gateway__action_other__position_box__global_position_child.destroy_particle()
 
     def destroy_position_gateway(self):
         if not self.join_for_destroy_position_gateway.arrive():
             return
         self.local_position_gateway.destroy_particle()
+
+    def init_position_gateway__action_other__position_box__global_position_child__global_position_grandchild(self):
+        self.destruction_position_position_gateway__action_other__position_box = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.other.Other
+        ).get_interface_position(
+            "position<box>"
+        )
+        self.destruction_position_position_gateway__action_other__position_box__global_position_child = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.other.Other
+        ).get_interface_position(
+            "position<box>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.child.Child
+        )

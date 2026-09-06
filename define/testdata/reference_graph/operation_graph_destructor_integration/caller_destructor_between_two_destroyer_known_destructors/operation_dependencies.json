@@ -163,7 +163,7 @@
           },
           "action_name": "destroyer"
         },
-        "action_name": "later_assigned_destructor"
+        "action_name": "earlier_assigned_destructor"
       },
       "operation_name": "create",
       "target": "/marker",
@@ -180,74 +180,6 @@
         },
         "operation_name": "destroy",
         "target": "target::/marker",
-        "occurrence": 1
-      }
-    ]
-  },
-  {
-    "operation": {
-      "execution": {
-        "caller": {
-          "caller": {
-            "caller": null,
-            "action_name": "test"
-          },
-          "action_name": "destroyer"
-        },
-        "action_name": "later_assigned_destructor"
-      },
-      "operation_name": "destroy",
-      "target": "/marker",
-      "occurrence": 1
-    },
-    "dependencies": [
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "destroyer"
-          },
-          "action_name": "later_assigned_destructor"
-        },
-        "operation_name": "create",
-        "target": "/marker",
-        "occurrence": 1
-      }
-    ]
-  },
-  {
-    "operation": {
-      "execution": {
-        "caller": {
-          "caller": {
-            "caller": null,
-            "action_name": "test"
-          },
-          "action_name": "destroyer"
-        },
-        "action_name": "earlier_assigned_destructor"
-      },
-      "operation_name": "create",
-      "target": "/marker",
-      "occurrence": 1
-    },
-    "dependencies": [
-      {
-        "execution": {
-          "caller": {
-            "caller": {
-              "caller": null,
-              "action_name": "test"
-            },
-            "action_name": "destroyer"
-          },
-          "action_name": "later_assigned_destructor"
-        },
-        "operation_name": "destroy",
-        "target": "/marker",
         "occurrence": 1
       }
     ]
@@ -279,6 +211,74 @@
             "action_name": "destroyer"
           },
           "action_name": "earlier_assigned_destructor"
+        },
+        "operation_name": "create",
+        "target": "/marker",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "operation": {
+      "execution": {
+        "caller": {
+          "caller": {
+            "caller": null,
+            "action_name": "test"
+          },
+          "action_name": "destroyer"
+        },
+        "action_name": "later_assigned_destructor"
+      },
+      "operation_name": "create",
+      "target": "/marker",
+      "occurrence": 1
+    },
+    "dependencies": [
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": null,
+              "action_name": "test"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "earlier_assigned_destructor"
+        },
+        "operation_name": "destroy",
+        "target": "/marker",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "operation": {
+      "execution": {
+        "caller": {
+          "caller": {
+            "caller": null,
+            "action_name": "test"
+          },
+          "action_name": "destroyer"
+        },
+        "action_name": "later_assigned_destructor"
+      },
+      "operation_name": "destroy",
+      "target": "/marker",
+      "occurrence": 1
+    },
+    "dependencies": [
+      {
+        "execution": {
+          "caller": {
+            "caller": {
+              "caller": null,
+              "action_name": "test"
+            },
+            "action_name": "destroyer"
+          },
+          "action_name": "later_assigned_destructor"
         },
         "operation_name": "create",
         "target": "/marker",
@@ -312,7 +312,7 @@
             },
             "action_name": "destroyer"
           },
-          "action_name": "earlier_assigned_destructor"
+          "action_name": "later_assigned_destructor"
         },
         "operation_name": "destroy",
         "target": "/marker",
@@ -377,7 +377,7 @@
             },
             "action_name": "destroyer"
           },
-          "action_name": "earlier_assigned_destructor"
+          "action_name": "later_assigned_destructor"
         },
         "operation_name": "destroy",
         "target": "/marker",
@@ -416,7 +416,7 @@
           "caller": null,
           "action_name": "test"
         },
-        "operation_name": "destroy",
+        "operation_name": "create",
         "target": "destroyer_particle::/destroyer::trigger_pos",
         "occurrence": 1
       },

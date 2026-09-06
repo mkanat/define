@@ -352,7 +352,7 @@
           "caller": null,
           "action_name": "test"
         },
-        "operation_name": "destroy",
+        "operation_name": "create",
         "target": "destroyer_particle::/destroyer::trigger_pos",
         "occurrence": 1
       },

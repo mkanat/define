@@ -146,8 +146,8 @@ class TestExecution:
         self.scheduler.submit(self.destroy_position_gw_b)
         self.execution_position_gw_a__action_worker_2.accept_for_empty_rule_position_slot()
 
-    def destroy_position_gw_b(self):
-        self.local_position_gw_b.destroy_particle()
-
     def destroy_position_gw_a(self):
         self.local_position_gw_a.destroy_particle()
+
+    def destroy_position_gw_b(self):
+        self.local_position_gw_b.destroy_particle()

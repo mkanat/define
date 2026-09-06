@@ -72,6 +72,10 @@ class MoverExecution:
         self.scheduler = scheduler
         self.guarantees = MoverGuarantees()
         self.destruction_connections = destruction_connections
+        self.destruction_position_position_guaranteed_destination__global_position_child_a: literal.Position
+        self.destruction_position_position_guaranteed_destination__global_position_child_b: literal.Position
+        self.destruction_position_position_caller_destination__global_position_child_a: literal.Position
+        self.destruction_position_position_caller_destination__global_position_child_b: literal.Position
         self.join_for_move_global_position_guaranteed_parent_to_position_guaranteed_destination: literal.Join
         self.join_for_move_global_position_caller_parent_to_position_caller_destination: literal.Join
         self.join_for_destroy_position_discard: literal.Join
@@ -113,6 +117,16 @@ class MoverExecution:
                 "position<guaranteed_destination>"
             )
         )
+        self.destruction_position_position_guaranteed_destination__global_position_child_a = self.action.get_interface_position(
+            "position<guaranteed_destination>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.child_a.ChildA
+        )
+        self.destruction_position_position_guaranteed_destination__global_position_child_b = self.action.get_interface_position(
+            "position<guaranteed_destination>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.child_b.ChildB
+        )
         self.guarantees.global_position_guaranteed_parent.publish(
             self.scheduler,
             self.destroy_position_guaranteed_destination__global_position_child_a,
@@ -128,6 +142,16 @@ class MoverExecution:
             self.action.get_interface_position(
                 "position<caller_destination>"
             )
+        )
+        self.destruction_position_position_caller_destination__global_position_child_a = self.action.get_interface_position(
+            "position<caller_destination>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.child_a.ChildA
+        )
+        self.destruction_position_position_caller_destination__global_position_child_b = self.action.get_interface_position(
+            "position<caller_destination>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.child_b.ChildB
         )
         self.guarantees.global_position_caller_parent.publish(
             self.scheduler,
@@ -152,22 +176,14 @@ class MoverExecution:
         literal.continue_destruction(self.continue_destroy_position_guaranteed_destination__global_position_child_a)
 
     def continue_destroy_position_guaranteed_destination__global_position_child_a(self):
-        self.action.get_interface_position(
-            "position<guaranteed_destination>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.child_a.ChildA
-        ).destroy_particle()
+        self.destruction_position_position_guaranteed_destination__global_position_child_a.destroy_particle()
         self.destroy_position_guaranteed_destination()
 
     def destroy_position_guaranteed_destination__global_position_child_b(self):
         literal.continue_destruction(self.continue_destroy_position_guaranteed_destination__global_position_child_b)
 
     def continue_destroy_position_guaranteed_destination__global_position_child_b(self):
-        self.action.get_interface_position(
-            "position<guaranteed_destination>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.child_b.ChildB
-        ).destroy_particle()
+        self.destruction_position_position_guaranteed_destination__global_position_child_b.destroy_particle()
         self.destroy_position_guaranteed_destination()
 
     def destroy_position_guaranteed_destination(self):
@@ -187,22 +203,14 @@ class MoverExecution:
         literal.continue_destruction(self.continue_destroy_position_caller_destination__global_position_child_a)
 
     def continue_destroy_position_caller_destination__global_position_child_a(self):
-        self.action.get_interface_position(
-            "position<caller_destination>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.child_a.ChildA
-        ).destroy_particle()
+        self.destruction_position_position_caller_destination__global_position_child_a.destroy_particle()
         self.destroy_position_caller_destination()
 
     def destroy_position_caller_destination__global_position_child_b(self):
         literal.continue_destruction(self.continue_destroy_position_caller_destination__global_position_child_b)
 
     def continue_destroy_position_caller_destination__global_position_child_b(self):
-        self.action.get_interface_position(
-            "position<caller_destination>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.child_b.ChildB
-        ).destroy_particle()
+        self.destruction_position_position_caller_destination__global_position_child_b.destroy_particle()
         self.destroy_position_caller_destination()
 
     def destroy_position_caller_destination(self):

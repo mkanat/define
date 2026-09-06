@@ -43,7 +43,7 @@
           "caller": null,
           "action_name": "test"
         },
-        "action_name": "destruct_a"
+        "action_name": "destruct_b"
       },
       "operation_name": "create",
       "target": "_noop",
@@ -71,7 +71,7 @@
           "caller": null,
           "action_name": "test"
         },
-        "action_name": "destruct_a"
+        "action_name": "destruct_b"
       },
       "operation_name": "destroy",
       "target": "_noop",
@@ -84,7 +84,7 @@
             "caller": null,
             "action_name": "test"
           },
-          "action_name": "destruct_a"
+          "action_name": "destruct_b"
         },
         "operation_name": "create",
         "target": "_noop",
@@ -164,42 +164,11 @@
   {
     "operation": {
       "execution": {
-        "caller": null,
-        "action_name": "test"
-      },
-      "operation_name": "destroy",
-      "target": "box",
-      "occurrence": 1
-    },
-    "dependencies": [
-      {
-        "execution": {
-          "caller": null,
-          "action_name": "test"
-        },
-        "operation_name": "destroy",
-        "target": "box::/maker::run",
-        "occurrence": 1
-      },
-      {
-        "execution": {
-          "caller": null,
-          "action_name": "test"
-        },
-        "operation_name": "destroy",
-        "target": "box::/maker::result",
-        "occurrence": 1
-      }
-    ]
-  },
-  {
-    "operation": {
-      "execution": {
         "caller": {
           "caller": null,
           "action_name": "test"
         },
-        "action_name": "destruct_b"
+        "action_name": "destruct_a"
       },
       "operation_name": "create",
       "target": "_noop",
@@ -227,7 +196,7 @@
           "caller": null,
           "action_name": "test"
         },
-        "action_name": "destruct_b"
+        "action_name": "destruct_a"
       },
       "operation_name": "destroy",
       "target": "_noop",
@@ -240,10 +209,41 @@
             "caller": null,
             "action_name": "test"
           },
-          "action_name": "destruct_b"
+          "action_name": "destruct_a"
         },
         "operation_name": "create",
         "target": "_noop",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "operation": {
+      "execution": {
+        "caller": null,
+        "action_name": "test"
+      },
+      "operation_name": "destroy",
+      "target": "box",
+      "occurrence": 1
+    },
+    "dependencies": [
+      {
+        "execution": {
+          "caller": null,
+          "action_name": "test"
+        },
+        "operation_name": "destroy",
+        "target": "box::/maker::result",
+        "occurrence": 1
+      },
+      {
+        "execution": {
+          "caller": null,
+          "action_name": "test"
+        },
+        "operation_name": "create",
+        "target": "box::/maker::run",
         "occurrence": 1
       }
     ]

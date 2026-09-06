@@ -43,6 +43,7 @@ class RightExecution:
         )
         self.destruction_connections = destruction_connections
         self.execution_action_right_child: local.my_domain_com.my_lib.right_child.RightChildExecution
+        self.destruction_position_action_right_child__position_trigger_pos: literal.Position
         self.join_for_empty_rule_global_position_marker: literal.Join
         self.execution_action_right_child = local.my_domain_com.my_lib.right_child.RightChildExecution(
             self.action.on_particle.get_action(
@@ -76,11 +77,12 @@ class RightExecution:
             "/right_child::trigger_pos",
             1,
         )
-        self.action.on_particle.get_action(
+        self.destruction_position_action_right_child__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.right_child.RightChild
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_right_child__position_trigger_pos.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "/right_child::trigger_pos",

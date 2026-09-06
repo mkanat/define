@@ -41,6 +41,9 @@ class TestExecution:
         self.execution_position_box__action_construct_a: local.my_domain_com.my_lib.construct_a.ConstructAExecution
         self.execution_position_box__action_construct_b: local.my_domain_com.my_lib.construct_b.ConstructBExecution
         self.execution_position_box__action_construct_c: local.my_domain_com.my_lib.construct_c.ConstructCExecution
+        self.destruction_position_position_box__global_position_marker_a: literal.Position
+        self.destruction_position_position_box__global_position_marker_b: literal.Position
+        self.destruction_position_position_box__global_position_marker_c: literal.Position
         self.join_for_destroy_position_box = self.scheduler.create_join(3)
 
     def on_action_parent_occupied(self):
@@ -54,6 +57,12 @@ class TestExecution:
             ),
             self.scheduler,
         )
+        self.execution_position_box__action_construct_a.guarantees.global_position_marker_a.inits.append(
+            self.init_position_box__action_construct_a__global_position_marker_a
+        )
+        self.execution_position_box__action_construct_a.guarantees.global_position_marker_a.consumers.append(
+            self.destroy_position_box
+        )
         self.execution_position_box__action_construct_a.guarantees.global_position_marker_a.consumers.append(
             self.destroy_position_box__global_position_marker_a
         )
@@ -62,6 +71,12 @@ class TestExecution:
                 local.my_domain_com.my_lib.construct_b.ConstructB
             ),
             self.scheduler,
+        )
+        self.execution_position_box__action_construct_b.guarantees.global_position_marker_b.inits.append(
+            self.init_position_box__action_construct_b__global_position_marker_b
+        )
+        self.execution_position_box__action_construct_b.guarantees.global_position_marker_b.consumers.append(
+            self.destroy_position_box
         )
         self.execution_position_box__action_construct_b.guarantees.global_position_marker_b.consumers.append(
             self.destroy_position_box__global_position_marker_b
@@ -72,6 +87,12 @@ class TestExecution:
             ),
             self.scheduler,
         )
+        self.execution_position_box__action_construct_c.guarantees.global_position_marker_c.inits.append(
+            self.init_position_box__action_construct_c__global_position_marker_c
+        )
+        self.execution_position_box__action_construct_c.guarantees.global_position_marker_c.consumers.append(
+            self.destroy_position_box
+        )
         self.execution_position_box__action_construct_c.guarantees.global_position_marker_c.consumers.append(
             self.destroy_position_box__global_position_marker_c
         )
@@ -79,25 +100,31 @@ class TestExecution:
         self.scheduler.submit(self.execution_position_box__action_construct_b.accept_when_empty_global_position_marker_b)
         self.execution_position_box__action_construct_c.accept_when_empty_global_position_marker_c()
 
-    def destroy_position_box__global_position_marker_c(self):
-        self.local_position_box.particle.get_position(
-            local.my_domain_com.my_lib.marker_c.MarkerC
-        ).destroy_particle()
-        self.destroy_position_box()
-
-    def destroy_position_box__global_position_marker_b(self):
-        self.local_position_box.particle.get_position(
-            local.my_domain_com.my_lib.marker_b.MarkerB
-        ).destroy_particle()
-        self.destroy_position_box()
-
-    def destroy_position_box__global_position_marker_a(self):
-        self.local_position_box.particle.get_position(
-            local.my_domain_com.my_lib.marker_a.MarkerA
-        ).destroy_particle()
-        self.destroy_position_box()
-
     def destroy_position_box(self):
         if not self.join_for_destroy_position_box.arrive():
             return
         self.local_position_box.destroy_particle()
+
+    def destroy_position_box__global_position_marker_a(self):
+        self.destruction_position_position_box__global_position_marker_a.destroy_particle()
+
+    def destroy_position_box__global_position_marker_b(self):
+        self.destruction_position_position_box__global_position_marker_b.destroy_particle()
+
+    def destroy_position_box__global_position_marker_c(self):
+        self.destruction_position_position_box__global_position_marker_c.destroy_particle()
+
+    def init_position_box__action_construct_a__global_position_marker_a(self):
+        self.destruction_position_position_box__global_position_marker_a = self.local_position_box.particle.get_position(
+            local.my_domain_com.my_lib.marker_a.MarkerA
+        )
+
+    def init_position_box__action_construct_b__global_position_marker_b(self):
+        self.destruction_position_position_box__global_position_marker_b = self.local_position_box.particle.get_position(
+            local.my_domain_com.my_lib.marker_b.MarkerB
+        )
+
+    def init_position_box__action_construct_c__global_position_marker_c(self):
+        self.destruction_position_position_box__global_position_marker_c = self.local_position_box.particle.get_position(
+            local.my_domain_com.my_lib.marker_c.MarkerC
+        )

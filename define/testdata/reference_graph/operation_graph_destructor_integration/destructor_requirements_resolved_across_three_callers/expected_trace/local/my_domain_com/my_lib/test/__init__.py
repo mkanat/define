@@ -57,6 +57,8 @@ class TestExecution:
         self.execution_action_middle: local.my_domain_com.my_lib.middle.MiddleExecution
         self.destruction_connection_action_middle: tracing.DestructionConnection
         self.destruction_position_action_middle__position_target__global_position_creator_known: literal.Position
+        self.destruction_position_position_source__global_position_callee_known: literal.Position
+        self.destruction_position_position_source__global_position_middle_known: literal.Position
         self.join_for_move_position_source_to_action_middle__position_target = self.scheduler.create_join(3)
         self.destruction_connection_action_middle = tracing.DestructionConnection(
             self.scheduler,
@@ -103,9 +105,10 @@ class TestExecution:
             "source::/callee_known",
             1,
         )
-        self.local_position_source.particle.get_position(
+        self.destruction_position_position_source__global_position_callee_known = self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.callee_known.CalleeKnown
-        ).destroy_particle()
+        )
+        self.destruction_position_position_source__global_position_callee_known.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "source::/callee_known",
@@ -122,9 +125,10 @@ class TestExecution:
             "source::/middle_known",
             1,
         )
-        self.local_position_source.particle.get_position(
+        self.destruction_position_position_source__global_position_middle_known = self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.middle_known.MiddleKnown
-        ).destroy_particle()
+        )
+        self.destruction_position_position_source__global_position_middle_known.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "source::/middle_known",

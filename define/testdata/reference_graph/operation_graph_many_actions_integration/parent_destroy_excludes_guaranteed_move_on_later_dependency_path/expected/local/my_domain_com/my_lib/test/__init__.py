@@ -32,6 +32,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_parent__action_mover: local.my_domain_com.my_lib.mover.MoverExecution
+        self.destruction_position_position_parent__action_mover__position_destination: literal.Position
         self.join_for_destroy_position_parent = self.scheduler.create_join(3)
 
     def on_action_parent_occupied(self):
@@ -51,6 +52,9 @@ class TestExecution:
         self.execution_position_parent__action_mover.join_for_move_position_source_to_position_intermediate = literal.NO_JOIN
         self.execution_position_parent__action_mover.join_for_move_position_intermediate_to_position_destination = literal.NO_JOIN
         self.execution_position_parent__action_mover.join_for_destroy_position_run = literal.NO_JOIN
+        self.execution_position_parent__action_mover.guarantees.position_destination.inits.append(
+            self.init_position_parent__action_mover__position_destination
+        )
         self.execution_position_parent__action_mover.guarantees.position_destination.consumers.append(
             self.destroy_position_parent__action_mover__position_destination
         )
@@ -80,14 +84,17 @@ class TestExecution:
         self.execution_position_parent__action_mover.accept_for_empty_rule_position_run()
 
     def destroy_position_parent__action_mover__position_destination(self):
-        self.local_position_parent.particle.get_action(
-            local.my_domain_com.my_lib.mover.Mover
-        ).get_interface_position(
-            "position<destination>"
-        ).destroy_particle()
+        self.destruction_position_position_parent__action_mover__position_destination.destroy_particle()
         self.destroy_position_parent()
 
     def destroy_position_parent(self):
         if not self.join_for_destroy_position_parent.arrive():
             return
         self.local_position_parent.destroy_particle()
+
+    def init_position_parent__action_mover__position_destination(self):
+        self.destruction_position_position_parent__action_mover__position_destination = self.local_position_parent.particle.get_action(
+            local.my_domain_com.my_lib.mover.Mover
+        ).get_interface_position(
+            "position<destination>"
+        )

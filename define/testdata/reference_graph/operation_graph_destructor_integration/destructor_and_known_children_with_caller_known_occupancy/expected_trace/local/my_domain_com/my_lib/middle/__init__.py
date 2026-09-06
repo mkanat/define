@@ -68,6 +68,7 @@ class MiddleExecution:
             scheduler=self.scheduler,
         )
         self.execution_action_destroyer: local.my_domain_com.my_lib.destroyer.DestroyerExecution
+        self.destruction_position_position_run__global_position_maybe_empty: literal.Position
         self.join_for_move_position_run__global_position_marker_a_to_position_holder_a: literal.Join
         self.join_for_move_position_run__global_position_marker_b_to_position_holder_b: literal.Join
         self.join_for_move_position_run_to_action_destroyer__position_run: literal.Join
@@ -177,11 +178,12 @@ class MiddleExecution:
             "run::/maybe_empty",
             1,
         )
-        self.action.get_interface_position(
+        self.destruction_position_position_run__global_position_maybe_empty = self.action.get_interface_position(
             "position<run>"
         ).particle.get_position(
             local.my_domain_com.my_lib.maybe_empty.MaybeEmpty
-        ).destroy_particle()
+        )
+        self.destruction_position_position_run__global_position_maybe_empty.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "run::/maybe_empty",

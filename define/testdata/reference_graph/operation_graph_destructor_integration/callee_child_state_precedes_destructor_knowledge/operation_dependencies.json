@@ -421,7 +421,7 @@
           },
           "action_name": "destroyer"
         },
-        "operation_name": "destroy",
+        "operation_name": "create",
         "target": "target::/occupied",
         "occurrence": 1
       }
@@ -510,7 +510,7 @@
           },
           "action_name": "destroyer"
         },
-        "operation_name": "destroy",
+        "operation_name": "create",
         "target": "target::/occupied",
         "occurrence": 1
       },

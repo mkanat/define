@@ -50,6 +50,7 @@ class DestroyerExecution:
         self.guarantees = DestroyerGuarantees()
         self.destruction_connections = destruction_connections
         self.execution_position_target__action_known_destructor: local.my_domain_com.my_lib.known_destructor.KnownDestructorExecution
+        self.destruction_position_position_target__global_position_marker: literal.Position
         self.join_for_destroy_position_target: literal.Join
         self.join_for_empty_rule_position_target: literal.Join
 
@@ -80,11 +81,12 @@ class DestroyerExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.marker.Marker
         ).create_particle()
-        self.action.get_interface_position(
+        self.destruction_position_position_target__global_position_marker = self.action.get_interface_position(
             "position<target>"
         ).particle.get_position(
             local.my_domain_com.my_lib.marker.Marker
-        ).destroy_particle()
+        )
+        self.destruction_position_position_target__global_position_marker.destroy_particle()
         self.execution_position_target__action_known_destructor.accept_when_empty_global_position_marker()
 
     def destroy_position_target(self):

@@ -44,7 +44,10 @@ class TestExecution:
         )
         self.execution_position_gateway__action_worker: local.my_domain_com.my_lib.worker.WorkerExecution
         self.execution_position_gateway__action_worker_2: local.my_domain_com.my_lib.worker.WorkerExecution
-        self.join_for_destroy_position_gateway__action_worker__position_item = self.scheduler.create_join(3)
+        self.destruction_position_position_gateway__action_worker__position_item: literal.Position
+        self.destruction_position_position_gateway__action_worker__position_item__global_position_a: literal.Position
+        self.destruction_position_position_gateway__action_worker__position_item__global_position_b: literal.Position
+        self.destruction_position_position_gateway__action_worker__position_item__global_position_c: literal.Position
         self.join_for_destroy_position_gateway = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -90,14 +93,20 @@ class TestExecution:
         self.execution_position_gateway__action_worker_2.join_for_empty_rule_position_trigger_pos = literal.NO_JOIN
         self.execution_position_gateway__action_worker_2.join_for_move_position_item_to_position_holder = literal.NO_JOIN
         self.execution_position_gateway__action_worker_2.join_for_destroy_position_trigger_pos = literal.NO_JOIN
+        self.execution_position_gateway__action_worker_2.guarantees.position_item.inits.append(
+            self.init_position_gateway__action_worker__position_item
+        )
         self.execution_position_gateway__action_worker_2.guarantees.position_item.consumers.append(
-            self.destroy_position_gateway__action_worker__position_item__global_position_c
+            self.destroy_position_gateway__action_worker__position_item
+        )
+        self.execution_position_gateway__action_worker_2.guarantees.position_item.consumers.append(
+            self.destroy_position_gateway__action_worker__position_item__global_position_a
         )
         self.execution_position_gateway__action_worker_2.guarantees.position_item.consumers.append(
             self.destroy_position_gateway__action_worker__position_item__global_position_b
         )
         self.execution_position_gateway__action_worker_2.guarantees.position_item.consumers.append(
-            self.destroy_position_gateway__action_worker__position_item__global_position_a
+            self.destroy_position_gateway__action_worker__position_item__global_position_c
         )
         self.execution_position_gateway__action_worker_2.guarantees.position_trigger_pos.consumers.append(
             self.destroy_position_gateway
@@ -186,65 +195,38 @@ class TestExecution:
         )
         self.execution_position_gateway__action_worker_2.accept_for_empty_rule_position_trigger_pos()
 
-    def destroy_position_gateway__action_worker__position_item__global_position_c(self):
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.worker.Worker
-        ).get_interface_position(
-            "position<item>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.c.C
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "gateway::/worker::item::/c",
-            1,
-        )
-        self.destroy_position_gateway__action_worker__position_item()
-
-    def destroy_position_gateway__action_worker__position_item__global_position_b(self):
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.worker.Worker
-        ).get_interface_position(
-            "position<item>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.b.B
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "gateway::/worker::item::/b",
-            1,
-        )
-        self.destroy_position_gateway__action_worker__position_item()
-
-    def destroy_position_gateway__action_worker__position_item__global_position_a(self):
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.worker.Worker
-        ).get_interface_position(
-            "position<item>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.a.A
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "gateway::/worker::item::/a",
-            1,
-        )
-        self.destroy_position_gateway__action_worker__position_item()
-
     def destroy_position_gateway__action_worker__position_item(self):
-        if not self.join_for_destroy_position_gateway__action_worker__position_item.arrive():
-            return
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.worker.Worker
-        ).get_interface_position(
-            "position<item>"
-        ).destroy_particle()
+        self.destruction_position_position_gateway__action_worker__position_item.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "gateway::/worker::item",
             1,
         )
         self.destroy_position_gateway()
+
+    def destroy_position_gateway__action_worker__position_item__global_position_a(self):
+        self.destruction_position_position_gateway__action_worker__position_item__global_position_a.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.trace_execution,
+            "gateway::/worker::item::/a",
+            1,
+        )
+
+    def destroy_position_gateway__action_worker__position_item__global_position_b(self):
+        self.destruction_position_position_gateway__action_worker__position_item__global_position_b.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.trace_execution,
+            "gateway::/worker::item::/b",
+            1,
+        )
+
+    def destroy_position_gateway__action_worker__position_item__global_position_c(self):
+        self.destruction_position_position_gateway__action_worker__position_item__global_position_c.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.trace_execution,
+            "gateway::/worker::item::/c",
+            1,
+        )
 
     def destroy_position_gateway(self):
         if not self.join_for_destroy_position_gateway.arrive():
@@ -254,4 +236,32 @@ class TestExecution:
             self.trace_execution,
             "gateway",
             1,
+        )
+
+    def init_position_gateway__action_worker__position_item(self):
+        self.destruction_position_position_gateway__action_worker__position_item = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.worker.Worker
+        ).get_interface_position(
+            "position<item>"
+        )
+        self.destruction_position_position_gateway__action_worker__position_item__global_position_a = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.worker.Worker
+        ).get_interface_position(
+            "position<item>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.a.A
+        )
+        self.destruction_position_position_gateway__action_worker__position_item__global_position_b = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.worker.Worker
+        ).get_interface_position(
+            "position<item>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.b.B
+        )
+        self.destruction_position_position_gateway__action_worker__position_item__global_position_c = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.worker.Worker
+        ).get_interface_position(
+            "position<item>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.c.C
         )

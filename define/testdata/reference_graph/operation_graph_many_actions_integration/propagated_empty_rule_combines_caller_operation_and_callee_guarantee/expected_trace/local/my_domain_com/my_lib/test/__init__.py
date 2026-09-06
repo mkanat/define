@@ -54,6 +54,8 @@ class TestExecution:
         self.destruction_connection_action_middle: tracing.DestructionConnection
         self.destruction_position_global_position_parent__global_position_guaranteed_child: literal.Position
         self.destruction_position_global_position_parent__global_position_direct_child: literal.Position
+        self.destruction_position_action_filler__position_trigger_pos: literal.Position
+        self.destruction_position_action_middle__position_trigger_pos: literal.Position
         self.join_when_empty_action_mover__position_destination: literal.Join
         self.join_for_accept_guarantee_action_middle: literal.Join
         self.execution_action_filler = local.my_domain_com.my_lib.filler.FillerExecution(
@@ -139,11 +141,12 @@ class TestExecution:
             "/filler::trigger_pos",
             1,
         )
-        self.action.on_particle.get_action(
+        self.destruction_position_action_filler__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.filler.Filler
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_filler__position_trigger_pos.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "/filler::trigger_pos",
@@ -161,11 +164,12 @@ class TestExecution:
             "/middle::trigger_pos",
             1,
         )
-        self.action.on_particle.get_action(
+        self.destruction_position_action_middle__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.middle.Middle
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_middle__position_trigger_pos.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "/middle::trigger_pos",

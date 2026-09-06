@@ -44,6 +44,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_action_middle_action: local.my_domain_com.my_lib.middle_action.MiddleActionExecution
+        self.destruction_position_action_middle_action__position_trigger_pos: literal.Position
         self.execution_action_middle_action = local.my_domain_com.my_lib.middle_action.MiddleActionExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.middle_action.MiddleAction
@@ -108,8 +109,9 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_middle_action__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.middle_action.MiddleAction
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_middle_action__position_trigger_pos.destroy_particle()

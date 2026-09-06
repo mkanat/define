@@ -61,6 +61,7 @@ class DestroyerExecution:
             ),
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_local__global_position_known_occupied: literal.Position
         self.join_for_move_position_run_to_global_position_target: literal.Join
         self.join_for_move_position_local__global_position_known_empty_to_global_position_destination: literal.Join
         self.join_for_destroy_position_local = self.scheduler.create_join(2)
@@ -121,16 +122,11 @@ class DestroyerExecution:
         self.local_position_local.particle.get_position(
             local.my_domain_com.my_lib.known_occupied.KnownOccupied
         ).create_particle()
-        self.destroy_position_local__global_position_known_occupied()
-
-    def destroy_position_local__global_position_known_occupied(self):
-        literal.continue_destruction(self.continue_destroy_position_local__global_position_known_occupied)
-
-    def continue_destroy_position_local__global_position_known_occupied(self):
-        self.local_position_local.particle.get_position(
+        self.destruction_position_position_local__global_position_known_occupied = self.local_position_local.particle.get_position(
             local.my_domain_com.my_lib.known_occupied.KnownOccupied
-        ).destroy_particle()
-        self.destroy_position_local()
+        )
+        self.scheduler.submit(self.destroy_position_local)
+        self.destroy_position_local__global_position_known_occupied()
 
     def destroy_position_local(self):
         if not self.join_for_destroy_position_local.arrive():
@@ -139,3 +135,9 @@ class DestroyerExecution:
 
     def continue_destroy_position_local(self):
         self.local_position_local.destroy_particle()
+
+    def destroy_position_local__global_position_known_occupied(self):
+        literal.continue_destruction(self.continue_destroy_position_local__global_position_known_occupied)
+
+    def continue_destroy_position_local__global_position_known_occupied(self):
+        self.destruction_position_position_local__global_position_known_occupied.destroy_particle()

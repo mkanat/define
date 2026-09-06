@@ -29,6 +29,7 @@ logical representations of what we intend to render.
 
 from __future__ import annotations
 
+import collections
 import typing
 from dataclasses import dataclass, field
 
@@ -62,6 +63,9 @@ type DestructionConnectionContinuation = (
 class InitPlan:
     """Runtime-state init performed together before runnable work starts."""
 
+    destruction_positions_to_retain: list[
+        operation_graph_model.DestructionFactDestroyNode
+    ] = field(init=False, default_factory=list)
     callee_binding_plans: list[CalleeBindingPlan] = field(
         init=False, default_factory=list
     )
@@ -90,7 +94,25 @@ class InitPlan:
     @property
     def has_inits(self) -> bool:
         """Whether this plan performs any init."""
+        return bool(
+            self.destruction_positions_to_retain
+            or self.action_executions
+            or self.callee_binding_plans
+        )
+
+    @property
+    def inits_action_executions(self) -> bool:
+        """Whether this plan inits Action Executions that a caller may configure."""
         return bool(self.action_executions or self.callee_binding_plans)
+
+    @property
+    def sole_action_execution(self) -> operation_graph_model.ActionExecution | None:
+        """The Action Execution, if its init is the entire plan."""
+        if self.callee_binding_plans or self.destruction_positions_to_retain:
+            return None
+        if len(self.action_executions) != 1:
+            return None
+        return self.action_executions[0]
 
 
 @dataclass(slots=True, eq=False)
@@ -98,6 +120,10 @@ class ActionFragment:
     """A maximal direct-call chain of Particle Operations."""
 
     operations: list[operation_graph_model.PositionOperationNode]
+    destruction_positions_to_retain_after: dict[
+        operation_graph_model.PositionOperationNode,
+        list[operation_graph_model.DestructionFactDestroyNode],
+    ] = field(init=False, default_factory=lambda: collections.defaultdict(list))
     guarantee_dependencies: Sequence[operation_graph.ResolvedGuarantee] = field(
         init=False, default=()
     )
@@ -392,9 +418,9 @@ class CalleeBindingPlan:
         return self._callee_binding.caller_binding_hole
 
     @property
-    def has_inits(self) -> bool:
-        """Whether this invocation synchronously performs init."""
-        return self.callee_fanout.inits.has_inits
+    def inits_action_executions(self) -> bool:
+        """Whether this invocation synchronously inits Action Executions."""
+        return self.callee_fanout.inits.inits_action_executions
 
     @property
     def has_continuations(self) -> bool:
@@ -405,7 +431,7 @@ class CalleeBindingPlan:
     def caller_invokes_init_method(self) -> bool:
         """Whether this Callee Binding makes the caller invoke an init method."""
         return self.requires_separate_init or (
-            self.has_inits and not self.has_continuations
+            self.inits_action_executions and not self.has_continuations
         )
 
     @property
@@ -422,7 +448,7 @@ class CalleeBindingPlan:
         """Whether caller work can follow a sole caller Particle Operation inline."""
         # Whether the caller performs this work immediately after its Particle
         # Operation affects whether init must be separate, not the other way around.
-        if self.has_inits:
+        if self.inits_action_executions:
             return True
         if self.guarantee_dependencies:
             return True
@@ -505,7 +531,7 @@ class _CalleeBindingInitPlanner:
         continuations: list[FanoutContinuation],
     ):
         """Record a callee init candidate and its runnable continuation."""
-        if callee_binding.has_inits:
+        if callee_binding.inits_action_executions:
             fanout = self._caller_fanouts.get(inits)
             if fanout is None:
                 fanout = _CallerFanoutWithInitCandidates(continuations)
@@ -564,7 +590,10 @@ class _CalleeBindingInitPlanner:
         if callee_binding.post_init_guarantee_consumption_plans:
             return True
         # Inline caller work performs init before scheduling the callee fanout.
-        return callee_binding.inline_after_local_operation and callee_binding.has_inits
+        return (
+            callee_binding.inline_after_local_operation
+            and callee_binding.inits_action_executions
+        )
 
 
 @dataclass(frozen=True, slots=True, eq=False)
@@ -607,6 +636,9 @@ class _InitPlans:
     """Init and Guarantee consumption plans."""
 
     creation_inits: InitPlan
+    destruction_positions_to_retain: list[
+        operation_graph_model.DestructionFactDestroyNode
+    ]
     guarantee_consumption_plans: list[GuaranteeConsumptionPlan]
     init_binding_hole_by_action_execution: dict[
         operation_graph_model.ActionExecution,
@@ -640,6 +672,9 @@ class ActionPlan:
         DestructionConnection,
     ]
     caller_resolved_joins: list[CallerResolvedJoin]
+    destruction_positions_to_retain: list[
+        operation_graph_model.DestructionFactDestroyNode
+    ]
 
     def view_point_create_plan(self) -> ViewPointCreatePlan:
         """Resolve the view-point Create against this reusable Action Plan."""
@@ -1229,6 +1264,9 @@ class _InitPlanner:
             init_placements,
             guarantee_consumption_plans,
         ) = self._plan_action_execution_inits()
+        destruction_positions_to_retain = self._plan_destruction_position_retentions(
+            guarantee_consumption_plans,
+        )
         assigned_consumption_plans = self._assign_guarantee_consumption_plans(
             guarantee_consumption_plans.values(),
         )
@@ -1238,9 +1276,61 @@ class _InitPlanner:
         # consumers populates its init or runnable fanout.
         return _InitPlans(
             init_placements.creation_inits,
+            destruction_positions_to_retain,
             assigned_consumption_plans,
             init_placements.binding_hole_by_action_execution,
         )
+
+    def _plan_destruction_position_retentions(
+        self,
+        guarantee_consumption_plans_by_guarantee: dict[
+            operation_graph.ResolvedGuarantee,
+            GuaranteeConsumptionPlan,
+        ],
+    ) -> list[operation_graph_model.DestructionFactDestroyNode]:
+        """Retain child Positions before simultaneous parent destruction."""
+        destruction_positions: list[
+            operation_graph_model.DestructionFactDestroyNode
+        ] = []
+        for operation in self._resolved_action.graph.destroys_for_own_destruction_facts:
+            # position<box> and position</marker> are accessed directly. In contrast,
+            # position<box>::position</marker> needs its Position object retained
+            # before another Destroy removes the particle in position<box>.
+            if len(operation.target.typed_names) == 1:
+                continue
+            destruction_positions.append(operation)
+            preceding_operations_in_this_action = (
+                self._resolved_action.local_operations_depended_on_by(operation)
+            )
+            if preceding_operations_in_this_action:
+                predecessor = preceding_operations_in_this_action[0]
+                fragment = self._action_fragment_plans.fragment_for_operation[
+                    predecessor
+                ]
+                fragment.destruction_positions_to_retain_after[predecessor].append(
+                    operation
+                )
+                continue
+            guarantee_predecessors = self._resolved_action.guarantee_dependencies_for(
+                operation
+            )
+            if guarantee_predecessors:
+                self._guarantee_consumption_plan(
+                    guarantee_predecessors[0], guarantee_consumption_plans_by_guarantee
+                ).inits.destruction_positions_to_retain.append(operation)
+                continue
+            binding_hole_predecessors = (
+                self._resolved_action.binding_holes_depended_on_by(operation)
+            )
+            if binding_hole_predecessors:
+                self._callee_binding_plans.binding_hole_fanouts[
+                    binding_hole_predecessors[0]
+                ].inits.destruction_positions_to_retain.append(operation)
+                continue
+            raise ValueError(
+                "A transitive Destroy has no predecessor that can retain its Position"
+            )
+        return destruction_positions
 
     def _assign_guarantee_consumption_plans(
         self,
@@ -1778,6 +1868,10 @@ class _ActionPlanBuilder:
         )
         caller_resolved_joins = join_planner.plan(callee_joins)
         return ActionPlan(
+            destruction_positions_to_retain=[
+                *destruction_connection_plans.destruction_connection_by_operation,
+                *init_plans.destruction_positions_to_retain,
+            ],
             fragments=action_fragment_plans.fragments,
             binding_hole_fanouts=callee_binding_plans.binding_hole_fanouts,
             action_executions=action_executions,
@@ -1832,6 +1926,17 @@ class _ActionPlanBuilder:
 
 
 @typing.final
+# TODO: Separate the temporary ActionPlan used for generation from an
+# ActionPlanInterface retained for later callers. The interface should describe
+# Binding Hole behavior, which Action Executions each init constructs, and
+# caller-resolved Join requirements; GeneratedActionInterface should retain the
+# corresponding generated names. Discard the full plan after rendering its action.
+# Audit indirect retention as well: ActionFragment keys in generated-name maps and
+# retained BindingHoleFanout objects keep implementation data alive. Use existing
+# operation/execution identities and the required interface facts rather than
+# wrapping full plan objects or introducing numeric IDs. Check ResolvedActions and
+# other owners too, so removing the plan from this collection actually frees its
+# generation-only data.
 class ActionPlans:
     """Build action plans in direct-callee-first definition order."""
 

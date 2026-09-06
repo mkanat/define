@@ -45,6 +45,7 @@ class MoverExecution:
         self.scheduler = scheduler
         self.guarantees = MoverGuarantees()
         self.execution_action_helper: local.my_domain_com.my_lib.helper.HelperExecution
+        self.destruction_position_action_helper__position_trigger_pos: literal.Position
         self.join_for_move_global_position_out_to_global_position_destination: literal.Join
         self.join_for_empty_rule_global_position_slot: literal.Join
         self.join_when_empty_global_position_destination: literal.Join
@@ -77,11 +78,12 @@ class MoverExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_helper__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.helper.Helper
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_helper__position_trigger_pos.destroy_particle()
 
     def move_global_position_out_to_global_position_destination(self):
         if not self.join_for_move_global_position_out_to_global_position_destination.arrive():

@@ -59,6 +59,7 @@ class OtherExecution:
         self.scheduler = scheduler
         self.guarantees = OtherGuarantees()
         self.destruction_connections = destruction_connections
+        self.destruction_position_global_position_input__global_position_a: literal.Position
         self.join_for_move_global_position_input__global_position_a_to_position_holder_a: literal.Join
         self.join_for_move_position_holder_a_to_position_holder_b: literal.Join
         self.join_for_move_position_holder_b_to_global_position_input__global_position_a = self.scheduler.create_join(2)
@@ -125,11 +126,12 @@ class OtherExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.a.A
         ).create_particle()
-        self.action.on_particle.get_position(
+        self.destruction_position_global_position_input__global_position_a = self.action.on_particle.get_position(
             local.my_domain_com.my_lib.input.Input
         ).particle.get_position(
             local.my_domain_com.my_lib.a.A
-        ).destroy_particle()
+        )
+        self.destruction_position_global_position_input__global_position_a.destroy_particle()
         self.move_position_holder_b_to_global_position_input__global_position_a()
 
     def move_position_holder_b_to_global_position_input__global_position_a(self):

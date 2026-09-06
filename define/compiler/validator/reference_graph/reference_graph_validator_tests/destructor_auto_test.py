@@ -42,13 +42,15 @@ def test_local_position_in_constructor_left_occupied_fires_destructor(
     assert result.action_call_graph.edges() == [(_TEST, _DESTRUCTOR)]
 
 
-def test_auto_destruction_in_reverse_definition_order(
+def test_auto_destruction_fires_all_local_particle_destructors(
     validate_testdata_project_with_reference_graph: ValidateTestdataProjectWithReferenceGraph,
 ):
     result = validate_testdata_project_with_reference_graph()
     assert_no_errors(result.program_result)
-    edges = result.action_call_graph.edges()
-    assert edges == [(_TEST, _DESTRUCTOR_B), (_TEST, _DESTRUCTOR_A)]
+    assert result.action_call_graph.edges() == [
+        (_TEST, _DESTRUCTOR_A),
+        (_TEST, _DESTRUCTOR_B),
+    ]
 
 
 def test_empty_local_position_does_not_fire_destructor(
@@ -303,7 +305,7 @@ def test_constructor_auto_destruction_failing_requirement(
     )
 
 
-def test_auto_destruction_failing_in_reverse_definition_order(
+def test_auto_destruction_reports_each_failing_destructor_requirement(
     validate_testdata_project_with_reference_graph: ValidateTestdataProjectWithReferenceGraph,
 ):
     result = validate_testdata_project_with_reference_graph()

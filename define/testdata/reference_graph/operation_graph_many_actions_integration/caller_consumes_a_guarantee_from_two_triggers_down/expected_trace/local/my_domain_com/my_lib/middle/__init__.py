@@ -61,6 +61,7 @@ class MiddleExecution:
         self.guarantees = MiddleGuarantees()
         self.destruction_connections = destruction_connections
         self.execution_position_igw__action_inner: local.my_domain_com.my_lib.inner.InnerExecution
+        self.destruction_position_position_igw__action_inner__position_trigger_pos: literal.Position
         self.join_for_move_position_igw__global_position_inner_result_to_position_out: literal.Join
         self.join_for_destroy_position_igw: literal.Join
         self.join_when_empty_position_out: literal.Join
@@ -127,13 +128,14 @@ class MiddleExecution:
             "igw::/inner::trigger_pos",
             1,
         )
-        self.action.get_interface_position(
+        self.destruction_position_position_igw__action_inner__position_trigger_pos = self.action.get_interface_position(
             "position<igw>"
         ).particle.get_action(
             local.my_domain_com.my_lib.inner.Inner
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_igw__action_inner__position_trigger_pos.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "igw::/inner::trigger_pos",

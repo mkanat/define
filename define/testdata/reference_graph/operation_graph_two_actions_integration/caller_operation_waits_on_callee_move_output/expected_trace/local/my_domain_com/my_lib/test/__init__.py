@@ -40,6 +40,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_gateway__action_other: local.my_domain_com.my_lib.other.OtherExecution
+        self.destruction_position_position_gateway__action_other__position_output: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_gateway()
@@ -61,6 +62,9 @@ class TestExecution:
         )
         self.execution_position_gateway__action_other.join_for_empty_rule_position_trigger_pos = literal.NO_JOIN
         self.execution_position_gateway__action_other.join_for_move_position_trigger_pos_to_position_output = literal.NO_JOIN
+        self.execution_position_gateway__action_other.guarantees.position_trigger_pos__move__position_output.inits.append(
+            self.init_position_gateway__action_other__position_trigger_pos__move__position_output
+        )
         self.execution_position_gateway__action_other.guarantees.position_trigger_pos__move__position_output.consumers.append(
             self.destroy_position_gateway__action_other__position_output
         )
@@ -80,11 +84,7 @@ class TestExecution:
         self.execution_position_gateway__action_other.accept_for_empty_rule_position_trigger_pos()
 
     def destroy_position_gateway__action_other__position_output(self):
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.other.Other
-        ).get_interface_position(
-            "position<output>"
-        ).destroy_particle()
+        self.destruction_position_position_gateway__action_other__position_output.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "gateway::/other::output",
@@ -95,4 +95,11 @@ class TestExecution:
             self.trace_execution,
             "gateway",
             1,
+        )
+
+    def init_position_gateway__action_other__position_trigger_pos__move__position_output(self):
+        self.destruction_position_position_gateway__action_other__position_output = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.other.Other
+        ).get_interface_position(
+            "position<output>"
         )

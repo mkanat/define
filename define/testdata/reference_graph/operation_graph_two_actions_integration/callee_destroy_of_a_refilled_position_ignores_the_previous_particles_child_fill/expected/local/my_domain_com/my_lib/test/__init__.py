@@ -35,6 +35,8 @@ class TestExecution:
         self.action = action
         self.scheduler = scheduler
         self.execution_action_other: local.my_domain_com.my_lib.other.OtherExecution
+        self.destruction_position_global_position_origin__global_position_child: literal.Position
+        self.destruction_position_action_other__position_trigger_pos: literal.Position
         self.execution_action_other = local.my_domain_com.my_lib.other.OtherExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.other.Other
@@ -59,11 +61,15 @@ class TestExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.child.Child
         ).create_particle()
-        self.action.on_particle.get_position(
+        self.destruction_position_global_position_origin__global_position_child = self.action.on_particle.get_position(
             local.my_domain_com.my_lib.origin.Origin
         ).particle.get_position(
             local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
+        )
+        self.scheduler.submit(self.destroy_global_position_origin)
+        self.destroy_global_position_origin__global_position_child()
+
+    def destroy_global_position_origin(self):
         self.action.on_particle.get_position(
             local.my_domain_com.my_lib.origin.Origin
         ).destroy_particle()
@@ -72,14 +78,18 @@ class TestExecution:
         ).create_particle()
         self.execution_action_other.accept_for_empty_rule_global_position_origin()
 
+    def destroy_global_position_origin__global_position_child(self):
+        self.destruction_position_global_position_origin__global_position_child.destroy_particle()
+
     def create_action_other__position_trigger_pos(self):
         self.action.on_particle.get_action(
             local.my_domain_com.my_lib.other.Other
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_other__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.other.Other
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_other__position_trigger_pos.destroy_particle()

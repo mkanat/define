@@ -71,6 +71,10 @@ class TestExecution:
             "position<right_b_holder>",
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_source__global_position_box_a: literal.Position
+        self.destruction_position_position_source__global_position_box_b: literal.Position
+        self.destruction_position_position_workspace__global_position_box_a: literal.Position
+        self.destruction_position_position_workspace__global_position_box_b: literal.Position
         self.join_for_move_position_source_to_position_stage_a = self.scheduler.create_join(2)
         self.join_for_destroy_position_workspace__global_position_box_a = self.scheduler.create_join(2)
         self.join_for_destroy_position_workspace__global_position_box_b = self.scheduler.create_join(2)
@@ -88,18 +92,20 @@ class TestExecution:
         self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.box_a.BoxA
         ).create_particle()
-        self.local_position_source.particle.get_position(
+        self.destruction_position_position_source__global_position_box_a = self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.box_a.BoxA
-        ).destroy_particle()
+        )
+        self.destruction_position_position_source__global_position_box_a.destroy_particle()
         self.move_position_source_to_position_stage_a()
 
     def create_position_source__global_position_box_b(self):
         self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.box_b.BoxB
         ).create_particle()
-        self.local_position_source.particle.get_position(
+        self.destruction_position_position_source__global_position_box_b = self.local_position_source.particle.get_position(
             local.my_domain_com.my_lib.box_b.BoxB
-        ).destroy_particle()
+        )
+        self.destruction_position_position_source__global_position_box_b.destroy_particle()
         self.move_position_source_to_position_stage_a()
 
     def move_position_source_to_position_stage_a(self):
@@ -135,6 +141,9 @@ class TestExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.left.Left
         ).move_particle_to(self.local_position_left_a_holder)
+        self.destruction_position_position_workspace__global_position_box_a = self.local_position_workspace.particle.get_position(
+            local.my_domain_com.my_lib.box_a.BoxA
+        )
         self.scheduler.submit(self.destroy_position_workspace__global_position_box_a)
         self.destroy_position_left_a_holder()
 
@@ -155,9 +164,7 @@ class TestExecution:
     def destroy_position_workspace__global_position_box_a(self):
         if not self.join_for_destroy_position_workspace__global_position_box_a.arrive():
             return
-        self.local_position_workspace.particle.get_position(
-            local.my_domain_com.my_lib.box_a.BoxA
-        ).destroy_particle()
+        self.destruction_position_position_workspace__global_position_box_a.destroy_particle()
         self.destroy_position_workspace()
 
     def destroy_position_left_a_holder(self):
@@ -184,6 +191,9 @@ class TestExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.left.Left
         ).move_particle_to(self.local_position_left_b_holder)
+        self.destruction_position_position_workspace__global_position_box_b = self.local_position_workspace.particle.get_position(
+            local.my_domain_com.my_lib.box_b.BoxB
+        )
         self.scheduler.submit(self.destroy_position_workspace__global_position_box_b)
         self.destroy_position_left_b_holder()
 
@@ -204,9 +214,7 @@ class TestExecution:
     def destroy_position_workspace__global_position_box_b(self):
         if not self.join_for_destroy_position_workspace__global_position_box_b.arrive():
             return
-        self.local_position_workspace.particle.get_position(
-            local.my_domain_com.my_lib.box_b.BoxB
-        ).destroy_particle()
+        self.destruction_position_position_workspace__global_position_box_b.destroy_particle()
         self.destroy_position_workspace()
 
     def destroy_position_left_b_holder(self):

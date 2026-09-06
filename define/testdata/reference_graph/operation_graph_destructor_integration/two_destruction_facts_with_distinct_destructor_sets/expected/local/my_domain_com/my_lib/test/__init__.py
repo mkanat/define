@@ -52,6 +52,7 @@ class TestExecution:
         self.execution_action_destroyer: local.my_domain_com.my_lib.destroyer.DestroyerExecution
         self.destruction_connection_action_destroyer: literal.DestructionConnection
         self.destruction_connection_action_destroyer_2: literal.DestructionConnection
+        self.destruction_position_action_destroyer__position_run: literal.Position
         self.destruction_connection_action_destroyer = literal.DestructionConnection(
             self.scheduler,
             0,
@@ -115,11 +116,12 @@ class TestExecution:
         ).get_interface_position(
             "position<run>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_destroyer__position_run = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.destroyer.Destroyer
         ).get_interface_position(
             "position<run>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_destroyer__position_run.destroy_particle()
 
     def run_action_destroyer__position_first__action_extra_destructor(self):
         execution = local.my_domain_com.my_lib.extra_destructor.ExtraDestructorExecution(

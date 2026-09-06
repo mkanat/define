@@ -54,6 +54,7 @@ class DestroyerExecution:
         )
         self.guarantees = DestroyerGuarantees()
         self.destruction_connections = destruction_connections
+        self.destruction_position_position_target__global_position_callee_known: literal.Position
         self.join_for_destroy_position_target: literal.Join
         self.join_for_destroy_position_run: literal.Join
         self.join_for_empty_rule_position_target: literal.Join
@@ -83,23 +84,13 @@ class DestroyerExecution:
             "target::/callee_known",
             1,
         )
-        self.destroy_position_target__global_position_callee_known()
-
-    def destroy_position_target__global_position_callee_known(self):
-        literal.continue_destruction(self.continue_destroy_position_target__global_position_callee_known)
-
-    def continue_destroy_position_target__global_position_callee_known(self):
-        self.action.get_interface_position(
+        self.destruction_position_position_target__global_position_callee_known = self.action.get_interface_position(
             "position<target>"
         ).particle.get_position(
             local.my_domain_com.my_lib.callee_known.CalleeKnown
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "target::/callee_known",
-            1,
         )
-        self.destroy_position_target()
+        self.scheduler.submit(self.destroy_position_target)
+        self.destroy_position_target__global_position_callee_known()
 
     def destroy_position_target(self):
         if not self.join_for_destroy_position_target.arrive():
@@ -117,6 +108,17 @@ class DestroyerExecution:
         )
         self.guarantees.position_target.publish(
             self.scheduler,
+        )
+
+    def destroy_position_target__global_position_callee_known(self):
+        literal.continue_destruction(self.continue_destroy_position_target__global_position_callee_known)
+
+    def continue_destroy_position_target__global_position_callee_known(self):
+        self.destruction_position_position_target__global_position_callee_known.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.trace_execution,
+            "target::/callee_known",
+            1,
         )
 
     def destroy_position_run(self):

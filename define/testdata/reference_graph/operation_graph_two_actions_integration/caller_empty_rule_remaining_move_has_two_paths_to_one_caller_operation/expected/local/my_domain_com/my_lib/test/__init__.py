@@ -46,6 +46,7 @@ class TestExecution:
         self.action = action
         self.scheduler = scheduler
         self.execution_action_other: local.my_domain_com.my_lib.other.OtherExecution
+        self.destruction_position_action_other__position_trigger_pos: literal.Position
         self.join_when_empty_action_other__position_holder_a: literal.Join
         self.join_when_empty_action_other__position_holder_b: literal.Join
         self.join_when_empty_action_other__position_holder_c: literal.Join
@@ -97,8 +98,9 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_other__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.other.Other
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_other__position_trigger_pos.destroy_particle()

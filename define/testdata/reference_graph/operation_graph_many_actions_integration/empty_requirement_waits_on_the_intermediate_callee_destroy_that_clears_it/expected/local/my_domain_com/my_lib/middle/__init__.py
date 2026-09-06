@@ -49,6 +49,8 @@ class MiddleExecution:
         self.destruction_connections = destruction_connections
         self.execution_position_gw__action_inner: local.my_domain_com.my_lib.inner.InnerExecution
         self.execution_position_gw__action_inner_2: local.my_domain_com.my_lib.inner.InnerExecution
+        self.destruction_position_position_gw__action_inner__position_slot: literal.Position
+        self.destruction_position_position_gw__action_inner__position_slot_2: literal.Position
         self.join_for_destroy_position_gw: literal.Join
         self.join_for_empty_rule_position_gw: literal.Join
 
@@ -63,6 +65,9 @@ class MiddleExecution:
         )
         self.execution_position_gw__action_inner.join_for_empty_rule_position_trigger_pos = literal.NO_JOIN
         self.execution_position_gw__action_inner.join_for_destroy_position_trigger_pos = literal.NO_JOIN
+        self.execution_position_gw__action_inner.guarantees.position_slot.inits.append(
+            self.init_position_gw__action_inner__position_slot
+        )
         self.execution_position_gw__action_inner.guarantees.position_slot.consumers.append(
             self.destroy_position_gw__action_inner__position_slot
         )
@@ -79,6 +84,9 @@ class MiddleExecution:
         )
         self.execution_position_gw__action_inner_2.join_for_empty_rule_position_trigger_pos = literal.NO_JOIN
         self.execution_position_gw__action_inner_2.join_for_destroy_position_trigger_pos = literal.NO_JOIN
+        self.execution_position_gw__action_inner_2.guarantees.position_slot.inits.append(
+            self.init_position_gw__action_inner__position_slot_2
+        )
         self.execution_position_gw__action_inner_2.guarantees.position_slot.consumers.append(
             self.destroy_position_gw__action_inner__position_slot_2
         )
@@ -99,6 +107,9 @@ class MiddleExecution:
         )
         self.execution_position_gw__action_inner.join_for_empty_rule_position_trigger_pos = literal.NO_JOIN
         self.execution_position_gw__action_inner.join_for_destroy_position_trigger_pos = literal.NO_JOIN
+        self.execution_position_gw__action_inner.guarantees.position_slot.inits.append(
+            self.init_position_gw__action_inner__position_slot
+        )
         self.execution_position_gw__action_inner.guarantees.position_slot.consumers.append(
             self.destroy_position_gw__action_inner__position_slot
         )
@@ -115,6 +126,9 @@ class MiddleExecution:
         )
         self.execution_position_gw__action_inner_2.join_for_empty_rule_position_trigger_pos = literal.NO_JOIN
         self.execution_position_gw__action_inner_2.join_for_destroy_position_trigger_pos = literal.NO_JOIN
+        self.execution_position_gw__action_inner_2.guarantees.position_slot.inits.append(
+            self.init_position_gw__action_inner__position_slot_2
+        )
         self.execution_position_gw__action_inner_2.guarantees.position_slot.consumers.append(
             self.destroy_position_gw__action_inner__position_slot_2
         )
@@ -144,13 +158,7 @@ class MiddleExecution:
         self.execution_position_gw__action_inner.accept_for_empty_rule_position_trigger_pos()
 
     def destroy_position_gw__action_inner__position_slot(self):
-        self.action.get_interface_position(
-            "position<gw>"
-        ).particle.get_action(
-            local.my_domain_com.my_lib.inner.Inner
-        ).get_interface_position(
-            "position<slot>"
-        ).destroy_particle()
+        self.destruction_position_position_gw__action_inner__position_slot.destroy_particle()
         self.execution_position_gw__action_inner_2.accept_when_empty_position_slot()
 
     def create_position_gw__action_inner__position_trigger_pos_2(self):
@@ -164,13 +172,7 @@ class MiddleExecution:
         self.execution_position_gw__action_inner_2.accept_for_empty_rule_position_trigger_pos()
 
     def destroy_position_gw__action_inner__position_slot_2(self):
-        self.action.get_interface_position(
-            "position<gw>"
-        ).particle.get_action(
-            local.my_domain_com.my_lib.inner.Inner
-        ).get_interface_position(
-            "position<slot>"
-        ).destroy_particle()
+        self.destruction_position_position_gw__action_inner__position_slot_2.destroy_particle()
         self.destroy_position_gw()
 
     def destroy_position_gw(self):
@@ -184,4 +186,22 @@ class MiddleExecution:
         ).destroy_particle()
         self.guarantees.position_gw.publish(
             self.scheduler,
+        )
+
+    def init_position_gw__action_inner__position_slot(self):
+        self.destruction_position_position_gw__action_inner__position_slot = self.action.get_interface_position(
+            "position<gw>"
+        ).particle.get_action(
+            local.my_domain_com.my_lib.inner.Inner
+        ).get_interface_position(
+            "position<slot>"
+        )
+
+    def init_position_gw__action_inner__position_slot_2(self):
+        self.destruction_position_position_gw__action_inner__position_slot_2 = self.action.get_interface_position(
+            "position<gw>"
+        ).particle.get_action(
+            local.my_domain_com.my_lib.inner.Inner
+        ).get_interface_position(
+            "position<slot>"
         )

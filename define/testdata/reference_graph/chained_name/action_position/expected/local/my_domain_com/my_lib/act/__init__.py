@@ -52,6 +52,7 @@ class ActExecution:
             "position<result>",
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_trigger_pos__global_position_inner: literal.Position
         self.join_for_destroy_position_trigger_pos__global_position_inner: literal.Join
         self.join_for_destroy_position_trigger_pos: literal.Join
         self.join_for_destroy_position_run: literal.Join
@@ -65,6 +66,11 @@ class ActExecution:
     def accept_for_empty_rule_position_trigger_pos__global_position_inner(self):
         if not self.join_for_empty_rule_position_trigger_pos__global_position_inner.arrive():
             return
+        self.destruction_position_position_trigger_pos__global_position_inner = self.action.get_interface_position(
+            "position<trigger_pos>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.inner.Inner
+        )
         self.destroy_position_trigger_pos__global_position_inner()
 
     def accept_for_empty_rule_position_trigger_pos(self):
@@ -87,11 +93,7 @@ class ActExecution:
         literal.continue_destruction(self.continue_destroy_position_trigger_pos__global_position_inner)
 
     def continue_destroy_position_trigger_pos__global_position_inner(self):
-        self.action.get_interface_position(
-            "position<trigger_pos>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.inner.Inner
-        ).destroy_particle()
+        self.destruction_position_position_trigger_pos__global_position_inner.destroy_particle()
         self.destroy_position_trigger_pos()
 
     def destroy_position_trigger_pos(self):

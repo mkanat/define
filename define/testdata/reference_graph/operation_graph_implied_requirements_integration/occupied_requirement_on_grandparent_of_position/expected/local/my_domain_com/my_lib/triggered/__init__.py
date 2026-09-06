@@ -49,6 +49,7 @@ class TriggeredExecution:
         self.scheduler = scheduler
         self.guarantees = TriggeredGuarantees()
         self.destruction_connections = destruction_connections
+        self.destruction_position_position_input__global_position_child__global_position_grandchild: literal.Position
         self.join_for_destroy_position_input__global_position_child__global_position_grandchild: literal.Join
         self.join_for_destroy_position_run: literal.Join
         self.join_for_empty_rule_position_input__global_position_child__global_position_grandchild: literal.Join
@@ -57,6 +58,13 @@ class TriggeredExecution:
     def accept_for_empty_rule_position_input__global_position_child__global_position_grandchild(self):
         if not self.join_for_empty_rule_position_input__global_position_child__global_position_grandchild.arrive():
             return
+        self.destruction_position_position_input__global_position_child__global_position_grandchild = self.action.get_interface_position(
+            "position<input>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.child.Child
+        ).particle.get_position(
+            local.my_domain_com.my_lib.grandchild.Grandchild
+        )
         self.destroy_position_input__global_position_child__global_position_grandchild()
 
     def accept_for_empty_rule_position_run(self):
@@ -70,13 +78,7 @@ class TriggeredExecution:
         literal.continue_destruction(self.continue_destroy_position_input__global_position_child__global_position_grandchild)
 
     def continue_destroy_position_input__global_position_child__global_position_grandchild(self):
-        self.action.get_interface_position(
-            "position<input>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.child.Child
-        ).particle.get_position(
-            local.my_domain_com.my_lib.grandchild.Grandchild
-        ).destroy_particle()
+        self.destruction_position_position_input__global_position_child__global_position_grandchild.destroy_particle()
         self.guarantees.position_input__global_position_child__global_position_grandchild.publish(
             self.scheduler,
         )

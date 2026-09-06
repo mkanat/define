@@ -39,6 +39,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_action_triggered: local.my_domain_com.my_lib.triggered.TriggeredExecution
+        self.destruction_position_action_triggered__position_run: literal.Position
         self.execution_action_triggered = local.my_domain_com.my_lib.triggered.TriggeredExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.triggered.Triggered
@@ -47,6 +48,9 @@ class TestExecution:
         )
         self.execution_action_triggered.join_for_empty_rule_position_run__global_position_child = literal.NO_JOIN
         self.execution_action_triggered.join_for_destroy_position_run__global_position_child = literal.NO_JOIN
+        self.execution_action_triggered.guarantees.position_run__global_position_child.inits.append(
+            self.init_action_triggered__position_run__global_position_child
+        )
         self.execution_action_triggered.guarantees.position_run__global_position_child.consumers.append(
             self.destroy_action_triggered__position_run
         )
@@ -69,8 +73,11 @@ class TestExecution:
         self.execution_action_triggered.accept_for_empty_rule_position_run__global_position_child()
 
     def destroy_action_triggered__position_run(self):
-        self.action.on_particle.get_action(
+        self.destruction_position_action_triggered__position_run.destroy_particle()
+
+    def init_action_triggered__position_run__global_position_child(self):
+        self.destruction_position_action_triggered__position_run = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.triggered.Triggered
         ).get_interface_position(
             "position<run>"
-        ).destroy_particle()
+        )

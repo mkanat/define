@@ -37,6 +37,7 @@ class TestExecution:
         )
         self.execution_position_gateway__action_other: local.my_domain_com.my_lib.other.OtherExecution
         self.execution_position_gateway__action_other_2: local.my_domain_com.my_lib.other.OtherExecution
+        self.destruction_position_position_gateway__action_other__position_slot: literal.Position
         self.join_for_destroy_position_gateway = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -66,6 +67,9 @@ class TestExecution:
         )
         self.execution_position_gateway__action_other_2.join_for_empty_rule_position_trigger_pos = literal.NO_JOIN
         self.execution_position_gateway__action_other_2.join_for_destroy_position_trigger_pos = literal.NO_JOIN
+        self.execution_position_gateway__action_other_2.guarantees.position_slot.inits.append(
+            self.init_position_gateway__action_other__position_slot
+        )
         self.execution_position_gateway__action_other_2.guarantees.position_slot.consumers.append(
             self.destroy_position_gateway__action_other__position_slot
         )
@@ -101,17 +105,20 @@ class TestExecution:
         self.execution_position_gateway__action_other_2.accept_for_empty_rule_position_trigger_pos()
 
     def destroy_position_gateway__action_other__position_slot(self):
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.other.Other
-        ).get_interface_position(
-            "position<slot>"
-        ).destroy_particle()
+        self.destruction_position_position_gateway__action_other__position_slot.destroy_particle()
         self.destroy_position_gateway()
+
+    def destroy_position_sink(self):
+        self.local_position_sink.destroy_particle()
 
     def destroy_position_gateway(self):
         if not self.join_for_destroy_position_gateway.arrive():
             return
         self.local_position_gateway.destroy_particle()
 
-    def destroy_position_sink(self):
-        self.local_position_sink.destroy_particle()
+    def init_position_gateway__action_other__position_slot(self):
+        self.destruction_position_position_gateway__action_other__position_slot = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.other.Other
+        ).get_interface_position(
+            "position<slot>"
+        )

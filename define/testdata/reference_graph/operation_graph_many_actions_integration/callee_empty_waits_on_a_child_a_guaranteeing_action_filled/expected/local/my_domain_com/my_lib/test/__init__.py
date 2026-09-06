@@ -49,6 +49,10 @@ class TestExecution:
         self.guarantees = TestGuarantees()
         self.execution_action_filler: local.my_domain_com.my_lib.filler.FillerExecution
         self.execution_action_mover: local.my_domain_com.my_lib.mover.MoverExecution
+        self.destruction_position_action_filler__position_trigger_pos: literal.Position
+        self.destruction_position_action_mover__position_dest: literal.Position
+        self.destruction_position_action_mover__position_dest__global_position_gc: literal.Position
+        self.destruction_position_action_mover__position_trigger_pos: literal.Position
         self.join_when_empty_action_mover__position_dest: literal.Join
         self.join_for_accept_guarantee_action_mover: literal.Join
         self.execution_action_filler = local.my_domain_com.my_lib.filler.FillerExecution(
@@ -68,6 +72,12 @@ class TestExecution:
         )
         self.execution_action_mover.join_for_empty_rule_global_position_parent__global_position_child = literal.NO_JOIN
         self.execution_action_mover.join_for_move_global_position_parent__global_position_child_to_position_dest = literal.NO_JOIN
+        self.execution_action_mover.guarantees.global_position_parent__global_position_child__move__position_dest.inits.append(
+            self.init_action_mover__global_position_parent__global_position_child__move__position_dest
+        )
+        self.execution_action_mover.guarantees.global_position_parent__global_position_child__move__position_dest.consumers.append(
+            self.destroy_action_mover__position_dest
+        )
         self.execution_action_mover.guarantees.global_position_parent__global_position_child__move__position_dest.consumers.append(
             self.destroy_action_mover__position_dest__global_position_gc
         )
@@ -107,11 +117,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_filler__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.filler.Filler
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_filler__position_trigger_pos.destroy_particle()
 
     def create_action_mover__position_trigger_pos(self):
         self.action.on_particle.get_action(
@@ -119,25 +130,32 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_mover__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.mover.Mover
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_mover__position_trigger_pos.destroy_particle()
+
+    def destroy_action_mover__position_dest(self):
+        self.destruction_position_action_mover__position_dest.destroy_particle()
 
     def destroy_action_mover__position_dest__global_position_gc(self):
-        self.action.on_particle.get_action(
+        self.destruction_position_action_mover__position_dest__global_position_gc.destroy_particle()
+
+    def init_action_mover__global_position_parent__global_position_child__move__position_dest(self):
+        self.destruction_position_action_mover__position_dest = self.action.on_particle.get_action(
+            local.my_domain_com.my_lib.mover.Mover
+        ).get_interface_position(
+            "position<dest>"
+        )
+        self.destruction_position_action_mover__position_dest__global_position_gc = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.mover.Mover
         ).get_interface_position(
             "position<dest>"
         ).particle.get_position(
             local.my_domain_com.my_lib.gc.Gc
-        ).destroy_particle()
-        self.action.on_particle.get_action(
-            local.my_domain_com.my_lib.mover.Mover
-        ).get_interface_position(
-            "position<dest>"
-        ).destroy_particle()
+        )
 
     def accept_guarantee_action_mover(self):
         if not self.join_for_accept_guarantee_action_mover.arrive():

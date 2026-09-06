@@ -31,6 +31,7 @@ class TestExecution:
         self.action = action
         self.scheduler = scheduler
         self.execution_action_runner: local.my_domain_com.my_lib.runner.RunnerExecution
+        self.destruction_position_action_runner__position_run: literal.Position
         self.execution_action_runner = local.my_domain_com.my_lib.runner.RunnerExecution(
             self.scheduler,
         )
@@ -45,8 +46,9 @@ class TestExecution:
         ).get_interface_position(
             "position<run>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_runner__position_run = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.runner.Runner
         ).get_interface_position(
             "position<run>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_runner__position_run.destroy_particle()

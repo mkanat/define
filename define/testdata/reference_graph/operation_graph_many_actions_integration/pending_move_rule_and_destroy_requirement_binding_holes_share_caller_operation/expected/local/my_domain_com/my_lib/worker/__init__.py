@@ -50,6 +50,7 @@ class WorkerExecution:
         self.scheduler = scheduler
         self.guarantees = WorkerGuarantees()
         self.destruction_connections = destruction_connections
+        self.destruction_position_position_state__global_position_occupied: literal.Position
         self.join_for_destroy_position_state__global_position_occupied: literal.Join
         self.join_for_move_position_source_to_position_state__global_position_target: literal.Join
         self.join_for_empty_rule_position_state__global_position_occupied: literal.Join
@@ -58,6 +59,11 @@ class WorkerExecution:
     def accept_for_empty_rule_position_state__global_position_occupied(self):
         if not self.join_for_empty_rule_position_state__global_position_occupied.arrive():
             return
+        self.destruction_position_position_state__global_position_occupied = self.action.get_interface_position(
+            "position<state>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.occupied.Occupied
+        )
         self.destroy_position_state__global_position_occupied()
 
     def accept_for_empty_rule_position_source(self):
@@ -71,11 +77,7 @@ class WorkerExecution:
         literal.continue_destruction(self.continue_destroy_position_state__global_position_occupied)
 
     def continue_destroy_position_state__global_position_occupied(self):
-        self.action.get_interface_position(
-            "position<state>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.occupied.Occupied
-        ).destroy_particle()
+        self.destruction_position_position_state__global_position_occupied.destroy_particle()
         self.guarantees.position_state__global_position_occupied.publish(
             self.scheduler,
         )

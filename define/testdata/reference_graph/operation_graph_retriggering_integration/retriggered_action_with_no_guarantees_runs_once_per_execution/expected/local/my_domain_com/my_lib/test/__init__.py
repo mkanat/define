@@ -33,6 +33,8 @@ class TestExecution:
         )
         self.execution_position_gw__action_worker: local.my_domain_com.my_lib.worker.WorkerExecution
         self.execution_position_gw__action_worker_2: local.my_domain_com.my_lib.worker.WorkerExecution
+        self.destruction_position_position_gw__action_worker__position_trigger_pos: literal.Position
+        self.destruction_position_position_gw__action_worker__position_trigger_pos_2: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_gw()
@@ -55,19 +57,21 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_gw.particle.get_action(
+        self.destruction_position_position_gw__action_worker__position_trigger_pos = self.local_position_gw.particle.get_action(
             local.my_domain_com.my_lib.worker.Worker
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_gw__action_worker__position_trigger_pos.destroy_particle()
         self.local_position_gw.particle.get_action(
             local.my_domain_com.my_lib.worker.Worker
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_gw.particle.get_action(
+        self.destruction_position_position_gw__action_worker__position_trigger_pos_2 = self.local_position_gw.particle.get_action(
             local.my_domain_com.my_lib.worker.Worker
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_gw__action_worker__position_trigger_pos_2.destroy_particle()
         self.local_position_gw.destroy_particle()

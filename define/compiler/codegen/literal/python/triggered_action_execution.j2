@@ -1,4 +1,5 @@
 {% from "position_expression.j2" import position_expression %}
+{% from "destruction_position.j2" import retain_destruction_positions %}
 {% from "join_value.j2" import join_value %}
 {% from "guarantee_consumption.j2" import configure_guarantee_consumption %}
 {% macro destruction_continuation(continuation) -%}
@@ -68,6 +69,7 @@
     {% endfor %}
 {% endmacro %}
 {% macro run_inits(inits) %}
+{{ retain_destruction_positions(inits.destruction_positions_to_retain) -}}
     {% for action_execution in inits.action_executions %}
 {{ _construct_action_execution(action_execution) -}}
 {{ _configure_action_execution(action_execution) -}}

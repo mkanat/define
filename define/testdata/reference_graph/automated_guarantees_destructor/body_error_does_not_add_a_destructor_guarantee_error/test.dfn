@@ -1,0 +1,13 @@
+# Moving twice from the same Position reports the invalid second Move, without
+# adding a Destructor Guarantee error for the already-invalid Position.
+define the potential action<my.domain.com:my_lib:/test> {
+    it also assigns the position</item>.
+    it happens when {
+        this particle is being destroyed.
+    } and it does {
+        define the position<first>.
+        define the position<second>.
+        move the particle in position</item> to position<first>.
+        move the particle in position</item> to position<second>.
+    }
+}

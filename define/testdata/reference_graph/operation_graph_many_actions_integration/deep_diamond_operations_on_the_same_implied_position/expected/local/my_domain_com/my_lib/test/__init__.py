@@ -35,6 +35,8 @@ class TestExecution:
         self.scheduler = scheduler
         self.execution_action_left: local.my_domain_com.my_lib.left.LeftExecution
         self.execution_action_right: local.my_domain_com.my_lib.right.RightExecution
+        self.destruction_position_action_left__position_trigger_pos: literal.Position
+        self.destruction_position_action_right__position_trigger_pos: literal.Position
         self.execution_action_left = local.my_domain_com.my_lib.left.LeftExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.left.Left
@@ -69,11 +71,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_left__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.left.Left
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_left__position_trigger_pos.destroy_particle()
 
     def create_action_right__position_trigger_pos(self):
         self.action.on_particle.get_action(
@@ -81,11 +84,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_right__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.right.Right
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_right__position_trigger_pos.destroy_particle()
 
     def accept_guarantee_action_right(self):
         self.execution_action_right.accept_for_empty_rule_global_position_marker()

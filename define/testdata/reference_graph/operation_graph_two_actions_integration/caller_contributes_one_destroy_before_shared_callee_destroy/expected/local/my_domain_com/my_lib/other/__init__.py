@@ -48,27 +48,36 @@ class OtherExecution:
         self.scheduler = scheduler
         self.guarantees = OtherGuarantees()
         self.destruction_connections = destruction_connections
+        self.destruction_position_position_parent__global_position_child__global_position_grandchild: literal.Position
+        self.destruction_position_position_parent__global_position_child: literal.Position
         self.join_for_destroy_position_parent__global_position_child__global_position_grandchild: literal.Join
-        self.join_for_destroy_position_parent__global_position_child: literal.Join
         self.join_for_destroy_position_parent: literal.Join
+        self.join_for_destroy_position_parent__global_position_child: literal.Join
         self.join_for_empty_rule_position_parent__global_position_child__global_position_grandchild: literal.Join
-        self.join_for_empty_rule_position_parent__global_position_child: literal.Join
         self.join_for_empty_rule_position_parent: literal.Join
+        self.join_for_empty_rule_position_parent__global_position_child: literal.Join
 
     def accept_for_empty_rule_position_parent__global_position_child__global_position_grandchild(self):
         if not self.join_for_empty_rule_position_parent__global_position_child__global_position_grandchild.arrive():
             return
+        self.destruction_position_position_parent__global_position_child__global_position_grandchild = self.action.get_interface_position(
+            "position<parent>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.child.Child
+        ).particle.get_position(
+            local.my_domain_com.my_lib.grandchild.Grandchild
+        )
         self.destroy_position_parent__global_position_child__global_position_grandchild()
-
-    def accept_for_empty_rule_position_parent__global_position_child(self):
-        if not self.join_for_empty_rule_position_parent__global_position_child.arrive():
-            return
-        self.destroy_position_parent__global_position_child()
 
     def accept_for_empty_rule_position_parent(self):
         if not self.join_for_empty_rule_position_parent.arrive():
             return
         self.destroy_position_parent()
+
+    def accept_for_empty_rule_position_parent__global_position_child(self):
+        if not self.join_for_empty_rule_position_parent__global_position_child.arrive():
+            return
+        self.destroy_position_parent__global_position_child()
 
     def destroy_position_parent__global_position_child__global_position_grandchild(self):
         if not self.join_for_destroy_position_parent__global_position_child__global_position_grandchild.arrive():
@@ -76,27 +85,14 @@ class OtherExecution:
         literal.continue_destruction(self.continue_destroy_position_parent__global_position_child__global_position_grandchild)
 
     def continue_destroy_position_parent__global_position_child__global_position_grandchild(self):
-        self.action.get_interface_position(
+        self.destruction_position_position_parent__global_position_child__global_position_grandchild.destroy_particle()
+        self.destruction_position_position_parent__global_position_child = self.action.get_interface_position(
             "position<parent>"
         ).particle.get_position(
             local.my_domain_com.my_lib.child.Child
-        ).particle.get_position(
-            local.my_domain_com.my_lib.grandchild.Grandchild
-        ).destroy_particle()
+        )
+        self.scheduler.submit(self.destroy_position_parent)
         self.destroy_position_parent__global_position_child()
-
-    def destroy_position_parent__global_position_child(self):
-        if not self.join_for_destroy_position_parent__global_position_child.arrive():
-            return
-        literal.continue_destruction(self.continue_destroy_position_parent__global_position_child)
-
-    def continue_destroy_position_parent__global_position_child(self):
-        self.action.get_interface_position(
-            "position<parent>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
-        self.destroy_position_parent()
 
     def destroy_position_parent(self):
         if not self.join_for_destroy_position_parent.arrive():
@@ -110,3 +106,11 @@ class OtherExecution:
         self.guarantees.position_parent.publish(
             self.scheduler,
         )
+
+    def destroy_position_parent__global_position_child(self):
+        if not self.join_for_destroy_position_parent__global_position_child.arrive():
+            return
+        literal.continue_destruction(self.continue_destroy_position_parent__global_position_child)
+
+    def continue_destroy_position_parent__global_position_child(self):
+        self.destruction_position_position_parent__global_position_child.destroy_particle()

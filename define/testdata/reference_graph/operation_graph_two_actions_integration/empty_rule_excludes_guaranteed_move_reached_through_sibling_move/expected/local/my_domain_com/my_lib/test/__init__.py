@@ -55,6 +55,8 @@ class TestExecution:
         self.scheduler = scheduler
         self.guarantees = TestGuarantees()
         self.execution_action_producer: local.my_domain_com.my_lib.producer.ProducerExecution
+        self.destruction_position_global_position_input__global_position_b: literal.Position
+        self.destruction_position_action_producer__position_trigger_pos: literal.Position
         self.join_for_move_global_position_holder_to_global_position_intermediate: literal.Join
         self.join_when_empty_global_position_holder: literal.Join
         self.join_when_empty_global_position_intermediate: literal.Join
@@ -102,11 +104,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_producer__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.producer.Producer
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_producer__position_trigger_pos.destroy_particle()
 
     def move_global_position_holder_to_global_position_intermediate(self):
         if not self.join_for_move_global_position_holder_to_global_position_intermediate.arrive():
@@ -133,20 +136,24 @@ class TestExecution:
                 local.my_domain_com.my_lib.b.B
             )
         )
-        self.guarantees.global_position_intermediate.publish(
-            self.scheduler,
-            self.destroy_global_position_input__global_position_b,
-        )
-
-    def destroy_global_position_input__global_position_b(self):
-        self.action.on_particle.get_position(
+        self.destruction_position_global_position_input__global_position_b = self.action.on_particle.get_position(
             local.my_domain_com.my_lib.input.Input
         ).particle.get_position(
             local.my_domain_com.my_lib.b.B
-        ).destroy_particle()
+        )
+        self.guarantees.global_position_intermediate.publish(
+            self.scheduler,
+            self.destroy_global_position_input,
+            self.destroy_global_position_input__global_position_b,
+        )
+
+    def destroy_global_position_input(self):
         self.action.on_particle.get_position(
             local.my_domain_com.my_lib.input.Input
         ).destroy_particle()
         self.guarantees.global_position_input.publish(
             self.scheduler,
         )
+
+    def destroy_global_position_input__global_position_b(self):
+        self.destruction_position_global_position_input__global_position_b.destroy_particle()

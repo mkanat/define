@@ -40,6 +40,8 @@ class TestExecution:
         self.scheduler = scheduler
         self.execution_action_producer: local.my_domain_com.my_lib.producer.ProducerExecution
         self.execution_action_consumer: local.my_domain_com.my_lib.consumer.ConsumerExecution
+        self.destruction_position_action_producer__position_trigger_pos: literal.Position
+        self.destruction_position_action_consumer__position_trigger_pos: literal.Position
         self.join_when_empty_global_position_box: literal.Join
         self.execution_action_producer = local.my_domain_com.my_lib.producer.ProducerExecution(
             self.action.on_particle.get_action(
@@ -84,11 +86,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_producer__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.producer.Producer
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_producer__position_trigger_pos.destroy_particle()
 
     def create_action_consumer__position_trigger_pos(self):
         self.action.on_particle.get_action(
@@ -96,11 +99,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_consumer__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.consumer.Consumer
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_consumer__position_trigger_pos.destroy_particle()
 
     def accept_guarantee_action_consumer(self):
         self.execution_action_consumer.accept_when_empty_global_position_box__global_position_item()

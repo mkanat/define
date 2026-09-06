@@ -44,51 +44,51 @@ def test_destroy_parent_fires_interface_position_child_destructor(
     assert result.action_call_graph.edges() == [(_TEST, _INNER), (_TEST, _DESTRUCTOR)]
 
 
-def test_cascade_destroys_interface_positions_in_reverse_definition_order(
+def test_transitive_destruction_fires_interface_position_destructors(
     validate_testdata_project_with_reference_graph: ValidateTestdataProjectWithReferenceGraph,
 ):
     result = validate_testdata_project_with_reference_graph()
     assert_no_errors(result.program_result)
     assert result.action_call_graph.edges() == [
         (_TEST, _INNER),
-        (_TEST, _DESTRUCTOR_C),
-        (_TEST, _DESTRUCTOR_B),
         (_TEST, _DESTRUCTOR_A),
+        (_TEST, _DESTRUCTOR_B),
+        (_TEST, _DESTRUCTOR_C),
     ]
 
 
-def test_cascade_fires_grandchild_destructor_before_child(
+def test_transitive_destruction_fires_child_and_grandchild_destructors(
     validate_testdata_project_with_reference_graph: ValidateTestdataProjectWithReferenceGraph,
 ):
     result = validate_testdata_project_with_reference_graph()
     assert_no_errors(result.program_result)
     assert result.action_call_graph.edges() == [
+        (_TEST, _CHILD_DESTRUCTOR),
         (_TEST, _GRANDCHILD_DESTRUCTOR),
-        (_TEST, _CHILD_DESTRUCTOR),
     ]
 
 
-def test_cascade_completes_each_subtree_before_the_next_sibling(
+def test_transitive_destruction_fires_destructors_on_both_branches(
     validate_testdata_project_with_reference_graph: ValidateTestdataProjectWithReferenceGraph,
 ):
     result = validate_testdata_project_with_reference_graph()
     assert_no_errors(result.program_result)
     assert result.action_call_graph.edges() == [
-        (_TEST, _B_LEAF_DESTRUCTOR),
-        (_TEST, _B_BRANCH_DESTRUCTOR),
-        (_TEST, _A_LEAF_DESTRUCTOR),
         (_TEST, _A_BRANCH_DESTRUCTOR),
+        (_TEST, _A_LEAF_DESTRUCTOR),
+        (_TEST, _B_BRANCH_DESTRUCTOR),
+        (_TEST, _B_LEAF_DESTRUCTOR),
     ]
 
 
-def test_cascade_fires_child_destructor_before_parents_own(
+def test_destroy_parent_fires_parent_and_child_destructors(
     validate_testdata_project_with_reference_graph: ValidateTestdataProjectWithReferenceGraph,
 ):
     result = validate_testdata_project_with_reference_graph()
     assert_no_errors(result.program_result)
     assert result.action_call_graph.edges() == [
-        (_TEST, _CHILD_DESTRUCTOR),
         (_TEST, _PARENT_DESTRUCTOR),
+        (_TEST, _CHILD_DESTRUCTOR),
     ]
 
 

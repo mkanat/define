@@ -40,6 +40,8 @@ class MiddleActionExecution:
         self.scheduler = scheduler
         self.destruction_connections = destruction_connections
         self.execution_action_inner: local.my_domain_com.my_lib.inner.InnerExecution
+        self.destruction_position_global_position_input__global_position_marker: literal.Position
+        self.destruction_position_action_inner__position_trigger_pos: literal.Position
         self.join_for_empty_rule_global_position_input: literal.Join
         self.execution_action_inner = local.my_domain_com.my_lib.inner.InnerExecution(
             self.action.on_particle.get_action(
@@ -67,11 +69,12 @@ class MiddleActionExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.marker.Marker
         ).create_particle()
-        self.action.on_particle.get_position(
+        self.destruction_position_global_position_input__global_position_marker = self.action.on_particle.get_position(
             local.my_domain_com.my_lib.input.Input
         ).particle.get_position(
             local.my_domain_com.my_lib.marker.Marker
-        ).destroy_particle()
+        )
+        self.destruction_position_global_position_input__global_position_marker.destroy_particle()
         self.execution_action_inner.accept_for_empty_rule_global_position_input()
 
     def create_action_inner__position_trigger_pos(self):
@@ -80,8 +83,9 @@ class MiddleActionExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_action(
+        self.destruction_position_action_inner__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.inner.Inner
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_inner__position_trigger_pos.destroy_particle()

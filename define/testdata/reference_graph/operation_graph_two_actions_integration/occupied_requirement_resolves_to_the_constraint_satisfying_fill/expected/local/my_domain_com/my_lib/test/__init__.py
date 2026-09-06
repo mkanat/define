@@ -52,6 +52,7 @@ class TestExecution:
         )
         self.execution_position_action_holder__action_move: local.my_domain_com.my_lib.move.MoveExecution
         self.execution_position_action_holder__action_move_2: local.my_domain_com.my_lib.move.MoveExecution
+        self.destruction_position_position_dest__global_position_a: literal.Position
         self.join_for_move_position_box2_to_position_action_holder__action_move__position_input = self.scheduler.create_join(2)
         self.join_for_move_position_box1_to_position_action_holder__action_move__position_input = self.scheduler.create_join(2)
 
@@ -143,13 +144,20 @@ class TestExecution:
         self.local_position_dest.particle.get_position(
             local.my_domain_com.my_lib.a.A
         ).create_particle()
-        self.local_position_dest.particle.get_position(
+        self.destruction_position_position_dest__global_position_a = self.local_position_dest.particle.get_position(
             local.my_domain_com.my_lib.a.A
-        ).destroy_particle()
-        self.local_position_dest.destroy_particle()
-
-    def destroy_position_action_holder(self):
-        self.local_position_action_holder.destroy_particle()
+        )
+        self.scheduler.submit(self.destroy_position_dest)
+        self.destroy_position_dest__global_position_a()
 
     def destroy_position_box2(self):
         self.local_position_box2.destroy_particle()
+
+    def destroy_position_dest(self):
+        self.local_position_dest.destroy_particle()
+
+    def destroy_position_dest__global_position_a(self):
+        self.destruction_position_position_dest__global_position_a.destroy_particle()
+
+    def destroy_position_action_holder(self):
+        self.local_position_action_holder.destroy_particle()

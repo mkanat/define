@@ -53,6 +53,8 @@ class DestroyerExecution:
             "position<holder_b>",
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_run__global_position_marker_a: literal.Position
+        self.destruction_position_position_run__global_position_marker_b: literal.Position
         self.join_for_move_position_run__global_position_marker_a_to_position_holder_a: literal.Join
         self.join_for_move_position_run__global_position_marker_b_to_position_holder_b: literal.Join
         self.join_for_destroy_position_run: literal.Join
@@ -90,6 +92,12 @@ class DestroyerExecution:
                 local.my_domain_com.my_lib.marker_a.MarkerA
             )
         )
+        self.destruction_position_position_run__global_position_marker_a = self.action.get_interface_position(
+            "position<run>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.marker_a.MarkerA
+        )
+        self.scheduler.submit(self.destroy_position_run)
         self.destroy_position_run__global_position_marker_a()
 
     def move_position_run__global_position_marker_b_to_position_holder_b(self):
@@ -107,29 +115,13 @@ class DestroyerExecution:
                 local.my_domain_com.my_lib.marker_b.MarkerB
             )
         )
-        self.destroy_position_run__global_position_marker_b()
-
-    def destroy_position_run__global_position_marker_b(self):
-        literal.continue_destruction(self.continue_destroy_position_run__global_position_marker_b)
-
-    def continue_destroy_position_run__global_position_marker_b(self):
-        self.action.get_interface_position(
+        self.destruction_position_position_run__global_position_marker_b = self.action.get_interface_position(
             "position<run>"
         ).particle.get_position(
             local.my_domain_com.my_lib.marker_b.MarkerB
-        ).destroy_particle()
-        self.destroy_position_run()
-
-    def destroy_position_run__global_position_marker_a(self):
-        literal.continue_destruction(self.continue_destroy_position_run__global_position_marker_a)
-
-    def continue_destroy_position_run__global_position_marker_a(self):
-        self.action.get_interface_position(
-            "position<run>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.marker_a.MarkerA
-        ).destroy_particle()
-        self.destroy_position_run()
+        )
+        self.scheduler.submit(self.destroy_position_run)
+        self.destroy_position_run__global_position_marker_b()
 
     def destroy_position_run(self):
         if not self.join_for_destroy_position_run.arrive():
@@ -143,3 +135,15 @@ class DestroyerExecution:
         self.guarantees.position_run.publish(
             self.scheduler,
         )
+
+    def destroy_position_run__global_position_marker_a(self):
+        literal.continue_destruction(self.continue_destroy_position_run__global_position_marker_a)
+
+    def continue_destroy_position_run__global_position_marker_a(self):
+        self.destruction_position_position_run__global_position_marker_a.destroy_particle()
+
+    def destroy_position_run__global_position_marker_b(self):
+        literal.continue_destruction(self.continue_destroy_position_run__global_position_marker_b)
+
+    def continue_destroy_position_run__global_position_marker_b(self):
+        self.destruction_position_position_run__global_position_marker_b.destroy_particle()

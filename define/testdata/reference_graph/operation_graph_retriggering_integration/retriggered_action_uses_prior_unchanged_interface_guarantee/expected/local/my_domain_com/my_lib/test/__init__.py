@@ -33,6 +33,7 @@ class TestExecution:
         )
         self.execution_position_gateway__action_worker: local.my_domain_com.my_lib.worker.WorkerExecution
         self.execution_position_gateway__action_worker_2: local.my_domain_com.my_lib.worker.WorkerExecution
+        self.destruction_position_position_gateway__action_worker__position_item: literal.Position
         self.join_for_destroy_position_gateway = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -66,6 +67,9 @@ class TestExecution:
         self.execution_position_gateway__action_worker_2.join_for_empty_rule_position_trigger_pos = literal.NO_JOIN
         self.execution_position_gateway__action_worker_2.join_for_move_position_item_to_position_holder = literal.NO_JOIN
         self.execution_position_gateway__action_worker_2.join_for_destroy_position_trigger_pos = literal.NO_JOIN
+        self.execution_position_gateway__action_worker_2.guarantees.position_item.inits.append(
+            self.init_position_gateway__action_worker__position_item
+        )
         self.execution_position_gateway__action_worker_2.guarantees.position_item.consumers.append(
             self.destroy_position_gateway__action_worker__position_item
         )
@@ -100,17 +104,20 @@ class TestExecution:
         self.execution_position_gateway__action_worker_2.accept_for_empty_rule_position_trigger_pos()
 
     def destroy_position_gateway__action_worker__position_item(self):
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.worker.Worker
-        ).get_interface_position(
-            "position<item>"
-        ).destroy_particle()
+        self.destruction_position_position_gateway__action_worker__position_item.destroy_particle()
         self.destroy_position_gateway()
 
     def destroy_position_gateway(self):
         if not self.join_for_destroy_position_gateway.arrive():
             return
         self.local_position_gateway.destroy_particle()
+
+    def init_position_gateway__action_worker__position_item(self):
+        self.destruction_position_position_gateway__action_worker__position_item = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.worker.Worker
+        ).get_interface_position(
+            "position<item>"
+        )
 
     def accept_guarantee_position_gateway__action_worker(self):
         self.execution_position_gateway__action_worker_2.accept_for_empty_rule_position_item()

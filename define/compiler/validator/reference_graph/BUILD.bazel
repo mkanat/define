@@ -26,27 +26,6 @@ py_library(
     ],
 )
 
-py_test(
-    name = "definition_postorder_validator_destruction_contract_test",
-    size = "small",
-    srcs = ["definition_postorder_validator_destruction_contract_test.py"],
-    deps = [
-        ":action_contract",
-        ":test_helpers",
-    ],
-)
-
-py_test(
-    name = "definition_postorder_validator_test",
-    size = "small",
-    srcs = ["definition_postorder_validator_test.py"],
-    deps = [
-        ":action_contract",
-        ":test_helpers",
-        "//define/compiler:ast",
-    ],
-)
-
 py_library(
     name = "definition_postorder_validator",
     srcs = ["definition_postorder_validator.py"],
@@ -200,10 +179,8 @@ py_test(
     size = "small",
     srcs = ["operation_graph_test.py"],
     deps = [
-        ":operation_graph",
         ":operation_graph_model",
         "//define/compiler:ast",
-        "@pypi//pytest",
     ],
 )
 
@@ -222,7 +199,6 @@ py_library(
     srcs = ["particle_operation.py"],
     visibility = ["//define/compiler:__subpackages__"],
     deps = [
-        ":operation_graph_model",
         ":particle_tracker",
         ":quality_assignment",
         "//define/compiler:ast",
@@ -243,18 +219,6 @@ py_library(
         "//define/compiler:ast",
         "//define/compiler/data_structures:trie",
         "//define/compiler/validator/reference_graph/dead_code:dead_interface_tracker",
-    ],
-)
-
-py_test(
-    name = "particle_tracker_test",
-    size = "small",
-    srcs = ["particle_tracker_test.py"],
-    deps = [
-        ":action_contract",
-        ":particle_tracker",
-        ":quality_assignment",
-        "//define/compiler:ast",
     ],
 )
 
@@ -352,20 +316,6 @@ py_library(
     ],
 )
 
-py_library(
-    name = "test_helpers",
-    testonly = True,
-    srcs = ["test_helpers.py"],
-    visibility = ["//define/compiler/validator/reference_graph:__subpackages__"],
-    deps = [
-        ":action_contract",
-        ":definition_postorder_validator",
-        ":reference_graph_validator",
-        "//define/compiler/validator:test_helpers",
-        "//define/compiler/validator/structural:program_validator",
-    ],
-)
-
 # --- Format checking ---
 
 format_test(
@@ -382,8 +332,6 @@ pyright_test(
         ":action_contract",
         ":action_contract_test",
         ":definition_postorder_validator",
-        ":definition_postorder_validator_destruction_contract_test",
-        ":definition_postorder_validator_test",
         ":operation_graph",
         ":operation_graph_action_resolver",
         ":operation_graph_labeler",
@@ -399,7 +347,6 @@ pyright_test(
         ":particle_info",
         ":particle_operation",
         ":particle_tracker",
-        ":particle_tracker_test",
         ":quality_assignment",
         ":quality_assignment_test",
         ":reference_graph",
@@ -408,6 +355,5 @@ pyright_test(
         ":reference_graph_validator",
         ":reference_graph_validator_test",
         ":requirement_violation",
-        ":test_helpers",
     ],
 )

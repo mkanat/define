@@ -32,6 +32,7 @@ class TestExecution:
         self.action = action
         self.scheduler = scheduler
         self.execution_action_runner: local.my_domain_com.my_lib.runner.RunnerExecution
+        self.destruction_position_action_runner__position_output: literal.Position
         self.execution_action_runner = local.my_domain_com.my_lib.runner.RunnerExecution(
             self.action.on_particle.get_action(
                 local.my_domain_com.my_lib.runner.Runner
@@ -40,6 +41,9 @@ class TestExecution:
         )
         self.execution_action_runner.join_for_empty_rule_position_run = literal.NO_JOIN
         self.execution_action_runner.join_for_destroy_position_run = literal.NO_JOIN
+        self.execution_action_runner.guarantees.position_output.inits.append(
+            self.init_action_runner__position_output
+        )
         self.execution_action_runner.guarantees.position_output.consumers.append(
             self.destroy_action_runner__position_output
         )
@@ -59,8 +63,11 @@ class TestExecution:
         self.execution_action_runner.accept_for_empty_rule_position_run()
 
     def destroy_action_runner__position_output(self):
-        self.action.on_particle.get_action(
+        self.destruction_position_action_runner__position_output.destroy_particle()
+
+    def init_action_runner__position_output(self):
+        self.destruction_position_action_runner__position_output = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.runner.Runner
         ).get_interface_position(
             "position<output>"
-        ).destroy_particle()
+        )

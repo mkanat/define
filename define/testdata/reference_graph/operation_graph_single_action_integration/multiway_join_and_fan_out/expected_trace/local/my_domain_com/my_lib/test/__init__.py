@@ -41,6 +41,8 @@ class TestExecution:
             ),
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_box__global_position_a: literal.Position
+        self.destruction_position_position_box__global_position_b: literal.Position
         self.join_for_destroy_position_box = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -65,15 +67,11 @@ class TestExecution:
             "box::/a",
             1,
         )
-        self.local_position_box.particle.get_position(
+        self.destruction_position_position_box__global_position_a = self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.a.A
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "box::/a",
-            1,
         )
-        self.destroy_position_box()
+        self.scheduler.submit(self.destroy_position_box)
+        self.destroy_position_box__global_position_a()
 
     def create_position_box__global_position_b(self):
         self.local_position_box.particle.get_position(
@@ -84,15 +82,11 @@ class TestExecution:
             "box::/b",
             1,
         )
-        self.local_position_box.particle.get_position(
+        self.destruction_position_position_box__global_position_b = self.local_position_box.particle.get_position(
             local.my_domain_com.my_lib.b.B
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "box::/b",
-            1,
         )
-        self.destroy_position_box()
+        self.scheduler.submit(self.destroy_position_box)
+        self.destroy_position_box__global_position_b()
 
     def destroy_position_box(self):
         if not self.join_for_destroy_position_box.arrive():
@@ -101,5 +95,21 @@ class TestExecution:
         self.scheduler.destroy_completed(
             self.trace_execution,
             "box",
+            1,
+        )
+
+    def destroy_position_box__global_position_a(self):
+        self.destruction_position_position_box__global_position_a.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.trace_execution,
+            "box::/a",
+            1,
+        )
+
+    def destroy_position_box__global_position_b(self):
+        self.destruction_position_position_box__global_position_b.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.trace_execution,
+            "box::/b",
             1,
         )

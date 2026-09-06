@@ -52,6 +52,7 @@ class TestExecution:
         self.destruction_connection_action_middle_2: tracing.DestructionConnection
         self.destruction_position_global_position_parent__global_position_child__global_position_grandchild__global_position_greatgrandchild: literal.Position
         self.destruction_position_global_position_parent__global_position_sibling: literal.Position
+        self.destruction_position_action_middle__position_trigger_pos: literal.Position
         self.destruction_connection_action_middle = tracing.DestructionConnection(
             self.scheduler,
             1,
@@ -177,11 +178,12 @@ class TestExecution:
             "/middle::trigger_pos",
             1,
         )
-        self.action.on_particle.get_action(
+        self.destruction_position_action_middle__position_trigger_pos = self.action.on_particle.get_action(
             local.my_domain_com.my_lib.middle.Middle
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_action_middle__position_trigger_pos.destroy_particle()
         self.scheduler.destroy_completed(
             self.trace_execution,
             "/middle::trigger_pos",

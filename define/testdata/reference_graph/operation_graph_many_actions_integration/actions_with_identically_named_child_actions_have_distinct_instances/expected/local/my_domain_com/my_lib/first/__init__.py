@@ -36,6 +36,7 @@ class FirstExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_box__action_inner: local.my_domain_com.my_lib.inner.InnerExecution
+        self.destruction_position_position_box__action_inner__position_trigger_pos: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_box()
@@ -54,9 +55,10 @@ class FirstExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_box.particle.get_action(
+        self.destruction_position_position_box__action_inner__position_trigger_pos = self.local_position_box.particle.get_action(
             local.my_domain_com.my_lib.inner.Inner
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_box__action_inner__position_trigger_pos.destroy_particle()
         self.local_position_box.destroy_particle()

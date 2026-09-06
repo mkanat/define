@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 import typing
 from dataclasses import dataclass
 
@@ -23,6 +24,20 @@ if typing.TYPE_CHECKING:
         Iterator,
         Sequence,
     )
+
+
+@dataclass(frozen=True, slots=True)
+class ParticleDestruction:
+    """A destruction target and its occupied transitive child Positions."""
+
+    position: ast.PositionReference
+    destruction_fact: operation_graph_model.DestructionFact
+    transitive_children: list[ast.PositionReference]
+
+    def positions(self) -> Iterator[ast.PositionReference]:
+        """Yield the target Position followed by its transitive child Positions."""
+        yield self.position
+        yield from self.transitive_children
 
 
 @dataclass(frozen=True, slots=True)
@@ -255,31 +270,26 @@ class _PendingNestedGuarantees:
             self._longest_pending_guarantee_key = 0
             return
         previous_key: tuple[str, ...] | None = None
+        previous_drained_prefix_count = 0
         for key in keys:
             if previous_key is None:
                 # A pending implied-action guarantee can use the empty tuple as
                 # its prefix, so the first path must begin there.
                 length = 0
             else:
-                # Every prefix shared with the preceding path was already fully
-                # drained. Find the first prefix unique to this path instead of
-                # repeating those dictionary lookups.
+                # Reuse only prefixes actually drained for the preceding path.
                 common_depth = 0
                 common_depth_limit = min(
                     len(previous_key),
                     len(key),
-                    # No pending prefix can be longer than this cached depth, so
-                    # comparing additional names cannot let us skip more lookups.
-                    self._longest_pending_guarantee_key,
+                    previous_drained_prefix_count,
                 )
                 while (
                     common_depth < common_depth_limit
                     and previous_key[common_depth] == key[common_depth]
                 ):
                     common_depth += 1
-                # ``common_depth`` is the length of the last shared prefix; the
-                # next length is therefore the first prefix not yet drained.
-                length = common_depth + 1
+                length = min(common_depth + 1, previous_drained_prefix_count)
             key_len = len(key)
             # A guarantee can affect the queried position only when its prefix
             # is one of the queried position's parent names.
@@ -296,6 +306,7 @@ class _PendingNestedGuarantees:
                     return
                 length += 1
             previous_key = key
+            previous_drained_prefix_count = length
 
     def drain_at_or_below(self, key: tuple[str, ...]) -> Iterator[_PendingGuarantee]:
         """Yield guarantees whose prefixes equal ``key`` or have it as a parent name."""
@@ -1187,81 +1198,64 @@ class ParticleTracker:
         if from_caller is None:
             self._register_explicit_action_interface_arrival(in_position, info)
 
-    def destroy(self, in_position: ast.PositionReference):
-        """Remove a particle from this position.
+    def destroy_simultaneously(
+        self,
+        destructions: Sequence[ParticleDestruction],
+    ):
+        """Record and apply a simultaneous set of particle destructions.
 
-        Raises ValueError if the position is not occupied.
+        Each target includes all its occupied transitive children; targets must
+        have disjoint state subtrees. Child order imposes no graph dependencies.
+        All graph operations are recorded before deleting each target's state.
         """
-        key, preceding_child_operations, _ = self._prepare_destroy(in_position)
-        operation_node = self._operation_graph_builder.record_destroy(
-            in_position,
-            preceding_child_operations,
+        positions = (destruction.positions() for destruction in destructions)
+        self._apply_pending_guarantees_up_to_all(
+            position.canonical_chained_name_tuple
+            for position in itertools.chain.from_iterable(positions)
         )
-        self._record_destroyed_state(key, in_position, operation_node)
-
-    def destroy_explicit(
-        self,
-        in_position: ast.PositionReference,
-        destruction_fact: operation_graph_model.DestructionFact,
-    ):
-        """Remove the particle targeted by an explicit Destroy statement."""
-        key, preceding_child_operations, particle = self._prepare_destroy(in_position)
-        if particle.from_caller:
-            operation_node = (
-                self._operation_graph_builder.record_destruction_fact_destroy(
-                    destruction_fact,
-                    in_position,
-                    preceding_child_operations,
-                    propagate_to_caller=True,
-                )
-            )
-        else:
-            operation_node = self._operation_graph_builder.record_destroy(
-                in_position,
-                preceding_child_operations,
-            )
-        self._record_destroyed_state(key, in_position, operation_node)
-
-    def destroy_for_destruction_fact(
-        self,
-        in_position: ast.PositionReference,
-        destruction_fact: operation_graph_model.DestructionFact,
-    ):
-        """Remove a particle as part of one Destruction Fact."""
-        key, preceding_child_operations, particle = self._prepare_destroy(in_position)
-        operation_node = self._operation_graph_builder.record_destruction_fact_destroy(
-            destruction_fact,
-            in_position,
-            preceding_child_operations,
-            propagate_to_caller=particle.from_caller,
-        )
-        self._record_destroyed_state(key, in_position, operation_node)
-
-    def _prepare_destroy(
-        self, in_position: ast.PositionReference
-    ) -> tuple[
-        tuple[str, ...],
-        operation_graph_model.PrecedingChildOperations,
-        particle_info.ParticleInfo,
-    ]:
-        """Validate a destruction and capture its child operations."""
-        key = in_position.canonical_chained_name_tuple
-        self._apply_pending_guarantees_up_to(key)
-        existing = self._store.state.get(key)
-        if existing is None or existing.particle_info is None:
-            raise ValueError(f"position {key} is not occupied")
         # Capture these before the subtree is deleted so graph dependencies see
         # the child operations.
-        return key, self._preceding_child_operations(key), existing.particle_info
+        graph_destructions: list[operation_graph.DestructionFactDestroyInput] = []
+        for destruction in destructions:
+            for position in destruction.positions():
+                key = position.canonical_chained_name_tuple
+                particle = self._store.occupant(key)
+                graph_destructions.append(
+                    operation_graph.DestructionFactDestroyInput(
+                        destruction_fact=destruction.destruction_fact,
+                        target=position,
+                        preceding_child_operations=self._preceding_child_operations(
+                            key
+                        ),
+                        propagate_to_caller=particle.from_caller,
+                    )
+                )
+        operation_nodes = (
+            self._operation_graph_builder.record_destruction_fact_destroys(
+                graph_destructions
+            )
+        )
+        target_operation_index = 0
+        for destruction in destructions:
+            self._record_destroyed_state(
+                destruction,
+                operation_nodes[target_operation_index],
+            )
+            target_operation_index += 1 + len(destruction.transitive_children)
 
     def _record_destroyed_state(
         self,
-        key: tuple[str, ...],
-        in_position: ast.PositionReference,
+        destruction: ParticleDestruction,
         operation_node: operation_graph_model.DestroyNode,
     ):
-        """Record the empty state produced by a Destroy operation."""
-        # Destroying the particle also destroys all particles at child positions.
+        """Record state changes for a target and its transitive children."""
+        # Pending Guarantees compare writes by Position, so children still
+        # need write records even though their state is deleted with the parent.
+        for child in destruction.transitive_children:
+            self._record_body_write(child.canonical_chained_name_tuple)
+        key = destruction.position.canonical_chained_name_tuple
+        # Subtree deletion notifies the interface trackers for every removed
+        # particle. Only the target's empty state survives the destruction.
         self._delete_particle_state_subtree(key)
         # Destroying puts all children back into a known state (they don't exist).
         if key in self._store.error:
@@ -1269,7 +1263,7 @@ class ParticleTracker:
         self._nested_guarantees.discard_for_destroyed_particle(key)
         self._record_body_write(key)
         self._store.state[key] = _NodeState(
-            emptied_by=in_position, operation_node=operation_node
+            emptied_by=destruction.position, operation_node=operation_node
         )
 
     def get_emptied_by(

@@ -55,6 +55,7 @@ class InnerExecution:
         self.scheduler = scheduler
         self.guarantees = InnerGuarantees()
         self.destruction_connections = destruction_connections
+        self.destruction_position_position_destination__global_position_child: literal.Position
         self.join_for_move_position_source_to_position_destination: literal.Join
         self.join_for_empty_rule_position_source: literal.Join
 
@@ -73,6 +74,11 @@ class InnerExecution:
                 "position<destination>"
             )
         )
+        self.destruction_position_position_destination__global_position_child = self.action.get_interface_position(
+            "position<destination>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.child.Child
+        )
         self.guarantees.position_source__move__position_destination.publish(
             self.scheduler,
             self.destroy_position_destination__global_position_child,
@@ -82,11 +88,7 @@ class InnerExecution:
         literal.continue_destruction(self.continue_destroy_position_destination__global_position_child)
 
     def continue_destroy_position_destination__global_position_child(self):
-        self.action.get_interface_position(
-            "position<destination>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
+        self.destruction_position_position_destination__global_position_child.destroy_particle()
         self.guarantees.position_destination__global_position_child.publish(
             self.scheduler,
         )

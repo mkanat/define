@@ -38,6 +38,8 @@ class TestExecution:
         self.execution_position_station__action_grind: local.my_domain_com.my_lib.grind.GrindExecution
         self.execution_position_station__action_heat: local.my_domain_com.my_lib.heat.HeatExecution
         self.execution_position_station__action_brew: local.my_domain_com.my_lib.brew.BrewExecution
+        self.destruction_position_position_station__action_brew__position_cup: literal.Position
+        self.destruction_position_position_station__action_brew__position_spent_puck: literal.Position
         self.join_for_destroy_position_station = self.scheduler.create_join(3)
 
     def on_action_parent_occupied(self):
@@ -77,8 +79,14 @@ class TestExecution:
         self.execution_position_station__action_brew.join_for_empty_rule_position_grounds = literal.NO_JOIN
         self.execution_position_station__action_brew.join_for_destroy_position_water = literal.NO_JOIN
         self.execution_position_station__action_brew.join_for_move_position_grounds_to_position_spent_puck = literal.NO_JOIN
+        self.execution_position_station__action_brew.guarantees.position_cup.inits.append(
+            self.init_position_station__action_brew__position_cup
+        )
         self.execution_position_station__action_brew.guarantees.position_cup.consumers.append(
             self.destroy_position_station__action_brew__position_cup
+        )
+        self.execution_position_station__action_brew.guarantees.position_grounds__move__position_spent_puck.inits.append(
+            self.init_position_station__action_brew__position_grounds__move__position_spent_puck
         )
         self.execution_position_station__action_brew.guarantees.position_grounds__move__position_spent_puck.consumers.append(
             self.destroy_position_station__action_brew__position_spent_puck
@@ -135,22 +143,28 @@ class TestExecution:
         self.execution_position_station__action_brew.accept_for_empty_rule_position_water()
 
     def destroy_position_station__action_brew__position_cup(self):
-        self.local_position_station.particle.get_action(
-            local.my_domain_com.my_lib.brew.Brew
-        ).get_interface_position(
-            "position<cup>"
-        ).destroy_particle()
+        self.destruction_position_position_station__action_brew__position_cup.destroy_particle()
         self.destroy_position_station()
 
     def destroy_position_station__action_brew__position_spent_puck(self):
-        self.local_position_station.particle.get_action(
-            local.my_domain_com.my_lib.brew.Brew
-        ).get_interface_position(
-            "position<spent_puck>"
-        ).destroy_particle()
+        self.destruction_position_position_station__action_brew__position_spent_puck.destroy_particle()
         self.destroy_position_station()
 
     def destroy_position_station(self):
         if not self.join_for_destroy_position_station.arrive():
             return
         self.local_position_station.destroy_particle()
+
+    def init_position_station__action_brew__position_cup(self):
+        self.destruction_position_position_station__action_brew__position_cup = self.local_position_station.particle.get_action(
+            local.my_domain_com.my_lib.brew.Brew
+        ).get_interface_position(
+            "position<cup>"
+        )
+
+    def init_position_station__action_brew__position_grounds__move__position_spent_puck(self):
+        self.destruction_position_position_station__action_brew__position_spent_puck = self.local_position_station.particle.get_action(
+            local.my_domain_com.my_lib.brew.Brew
+        ).get_interface_position(
+            "position<spent_puck>"
+        )

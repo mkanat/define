@@ -41,6 +41,8 @@ class TestExecution:
         )
         self.execution_position_holder_first__action_first: local.my_domain_com.my_lib.first.FirstExecution
         self.execution_position_holder_second__action_second: local.my_domain_com.my_lib.second.SecondExecution
+        self.destruction_position_position_holder_first__action_first__position_trigger_pos: literal.Position
+        self.destruction_position_position_holder_second__action_second__position_trigger_pos: literal.Position
 
     def on_action_parent_occupied(self):
         self.scheduler.submit(self.create_position_holder_first)
@@ -60,11 +62,12 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_holder_first.particle.get_action(
+        self.destruction_position_position_holder_first__action_first__position_trigger_pos = self.local_position_holder_first.particle.get_action(
             local.my_domain_com.my_lib.first.First
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_holder_first__action_first__position_trigger_pos.destroy_particle()
         self.local_position_holder_first.destroy_particle()
 
     def create_position_holder_second(self):
@@ -81,9 +84,10 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_holder_second.particle.get_action(
+        self.destruction_position_position_holder_second__action_second__position_trigger_pos = self.local_position_holder_second.particle.get_action(
             local.my_domain_com.my_lib.second.Second
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_holder_second__action_second__position_trigger_pos.destroy_particle()
         self.local_position_holder_second.destroy_particle()

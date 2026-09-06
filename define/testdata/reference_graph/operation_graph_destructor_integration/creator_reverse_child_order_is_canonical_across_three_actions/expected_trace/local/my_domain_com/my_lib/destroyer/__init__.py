@@ -59,8 +59,10 @@ class DestroyerExecution:
             "position<second_holder>",
             scheduler=self.scheduler,
         )
-        self.execution_position_target__action_fourth_destructor: local.my_domain_com.my_lib.fourth_destructor.FourthDestructorExecution
         self.execution_position_target__action_second_destructor: local.my_domain_com.my_lib.second_destructor.SecondDestructorExecution
+        self.execution_position_target__action_fourth_destructor: local.my_domain_com.my_lib.fourth_destructor.FourthDestructorExecution
+        self.destruction_position_position_target__global_position_second: literal.Position
+        self.destruction_position_position_target__global_position_fourth: literal.Position
         self.join_for_move_position_target__global_position_second_to_position_second_holder: literal.Join
         self.join_for_destroy_position_target: literal.Join
         self.join_for_empty_rule_position_target__global_position_second: literal.Join
@@ -75,7 +77,7 @@ class DestroyerExecution:
         self.create_position_target__global_position_fourth()
 
     def accept_when_empty_position_target__global_position_marker(self):
-        self.execution_position_target__action_fourth_destructor.accept_when_empty_global_position_marker()
+        self.execution_position_target__action_second_destructor.accept_when_empty_global_position_marker()
 
     def accept_for_empty_rule_position_target(self):
         if not self.join_for_empty_rule_position_target.arrive():
@@ -83,24 +85,6 @@ class DestroyerExecution:
         self.destroy_position_target()
 
     def init_when_occupied_position_target(self):
-        self.execution_position_target__action_fourth_destructor = local.my_domain_com.my_lib.fourth_destructor.FourthDestructorExecution(
-            self.action.get_interface_position(
-                "position<target>"
-            ).particle.get_action(
-                local.my_domain_com.my_lib.fourth_destructor.FourthDestructor
-            ),
-            self.scheduler,
-            self.trace_execution,
-            "fourth_destructor",
-        )
-        self.execution_position_target__action_fourth_destructor.join_for_empty_rule_global_position_fourth = literal.NO_JOIN
-        self.execution_position_target__action_fourth_destructor.join_for_move_global_position_fourth_to_position_holder = literal.NO_JOIN
-        self.execution_position_target__action_fourth_destructor.guarantees.global_position_fourth.consumers.append(
-            self.destroy_position_target__global_position_fourth
-        )
-        self.execution_position_target__action_fourth_destructor.guarantees.global_position_marker.consumers.append(
-            self.accept_guarantee_position_target__action_second_destructor
-        )
         self.execution_position_target__action_second_destructor = local.my_domain_com.my_lib.second_destructor.SecondDestructorExecution(
             self.action.get_interface_position(
                 "position<target>"
@@ -113,10 +97,40 @@ class DestroyerExecution:
         )
         self.execution_position_target__action_second_destructor.join_for_empty_rule_global_position_second = literal.NO_JOIN
         self.execution_position_target__action_second_destructor.join_for_move_global_position_second_to_position_holder = literal.NO_JOIN
+        self.execution_position_target__action_second_destructor.guarantees.global_position_second.inits.append(
+            self.init_position_target__action_second_destructor__global_position_second
+        )
+        self.execution_position_target__action_second_destructor.guarantees.global_position_second.consumers.append(
+            self.destroy_position_target
+        )
         self.execution_position_target__action_second_destructor.guarantees.global_position_second.consumers.append(
             self.destroy_position_target__global_position_second
         )
         self.execution_position_target__action_second_destructor.guarantees.global_position_marker.consumers.append(
+            self.accept_guarantee_position_target__action_fourth_destructor
+        )
+        self.execution_position_target__action_fourth_destructor = local.my_domain_com.my_lib.fourth_destructor.FourthDestructorExecution(
+            self.action.get_interface_position(
+                "position<target>"
+            ).particle.get_action(
+                local.my_domain_com.my_lib.fourth_destructor.FourthDestructor
+            ),
+            self.scheduler,
+            self.trace_execution,
+            "fourth_destructor",
+        )
+        self.execution_position_target__action_fourth_destructor.join_for_empty_rule_global_position_fourth = literal.NO_JOIN
+        self.execution_position_target__action_fourth_destructor.join_for_move_global_position_fourth_to_position_holder = literal.NO_JOIN
+        self.execution_position_target__action_fourth_destructor.guarantees.global_position_fourth.inits.append(
+            self.init_position_target__action_fourth_destructor__global_position_fourth
+        )
+        self.execution_position_target__action_fourth_destructor.guarantees.global_position_fourth.consumers.append(
+            self.destroy_position_target
+        )
+        self.execution_position_target__action_fourth_destructor.guarantees.global_position_fourth.consumers.append(
+            self.destroy_position_target__global_position_fourth
+        )
+        self.execution_position_target__action_fourth_destructor.guarantees.global_position_marker.consumers.append(
             self.destroy_position_target
         )
 
@@ -162,38 +176,6 @@ class DestroyerExecution:
         )
         self.execution_position_target__action_fourth_destructor.accept_for_empty_rule_global_position_fourth()
 
-    def destroy_position_target__global_position_fourth(self):
-        literal.continue_destruction(self.continue_destroy_position_target__global_position_fourth)
-
-    def continue_destroy_position_target__global_position_fourth(self):
-        self.action.get_interface_position(
-            "position<target>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.fourth.Fourth
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "target::/fourth",
-            1,
-        )
-        self.destroy_position_target()
-
-    def destroy_position_target__global_position_second(self):
-        literal.continue_destruction(self.continue_destroy_position_target__global_position_second)
-
-    def continue_destroy_position_target__global_position_second(self):
-        self.action.get_interface_position(
-            "position<target>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.second.Second
-        ).destroy_particle()
-        self.scheduler.destroy_completed(
-            self.trace_execution,
-            "target::/second",
-            1,
-        )
-        self.destroy_position_target()
-
     def destroy_position_target(self):
         if not self.join_for_destroy_position_target.arrive():
             return
@@ -212,5 +194,41 @@ class DestroyerExecution:
             self.scheduler,
         )
 
-    def accept_guarantee_position_target__action_second_destructor(self):
-        self.execution_position_target__action_second_destructor.accept_when_empty_global_position_marker()
+    def destroy_position_target__global_position_second(self):
+        literal.continue_destruction(self.continue_destroy_position_target__global_position_second)
+
+    def continue_destroy_position_target__global_position_second(self):
+        self.destruction_position_position_target__global_position_second.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.trace_execution,
+            "target::/second",
+            1,
+        )
+
+    def destroy_position_target__global_position_fourth(self):
+        literal.continue_destruction(self.continue_destroy_position_target__global_position_fourth)
+
+    def continue_destroy_position_target__global_position_fourth(self):
+        self.destruction_position_position_target__global_position_fourth.destroy_particle()
+        self.scheduler.destroy_completed(
+            self.trace_execution,
+            "target::/fourth",
+            1,
+        )
+
+    def init_position_target__action_second_destructor__global_position_second(self):
+        self.destruction_position_position_target__global_position_second = self.action.get_interface_position(
+            "position<target>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.second.Second
+        )
+
+    def init_position_target__action_fourth_destructor__global_position_fourth(self):
+        self.destruction_position_position_target__global_position_fourth = self.action.get_interface_position(
+            "position<target>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.fourth.Fourth
+        )
+
+    def accept_guarantee_position_target__action_fourth_destructor(self):
+        self.execution_position_target__action_fourth_destructor.accept_when_empty_global_position_marker()

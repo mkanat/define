@@ -45,6 +45,8 @@ class MiddleExecution:
         self.guarantees = MiddleGuarantees()
         self.execution_global_position_shared__action_child_a: local.my_domain_com.my_lib.child_a.ChildAExecution
         self.execution_global_position_shared__action_child_b: local.my_domain_com.my_lib.child_b.ChildBExecution
+        self.destruction_position_global_position_shared__action_child_a__position_trigger_pos: literal.Position
+        self.destruction_position_global_position_shared__action_child_b__position_trigger_pos: literal.Position
 
     def accept_when_empty_global_position_shared__global_position_marker(self):
         self.create_global_position_shared__global_position_marker()
@@ -91,13 +93,14 @@ class MiddleExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_position(
+        self.destruction_position_global_position_shared__action_child_a__position_trigger_pos = self.action.on_particle.get_position(
             local.my_domain_com.my_lib.shared.Shared
         ).particle.get_action(
             local.my_domain_com.my_lib.child_a.ChildA
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_global_position_shared__action_child_a__position_trigger_pos.destroy_particle()
 
     def create_global_position_shared__action_child_b__position_trigger_pos(self):
         self.action.on_particle.get_position(
@@ -107,10 +110,11 @@ class MiddleExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.action.on_particle.get_position(
+        self.destruction_position_global_position_shared__action_child_b__position_trigger_pos = self.action.on_particle.get_position(
             local.my_domain_com.my_lib.shared.Shared
         ).particle.get_action(
             local.my_domain_com.my_lib.child_b.ChildB
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_global_position_shared__action_child_b__position_trigger_pos.destroy_particle()

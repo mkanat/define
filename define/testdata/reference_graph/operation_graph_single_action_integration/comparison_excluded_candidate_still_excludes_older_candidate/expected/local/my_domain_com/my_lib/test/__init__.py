@@ -33,6 +33,10 @@ class TestExecution:
             ),
             scheduler=self.scheduler,
         )
+        self.destruction_position_position_parent__global_position_child__global_position_grandchild_x: literal.Position
+        self.destruction_position_position_parent__global_position_child: literal.Position
+        self.destruction_position_position_parent__global_position_child__global_position_grandchild_y: literal.Position
+        self.destruction_position_position_parent__global_position_child_2: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_parent()
@@ -47,14 +51,16 @@ class TestExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.grandchild_x.GrandchildX
         ).create_particle()
-        self.local_position_parent.particle.get_position(
+        self.destruction_position_position_parent__global_position_child__global_position_grandchild_x = self.local_position_parent.particle.get_position(
             local.my_domain_com.my_lib.child.Child
         ).particle.get_position(
             local.my_domain_com.my_lib.grandchild_x.GrandchildX
-        ).destroy_particle()
-        self.local_position_parent.particle.get_position(
+        )
+        self.destruction_position_position_parent__global_position_child__global_position_grandchild_x.destroy_particle()
+        self.destruction_position_position_parent__global_position_child = self.local_position_parent.particle.get_position(
             local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
+        )
+        self.destruction_position_position_parent__global_position_child.destroy_particle()
         self.local_position_parent.particle.get_position(
             local.my_domain_com.my_lib.child.Child
         ).create_particle()
@@ -63,12 +69,14 @@ class TestExecution:
         ).particle.get_position(
             local.my_domain_com.my_lib.grandchild_y.GrandchildY
         ).create_particle()
-        self.local_position_parent.particle.get_position(
+        self.destruction_position_position_parent__global_position_child__global_position_grandchild_y = self.local_position_parent.particle.get_position(
             local.my_domain_com.my_lib.child.Child
         ).particle.get_position(
             local.my_domain_com.my_lib.grandchild_y.GrandchildY
-        ).destroy_particle()
-        self.local_position_parent.particle.get_position(
+        )
+        self.destruction_position_position_parent__global_position_child__global_position_grandchild_y.destroy_particle()
+        self.destruction_position_position_parent__global_position_child_2 = self.local_position_parent.particle.get_position(
             local.my_domain_com.my_lib.child.Child
-        ).destroy_particle()
+        )
+        self.destruction_position_position_parent__global_position_child_2.destroy_particle()
         self.local_position_parent.destroy_particle()

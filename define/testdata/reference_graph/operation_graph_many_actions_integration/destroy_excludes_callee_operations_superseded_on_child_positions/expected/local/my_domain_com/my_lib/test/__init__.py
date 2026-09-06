@@ -32,6 +32,7 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_box__action_worker: local.my_domain_com.my_lib.worker.WorkerExecution
+        self.destruction_position_position_box__action_worker__position_result: literal.Position
 
     def on_action_parent_occupied(self):
         self.create_position_box()
@@ -46,6 +47,9 @@ class TestExecution:
         )
         self.execution_position_box__action_worker.join_for_empty_rule_position_input = literal.NO_JOIN
         self.execution_position_box__action_worker.join_for_move_position_input_to_position_result = literal.NO_JOIN
+        self.execution_position_box__action_worker.guarantees.position_input__move__position_result.inits.append(
+            self.init_position_box__action_worker__position_input__move__position_result
+        )
         self.execution_position_box__action_worker.guarantees.position_input__move__position_result.consumers.append(
             self.destroy_position_box__action_worker__position_result
         )
@@ -60,9 +64,12 @@ class TestExecution:
         self.execution_position_box__action_worker.accept_for_empty_rule_position_input()
 
     def destroy_position_box__action_worker__position_result(self):
-        self.local_position_box.particle.get_action(
+        self.destruction_position_position_box__action_worker__position_result.destroy_particle()
+        self.local_position_box.destroy_particle()
+
+    def init_position_box__action_worker__position_input__move__position_result(self):
+        self.destruction_position_position_box__action_worker__position_result = self.local_position_box.particle.get_action(
             local.my_domain_com.my_lib.worker.Worker
         ).get_interface_position(
             "position<result>"
-        ).destroy_particle()
-        self.local_position_box.destroy_particle()
+        )

@@ -33,6 +33,9 @@ class TestExecution:
             scheduler=self.scheduler,
         )
         self.execution_position_gateway__action_other: local.my_domain_com.my_lib.other.OtherExecution
+        self.destruction_position_position_gateway__action_other__position_holder__global_position_a: literal.Position
+        self.destruction_position_position_gateway__action_other__position_holder: literal.Position
+        self.destruction_position_position_gateway__action_other__position_trigger_pos: literal.Position
         self.join_for_destroy_position_gateway = self.scheduler.create_join(2)
 
     def on_action_parent_occupied(self):
@@ -48,6 +51,9 @@ class TestExecution:
         )
         self.execution_position_gateway__action_other.join_for_empty_rule_position_source = literal.NO_JOIN
         self.execution_position_gateway__action_other.join_for_move_position_source_to_position_holder = literal.NO_JOIN
+        self.execution_position_gateway__action_other.guarantees.position_source__move__position_holder.inits.append(
+            self.init_position_gateway__action_other__position_source__move__position_holder
+        )
         self.execution_position_gateway__action_other.guarantees.position_source__move__position_holder.consumers.append(
             self.destroy_position_gateway__action_other__position_holder__global_position_a
         )
@@ -75,29 +81,34 @@ class TestExecution:
         ).get_interface_position(
             "position<trigger_pos>"
         ).create_particle()
-        self.local_position_gateway.particle.get_action(
+        self.destruction_position_position_gateway__action_other__position_trigger_pos = self.local_position_gateway.particle.get_action(
             local.my_domain_com.my_lib.other.Other
         ).get_interface_position(
             "position<trigger_pos>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_gateway__action_other__position_trigger_pos.destroy_particle()
         self.destroy_position_gateway()
 
     def destroy_position_gateway__action_other__position_holder__global_position_a(self):
-        self.local_position_gateway.particle.get_action(
+        self.destruction_position_position_gateway__action_other__position_holder__global_position_a.destroy_particle()
+        self.destruction_position_position_gateway__action_other__position_holder = self.local_position_gateway.particle.get_action(
             local.my_domain_com.my_lib.other.Other
         ).get_interface_position(
             "position<holder>"
-        ).particle.get_position(
-            local.my_domain_com.my_lib.a.A
-        ).destroy_particle()
-        self.local_position_gateway.particle.get_action(
-            local.my_domain_com.my_lib.other.Other
-        ).get_interface_position(
-            "position<holder>"
-        ).destroy_particle()
+        )
+        self.destruction_position_position_gateway__action_other__position_holder.destroy_particle()
         self.destroy_position_gateway()
 
     def destroy_position_gateway(self):
         if not self.join_for_destroy_position_gateway.arrive():
             return
         self.local_position_gateway.destroy_particle()
+
+    def init_position_gateway__action_other__position_source__move__position_holder(self):
+        self.destruction_position_position_gateway__action_other__position_holder__global_position_a = self.local_position_gateway.particle.get_action(
+            local.my_domain_com.my_lib.other.Other
+        ).get_interface_position(
+            "position<holder>"
+        ).particle.get_position(
+            local.my_domain_com.my_lib.a.A
+        )

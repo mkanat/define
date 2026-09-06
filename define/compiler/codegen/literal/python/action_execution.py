@@ -112,6 +112,7 @@ class ActionExecutionGenerator:
         )
         init_methods = self._generate_init_methods(
             names,
+            statement_generator,
             action_execution_contexts_by_execution,
         )
         deferred_guarantee_registrations: list[
@@ -145,11 +146,13 @@ class ActionExecutionGenerator:
             ),
             binding_hole_fanouts=self._generate_binding_hole_fanouts(
                 names,
+                statement_generator,
                 action_execution_contexts_by_execution,
             ),
             action_executions=list(action_execution_contexts_by_execution.values()),
             creation_inits=self._generate_inits_context(
                 names,
+                statement_generator,
                 self._plan.creation_inits,
                 action_execution_contexts_by_execution,
             ),
@@ -247,15 +250,28 @@ class ActionExecutionGenerator:
                         guarantee_consumptions,
                     )
                 )
+            statements: list[template_context.ActionStatementContext] = []
+            for operation in fragment.operations:
+                statement = statement_generator.build_operation(operation)
+                for destruction in fragment.destruction_positions_to_retain_after.get(
+                    operation, ()
+                ):
+                    statement.destruction_positions_to_retain.append(
+                        template_context.DestructionPositionContext(
+                            member_name=names.destruction_positions[destruction],
+                            position=statement_generator.build_position(
+                                destruction.target
+                            ),
+                        )
+                    )
+                statements.append(statement)
             fragments.append(
                 template_context.ActionFragmentContext(
                     method_name=names.fragments[fragment],
-                    statements=[
-                        statement_generator.build_operation(operation)
-                        for operation in fragment.operations
-                    ],
+                    statements=statements,
                     inits=self._generate_inits_context(
                         names,
+                        statement_generator,
                         fragment.inits,
                         action_execution_contexts_by_execution,
                     ),
@@ -283,6 +299,7 @@ class ActionExecutionGenerator:
     def _generate_binding_hole_fanouts(
         self,
         names: action_names.ActionNames,
+        statement_generator: action_statements.ActionStatementsGenerator,
         action_execution_contexts_by_execution: dict[
             operation_graph_model.ActionExecution,
             template_context.TriggeredActionExecutionContext,
@@ -293,6 +310,7 @@ class ActionExecutionGenerator:
             binding_hole_names = names.binding_holes[binding_hole_fanout.binding_hole]
             inits = self._generate_inits_context(
                 names,
+                statement_generator,
                 binding_hole_fanout.inits,
                 action_execution_contexts_by_execution,
             )
@@ -320,13 +338,23 @@ class ActionExecutionGenerator:
     def _generate_inits_context(
         self,
         names: action_names.ActionNames,
+        statement_generator: action_statements.ActionStatementsGenerator,
         inits: action_plan.InitPlan,
         action_execution_contexts_by_execution: dict[
             operation_graph_model.ActionExecution,
             template_context.TriggeredActionExecutionContext,
         ],
     ) -> template_context.InitContext:
+        destruction_positions: list[template_context.DestructionPositionContext] = []
+        for operation in inits.destruction_positions_to_retain:
+            destruction_positions.append(
+                template_context.DestructionPositionContext(
+                    member_name=names.destruction_positions[operation],
+                    position=statement_generator.build_position(operation.target),
+                )
+            )
         return template_context.InitContext(
+            destruction_positions_to_retain=destruction_positions,
             action_executions=[
                 action_execution_contexts_by_execution[action_execution]
                 for action_execution in inits.action_executions
@@ -429,6 +457,7 @@ class ActionExecutionGenerator:
     def _generate_init_methods(
         self,
         names: action_names.ActionNames,
+        statement_generator: action_statements.ActionStatementsGenerator,
         action_execution_contexts_by_execution: dict[
             operation_graph_model.ActionExecution,
             template_context.TriggeredActionExecutionContext,
@@ -444,6 +473,7 @@ class ActionExecutionGenerator:
                     method_name,
                     self._generate_inits_context(
                         names,
+                        statement_generator,
                         consumption_plan.inits,
                         action_execution_contexts_by_execution,
                     ),

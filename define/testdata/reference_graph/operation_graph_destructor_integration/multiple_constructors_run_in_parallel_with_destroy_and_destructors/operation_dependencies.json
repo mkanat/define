@@ -18,7 +18,7 @@
           "caller": null,
           "action_name": "test"
         },
-        "action_name": "destruct_a"
+        "action_name": "destruct_b"
       },
       "operation_name": "create",
       "target": "_noop",
@@ -43,7 +43,7 @@
           "caller": null,
           "action_name": "test"
         },
-        "action_name": "destruct_a"
+        "action_name": "destruct_b"
       },
       "operation_name": "destroy",
       "target": "_noop",
@@ -56,7 +56,7 @@
             "caller": null,
             "action_name": "test"
           },
-          "action_name": "destruct_a"
+          "action_name": "destruct_b"
         },
         "operation_name": "create",
         "target": "_noop",
@@ -199,7 +199,7 @@
           "caller": null,
           "action_name": "test"
         },
-        "action_name": "destruct_b"
+        "action_name": "destruct_a"
       },
       "operation_name": "create",
       "target": "_noop",
@@ -224,7 +224,7 @@
           "caller": null,
           "action_name": "test"
         },
-        "action_name": "destruct_b"
+        "action_name": "destruct_a"
       },
       "operation_name": "destroy",
       "target": "_noop",
@@ -237,7 +237,7 @@
             "caller": null,
             "action_name": "test"
           },
-          "action_name": "destruct_b"
+          "action_name": "destruct_a"
         },
         "operation_name": "create",
         "target": "_noop",
