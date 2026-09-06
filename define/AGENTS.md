@@ -80,13 +80,13 @@ flowchart LR
     DefinitionPostorderValidator["validator/reference_graph/definition_postorder_validator.py"] --> ReferenceGraphValidator
     ActionContract["validator/reference_graph/action_contract.py"] --> ReferenceGraphValidator
     ParticleTracker["validator/reference_graph/particle_tracker.py"] --> DefinitionPostorderValidator
-    ParticleOperation["validator/reference_graph/particle_operation.py"] --> DefinitionPostorderValidator
+    ParticleOperationValidator["validator/reference_graph/particle_operation_validator.py"] --> DefinitionPostorderValidator
     RequirementViolation["validator/reference_graph/requirement_violation.py"] --> DefinitionPostorderValidator
     DeadConstraintTracker["validator/reference_graph/dead_constraint_tracker.py"] --> DefinitionPostorderValidator
     ActionContract --> DefinitionPostorderValidator
     ActionContract --> ParticleTracker
     ActionContract --> RequirementViolation
-    ParticleTracker --> ParticleOperation
+    ParticleTracker --> ParticleOperationValidator
     ParticleTracker --> RequirementViolation
     ScopeTracker["validator/scope_tracker.py"] --> DefinitionPostorderValidator
     ReferenceGraph["graphs/reference_graph.py"] --> ReferenceGraphValidator

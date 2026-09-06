@@ -13,7 +13,7 @@ from define.compiler.validator.reference_graph import (
     action_contract,
     operation_graph_model,
     particle_info,
-    particle_operation,
+    particle_operation_validator,
     particle_tracker,
     quality_assignment,
     reference_graph_validation_state,
@@ -171,8 +171,10 @@ class ActionPostorderValidator:
         return particle_tracker.ParticleTracker(self._definition.typed_name)
 
     @cached_property
-    def _executor(self) -> particle_operation.ParticleOperationExecutor:
-        return particle_operation.ParticleOperationExecutor(
+    def _operation_validator(
+        self,
+    ) -> particle_operation_validator.ParticleOperationValidator:
+        return particle_operation_validator.ParticleOperationValidator(
             self._tracker, self._enclosing_fqun
         )
 
@@ -245,17 +247,13 @@ class ActionPostorderValidator:
                 qualities = self._get_transitive_required_qualities(
                     contracted_position, scope
                 )
-                self._executor.execute_assume_occupied(
-                    particle_operation.AssumeOccupied(
-                        target=local_position,
-                        qualities=qualities,
-                        contracted_position_chain=contracted_position,
-                    )
+                self._tracker.create(
+                    local_position,
+                    qualities,
+                    from_caller=contracted_position,
                 )
             case action_contract.PositionOccupancyState.EMPTY:
-                self._executor.execute_assume_empty(
-                    particle_operation.AssumeEmpty(target=local_position)
-                )
+                self._tracker.mark_empty(local_position)
 
     # TODO: Classify every Position Requirement once, in one batched tracker
     # query, as either needing propagation or local violation checking. The
@@ -1351,12 +1349,11 @@ class ActionPostorderValidator:
             action_contract.PositionOccupancyState.EMPTY, position, scope
         )
         qualities = self._get_transitive_required_qualities(position, scope)
-        diags = self._executor.execute_create(
-            particle_operation.Create(target=position, qualities=qualities)
-        )
-        self._diagnostics.extend(diags)
-        if diags:
+        diagnostic = self._operation_validator.validate_create(position)
+        if diagnostic is not None:
+            self._diagnostics.append(diagnostic)
             return
+        self._tracker.create(position, qualities)
         self._run_constructors(position, qualities, scope)
         self._check_trigger(position, scope)
 
@@ -1375,29 +1372,26 @@ class ActionPostorderValidator:
         self._maybe_infer_requirements_on_chain(
             action_contract.PositionOccupancyState.OCCUPIED, stmt.target_position, scope
         )
+        diagnostic = self._operation_validator.validate_destroy(stmt.target_position)
+        if diagnostic is not None:
+            self._diagnostics.append(diagnostic)
+            return
         destruction_fact = operation_graph_model.DestructionFact(
             destroyed_position_in_destroyer=stmt.target_position,
             destroying_action=self._definition.typed_name,
         )
 
-        def destroy() -> None:
-            self._destroy_particles(
-                (
-                    _DestructionTarget(
-                        position=stmt.target_position,
-                        destruction_fact=destruction_fact,
-                        auto_destruction_target=None,
-                    ),
+        self._destroy_particles(
+            (
+                _DestructionTarget(
+                    position=stmt.target_position,
+                    destruction_fact=destruction_fact,
+                    auto_destruction_target=None,
                 ),
-                scope,
-                is_auto_destruction=False,
-            )
-
-        diags = self._executor.execute_destroy(
-            particle_operation.Destroy(target=stmt.target_position),
-            destroy=destroy,
+            ),
+            scope,
+            is_auto_destruction=False,
         )
-        self._diagnostics.extend(diags)
 
     def _analyze_move(
         self,
@@ -1446,16 +1440,15 @@ class ActionPostorderValidator:
         target_required_qualities, _ = self._get_direct_required_qualities(
             to_pos, scope
         )
-        move_diagnostics = self._executor.execute_move(
-            particle_operation.Move(
-                source=from_pos,
-                target=to_pos,
-                target_required_qualities=target_required_qualities or (),
-            )
+        move_diagnostics = self._operation_validator.validate_move(
+            source=from_pos,
+            target=to_pos,
+            target_required_qualities=target_required_qualities or (),
         )
         if move_diagnostics:
             self._diagnostics.extend(move_diagnostics)
             return
+        self._tracker.move(from_pos, to_pos)
         self._check_trigger(to_pos, scope)
 
     def _validate_chained_name(
@@ -1914,12 +1907,10 @@ class ActionPostorderValidator:
             # DLP 37: We assume trigger points are occupied upon the start
             # of the action, but we can only assume they have the qualities
             # they are declared with.
-            self._executor.execute_assume_occupied(
-                particle_operation.AssumeOccupied(
-                    target=trigger_ref,
-                    qualities=qualities,
-                    contracted_position_chain=trigger_ref,
-                )
+            self._tracker.create(
+                trigger_ref,
+                qualities,
+                from_caller=trigger_ref,
             )
 
         scope.enter_child_scope()
