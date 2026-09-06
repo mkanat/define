@@ -1,0 +1,9 @@
+define the potential action<mv:define-lang.org:fuzz_test:/relay> {
+    define the position<incoming>.
+    define the position<result>.
+    it happens when {
+        the position<incoming> has a particle.
+    } and it does {
+        move the particle in position<incoming> to position<result>.
+    }
+}

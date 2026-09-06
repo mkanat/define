@@ -28,6 +28,25 @@ _B_BRANCH_DESTRUCTOR = "action<my.domain.com:my_lib:/b_branch_destructor>"
 _B_LEAF_DESTRUCTOR = "action<my.domain.com:my_lib:/b_leaf_destructor>"
 
 
+def test_invalid_destructor_child_guarantee_during_auto_destruction(
+    validate_testdata_project_with_reference_graph: ValidateTestdataProjectWithReferenceGraph,
+):
+    result = validate_testdata_project_with_reference_graph()
+    assert result.program_result.all_exceptions == []
+    all_diags = result.program_result.all_diagnostics
+    assert len(all_diags) == 2
+    assert isinstance(
+        all_diags[0], diagnostics.DestructorProducesEmptyGuaranteeDiagnostic
+    )
+    assert all_diags[0].location.file_path == PurePosixPath("cleanup.dfn")
+    assert all_diags[0].location.line == 7
+    assert all_diags[0].position_name == "position</child>"
+    assert isinstance(all_diags[1], diagnostics.UndefinedLocalNameDiagnostic)
+    assert all_diags[1].location.file_path == PurePosixPath("cleanup.dfn")
+    assert all_diags[1].location.line == 8
+    assert all_diags[1].local_name == "position<emporary>"
+
+
 def test_destroy_parent_fires_position_quality_child_destructor(
     validate_testdata_project_with_reference_graph: ValidateTestdataProjectWithReferenceGraph,
 ):

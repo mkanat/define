@@ -1,0 +1,21 @@
+# An invalid Destructor must report its source error even when its child
+# particle was collected for transitive destruction before the Destructor ran.
+# Another local particle must still be destroyed after that error.
+define the potential action<mv:define-lang.org:fuzz_test:/test> {
+    it also assigns the action</relay>.
+    it happens when {
+        this particle is created.
+    } and it does {
+        define the position<item> {
+            it may only contain particles where {
+                it has the action</initialize>.
+                it has the action</cleanup>.
+            }
+        }
+        create a particle in position<item>.
+        define the position<other>.
+        create a particle in position<other>.
+        move the particle in position<item> to action</relay>::position<incoming>.
+        move the particle in action</relay>::position<result> to position<item>.
+    }
+}

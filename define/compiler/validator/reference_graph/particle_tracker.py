@@ -1216,10 +1216,17 @@ class ParticleTracker:
         # Capture these before the subtree is deleted so graph dependencies see
         # the child operations.
         graph_destructions: list[operation_graph.DestructionFactDestroyInput] = []
+        target_operation_indices: list[int] = []
         for destruction in destructions:
+            target_operation_indices.append(len(graph_destructions))
             for position in destruction.positions():
                 key = position.canonical_chained_name_tuple
-                particle = self._store.occupant(key)
+                particle = self._store.occupant_or_none(key)
+                # An invalid Destructor's ErrorGuarantee can remove this particle
+                # or its parent's state after collection. Valid Destructors
+                # preserve these particles; the source error is already reported.
+                if particle is None:
+                    continue
                 graph_destructions.append(
                     operation_graph.DestructionFactDestroyInput(
                         destruction_fact=destruction.destruction_fact,
@@ -1235,13 +1242,13 @@ class ParticleTracker:
                 graph_destructions
             )
         )
-        target_operation_index = 0
-        for destruction in destructions:
+        for destruction, target_operation_index in zip(
+            destructions, target_operation_indices, strict=True
+        ):
             self._record_destroyed_state(
                 destruction,
                 operation_nodes[target_operation_index],
             )
-            target_operation_index += 1 + len(destruction.transitive_children)
 
     def _record_destroyed_state(
         self,
